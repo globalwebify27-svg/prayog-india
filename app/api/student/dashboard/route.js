@@ -20,7 +20,7 @@ export async function GET() {
     
     // 2. Get Enrollments
     const [enrollments] = await pool.query(`
-      SELECT e.*, c.title, c.duration 
+      SELECT e.*, c.title, c.duration, c.type as mode 
       FROM enrollments e 
       JOIN courses c ON e.course_id = c.id 
       WHERE e.user_id = ?

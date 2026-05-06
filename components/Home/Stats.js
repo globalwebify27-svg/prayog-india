@@ -1,16 +1,35 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Users, BookOpen, Award, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 
-const stats = [
-  { icon: <Users size={24} />, value: "5000", suffix: "+", label: "Students Trained" },
-  { icon: <BookOpen size={24} />, value: "50", suffix: "+", label: "Courses & Programs" },
-  { icon: <Award size={24} />, value: "120", suffix: "+", label: "Awards Won" },
-  { icon: <Briefcase size={24} />, value: "30", suffix: "+", label: "Corporate Partners" }
-];
+const iconMap = {
+  students: <Users size={24} />,
+  courses: <BookOpen size={24} />,
+  awards: <Award size={24} />,
+  partners: <Briefcase size={24} />
+};
 
 export default function Stats() {
+  const [stats, setStats] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch("/api/stats");
+        const data = await res.json();
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
   return (
     <section className="py-16 md:py-20 relative overflow-hidden text-white">
 
@@ -30,7 +49,7 @@ export default function Stats() {
       
       <div className="max-w-7xl mx-auto px-2 md:px-8 relative z-10">
         <div className="grid grid-cols-4 gap-2 md:gap-6">
-          {stats.map((stat, i) => (
+          {!loading && stats.map((stat, i) => (
             <motion.div 
               key={i}
               initial={{ opacity: 0, y: 30 }}
@@ -44,7 +63,7 @@ export default function Stats() {
               <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="mb-2 md:mb-8 relative">
                   <div className="w-8 h-8 md:w-20 md:h-20 rounded-lg md:rounded-[1.5rem] bg-white/5 border border-white/10 flex items-center justify-center text-primary shadow-2xl group-hover:bg-primary group-hover:text-secondary transition-all duration-500">
-                    <div className="scale-50 md:scale-100">{stat.icon}</div>
+                    <div className="scale-50 md:scale-100">{iconMap[stat.id] || <Award size={24} />}</div>
                   </div>
                 </div>
 

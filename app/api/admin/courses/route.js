@@ -16,11 +16,11 @@ export async function GET() {
 
 export async function POST(req) {
   try {
-    const { title, description, price, type, duration } = await req.json();
+    const { title, description, price, type, duration, image } = await req.json();
 
     const [result] = await pool.query(
-      "INSERT INTO courses (title, description, price, type, duration) VALUES (?, ?, ?, ?, ?)",
-      [title, description, price, type, duration]
+      "INSERT INTO courses (title, description, price, type, duration, image) VALUES (?, ?, ?, ?, ?, ?)",
+      [title, description, price, type, duration, image]
     );
 
     return NextResponse.json({ 

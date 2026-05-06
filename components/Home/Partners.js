@@ -1,17 +1,27 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-const partners = [
-  { name: "Google", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" },
-  { name: "Microsoft", logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" },
-  { name: "Amazon", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" },
-  { name: "Tesla", logo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg" },
-  { name: "Intel", logo: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Intel-logo.svg" },
-  { name: "NVIDIA", logo: "https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg" },
-];
-
 export default function Partners() {
+  const [partners, setPartners] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPartners() {
+      try {
+        const res = await fetch("/api/partners");
+        const data = await res.json();
+        setPartners(data);
+      } catch (err) {
+        console.error("Failed to fetch partners:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPartners();
+  }, []);
+
   return (
     <section className="py-12 bg-slate-50 border-y border-slate-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -20,17 +30,25 @@ export default function Partners() {
         </div>
         
         <div className="relative flex overflow-hidden group">
-          <motion.div 
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
-            className="flex items-center space-x-12 md:space-x-24 whitespace-nowrap"
-          >
-            {[...partners, ...partners].map((partner, i) => (
-              <div key={i} className="flex-shrink-0 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
-                <img src={partner.logo} alt={partner.name} className="h-6 md:h-8 w-auto object-contain" />
-              </div>
-            ))}
-          </motion.div>
+          {!loading && partners.length > 0 && (
+            <motion.div 
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+              className="flex items-center space-x-12 md:space-x-24 whitespace-nowrap"
+            >
+              {[...partners, ...partners].map((partner, i) => (
+                <div key={i} className="flex-shrink-0 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
+                  <img src={partner.logo} alt={partner.name} className="h-6 md:h-8 w-auto object-contain" />
+                </div>
+              ))}
+            </motion.div>
+          )}
+          
+          {loading && (
+             <div className="flex items-center space-x-12 animate-pulse">
+               {[1,2,3,4,5,6].map(i => <div key={i} className="h-8 w-24 bg-slate-200 rounded" />)}
+             </div>
+          )}
           
           {/* Edge Fades */}
           <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-slate-50 to-transparent z-10" />

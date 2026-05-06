@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Mail, 
@@ -13,46 +14,25 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const faculties = [
-  {
-    name: "Prof. Rajesh Khanna",
-    role: "Head of Robotics",
-    specialty: "Industrial Automation",
-    img: "/assets/t3.png",
-    bio: "20+ years of industrial experience in heavy-duty robotics and automated production lines. Former consultant for global automotive giants.",
-    expertise: ["Kinematics", "PLC Programming", "Industrial Safety"],
-    education: "Ph.D. Robotics, IIT Bombay"
-  },
-  {
-    name: "Dr. Ananya Roy",
-    role: "AI Researcher",
-    specialty: "Computer Vision",
-    img: "/assets/t2.png",
-    bio: "Pioneering researcher in neural networks for autonomous navigation. Leading the AI integration initiative at Prayog India.",
-    expertise: ["Deep Learning", "TensorFlow", "Object Detection"],
-    education: "Post-Doc AI, Stanford University"
-  },
-  {
-    name: "Vikram Malhotra",
-    role: "Drone Specialist",
-    specialty: "Aerodynamics",
-    img: "/assets/t1.png",
-    bio: "Certified UAV pilot and aerospace engineer. Dedicated to developing high-performance drone solutions for industrial monitoring.",
-    expertise: ["Aviation Design", "Flight Dynamics", "UAV Maintenance"],
-    education: "M.Tech Aerospace, IISc Bangalore"
-  },
-  {
-    name: "Sanjay Deshmukh",
-    role: "Senior Mentor",
-    specialty: "Embedded Systems",
-    img: "/assets/m5.png",
-    bio: "Expert in real-time operating systems (RTOS) and firmware development. Shaping the core electronics curriculum for modern students.",
-    expertise: ["ARM Cortex", "Firmware", "RTOS Architecture"],
-    education: "B.E. Electronics, Mumbai University"
-  }
-];
-
 export default function FacultiesPage() {
+  const [faculties, setFaculties] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFaculties() {
+      try {
+        const res = await fetch("/api/faculties");
+        const data = await res.json();
+        setFaculties(data);
+      } catch (err) {
+        console.error("Failed to fetch faculties:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchFaculties();
+  }, []);
+
   return (
     <main className="min-h-screen bg-slate-50 font-body">
       <Header />
@@ -75,8 +55,15 @@ export default function FacultiesPage() {
       {/* Faculty Directory */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-10 h-10 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
           <div className="space-y-16">
-            {faculties.map((f, i) => (
+            {faculties.map((f, i) => {
+              const expertise = typeof f.expertise === 'string' ? JSON.parse(f.expertise) : (f.expertise || []);
+              return (
               <motion.div 
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -88,7 +75,7 @@ export default function FacultiesPage() {
                 <div className="grid lg:grid-cols-12 gap-0">
                   {/* Photo Column */}
                   <div className="lg:col-span-4 relative h-80 lg:h-auto overflow-hidden bg-slate-100">
-                    <img src={f.img} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src={f.image} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-8">
                       <div className="flex space-x-3">
                         <button className="w-10 h-10 rounded-lg bg-white text-navy flex items-center justify-center hover:bg-primary transition-all shadow-lg">
@@ -131,7 +118,7 @@ export default function FacultiesPage() {
                           <BookOpen size={14} /> Core Expertise
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                          {f.expertise.map(exp => (
+                          {expertise.map(exp => (
                             <span key={exp} className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-[10px] font-bold uppercase border border-slate-200">
                               {exp}
                             </span>
@@ -153,8 +140,10 @@ export default function FacultiesPage() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
+          )}
         </div>
       </section>
 

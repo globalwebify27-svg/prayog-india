@@ -15,7 +15,9 @@ import {
   Menu,
   X,
   Bell,
-  Search
+  Search,
+  Image,
+  Layout
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -23,8 +25,11 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin" },
   { icon: Users, label: "Students", href: "/admin/students" },
   { icon: BookOpen, label: "LMS / Courses", href: "/admin/courses" },
+  { icon: Users, label: "Faculties", href: "/admin/faculties" },
   { icon: CheckSquare, label: "Attendance", href: "/admin/attendance" },
   { icon: CreditCard, label: "Payments", href: "/admin/payments" },
+  { icon: Layout, label: "Workshops", href: "/admin/workshops" },
+  { icon: Image, label: "Media Gallery", href: "/admin/gallery" },
   { icon: Award, label: "Certificates", href: "/admin/certificates" },
 ];
 

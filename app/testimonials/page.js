@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Play, 
@@ -17,17 +17,26 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const videoTestimonials = [
-  { id: 1, name: "Rahul Sharma", course: "Industrial Robotics", year: "2025", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/assets/course1.png" },
-  { id: 2, name: "Priya Patel", course: "AI & ML", year: "2024", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/assets/course2.png" },
-  { id: 3, name: "Amit Kumar", course: "Drone Tech", year: "2025", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/assets/course1.png" },
-  { id: 4, name: "Sneha Reddy", course: "Embedded Systems", year: "2025", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/assets/course2.png" },
-  { id: 5, name: "Vikram Malhotra", course: "Robotics", year: "2023", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/assets/course1.png" },
-  { id: 6, name: "Ananya Rao", course: "IoT Systems", year: "2025", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/assets/course2.png" }
-];
-
 export default function TestimonialsPage() {
+  const [videoTestimonials, setVideoTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState(null);
+
+  useEffect(() => {
+    async function fetchTestimonials() {
+      try {
+        const res = await fetch("/api/testimonials");
+        const data = await res.json();
+        setVideoTestimonials(data);
+      } catch (err) {
+        console.error("Failed to fetch testimonials:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTestimonials();
+  }, []);
+
 
   return (
     <main className="min-h-screen bg-slate-50 font-body">
@@ -51,6 +60,11 @@ export default function TestimonialsPage() {
       {/* Video Grid */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-10 h-10 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {videoTestimonials.map((item, i) => (
               <motion.div
@@ -97,6 +111,7 @@ export default function TestimonialsPage() {
               </motion.div>
             ))}
           </div>
+          )}
         </div>
       </section>
 
@@ -145,7 +160,7 @@ export default function TestimonialsPage() {
             >
               <div className="relative pt-[56.25%] bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                 <iframe 
-                  src={activeVideo.videoUrl} 
+                  src={activeVideo.video_url} 
                   className="absolute inset-0 w-full h-full" 
                   title={activeVideo.name}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 

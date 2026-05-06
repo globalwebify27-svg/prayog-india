@@ -68,7 +68,7 @@ export default function ShortTermActivities() {
                 <p className="text-slate-500 text-sm leading-relaxed mb-10">{activity.description}</p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-6">
-                  <Link href="/register" className="w-full sm:w-auto bg-navy text-white px-10 py-5 rounded-2xl font-heading font-bold text-sm uppercase tracking-widest shadow-xl shadow-navy/20 hover:scale-105 transition-all flex items-center justify-center gap-3">
+                  <Link href="/summer-camp" className="w-full sm:w-auto bg-navy text-white px-10 py-5 rounded-2xl font-heading font-bold text-sm uppercase tracking-widest shadow-xl shadow-navy/20 hover:scale-105 transition-all flex items-center justify-center gap-3">
                     <span>Enroll Now</span>
                     <Zap size={18} className="text-primary" />
                   </Link>

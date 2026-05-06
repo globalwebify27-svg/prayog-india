@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   BookOpen, 
@@ -18,128 +18,37 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 
-const courses = [
-  {
-    id: 1,
-    title: "Industrial Robotics & Automation",
-    category: "Robotics",
-    duration: "6 Months",
-    level: "Advanced",
-    price: "₹15,000",
-    rating: "4.9",
-    desc: "Master industrial arm controllers, PLC integration, and automated production line design.",
-    image: "/assets/course1.png"
-  },
-  {
-    id: 2,
-    title: "AI & Machine Learning Foundation",
-    category: "Artificial Intelligence",
-    duration: "4 Months",
-    level: "Intermediate",
-    price: "₹25,000",
-    rating: "4.8",
-    desc: "Build neural networks, implement computer vision, and deploy predictive models.",
-    image: "/assets/course2.png"
-  },
-  {
-    id: 3,
-    title: "Next-Gen Drone Technology",
-    category: "Aviation",
-    duration: "3 Months",
-    level: "Beginner",
-    price: "₹18,000",
-    rating: "4.7",
-    desc: "Learn flight dynamics, autonomous navigation, and industrial drone maintenance.",
-    image: "/assets/course1.png"
-  },
-  {
-    id: 4,
-    title: "IoT & Smart Systems Design",
-    category: "Electronics",
-    duration: "4 Months",
-    level: "Intermediate",
-    price: "₹12,000",
-    rating: "4.8",
-    desc: "Design connected ecosystems using ESP32, Raspberry Pi, and MQTT protocols.",
-    image: "/assets/course2.png"
-  },
-  {
-    id: 5,
-    title: "Cyber-Physical Security",
-    category: "Robotics",
-    duration: "5 Months",
-    level: "Advanced",
-    price: "₹30,000",
-    rating: "4.9",
-    desc: "Secure industrial control systems and protect robotics infrastructure from threats.",
-    image: "/assets/course1.png"
-  },
-  {
-    id: 6,
-    title: "Embedded Systems Mastery",
-    category: "Electronics",
-    duration: "6 Months",
-    level: "Advanced",
-    price: "₹20,000",
-    rating: "4.9",
-    desc: "Deep dive into RTOS, ARM Cortex-M architecture, and firmware optimization.",
-    image: "/assets/course2.png"
-  },
-  {
-    id: 7,
-    title: "Robot Operating System (ROS 2)",
-    category: "Robotics",
-    duration: "4 Months",
-    level: "Advanced",
-    price: "₹22,000",
-    rating: "4.8",
-    desc: "Develop scalable robotic applications using the industry-standard ROS 2 framework.",
-    image: "/assets/course1.png"
-  },
-  {
-    id: 8,
-    title: "Smart City Township Program",
-    category: "Township",
-    duration: "1 Month",
-    level: "Advanced",
-    price: "₹45,000",
-    rating: "5.0",
-    desc: "An immersive 30-day experience building IoT-driven infrastructure in our model smart township.",
-    image: "/assets/m1.png"
-  },
-  {
-    id: 9,
-    title: "Industrial Automation Residency",
-    category: "Township",
-    duration: "2 Weeks",
-    level: "Intermediate",
-    price: "₹25,000",
-    rating: "4.9",
-    desc: "Hands-on industrial residency focusing on full-scale production line automation and robotics.",
-    image: "/assets/m2.png"
-  },
-  {
-    id: 10,
-    title: "3D Design & Prototyping",
-    category: "Design",
-    duration: "2 Months",
-    level: "Beginner",
-    price: "₹8,000",
-    rating: "4.6",
-    desc: "Master CAD modeling, generative design, and professional 3D printing techniques.",
-    image: "/assets/course2.png"
-  }
-];
-
 const categories = ["All", "Township", "Robotics", "Artificial Intelligence", "Aviation", "Electronics", "Design"];
 
 export default function CoursesPage() {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("All");
   const [viewMode, setViewMode] = useState("grid");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredCourses = activeTab === "All" 
-    ? courses 
-    : courses.filter(c => c.category === activeTab);
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const res = await fetch("/api/courses");
+        const data = await res.json();
+        setCourses(data);
+      } catch (err) {
+        console.error("Failed to fetch courses:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCourses();
+  }, []);
+
+  const filteredCourses = courses.filter(course => {
+    const matchesTab = activeTab === "All" || course.category === activeTab;
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesTab && matchesSearch;
+  });
+
 
   return (
     <main className="min-h-screen bg-slate-50 font-body">
@@ -166,6 +75,8 @@ export default function CoursesPage() {
               <input 
                 type="text" 
                 placeholder="Search by technology, level, or program name..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:bg-white/10 focus:border-white/20 transition-all text-sm"
               />
             </div>
@@ -218,10 +129,19 @@ export default function CoursesPage() {
           </div>
 
           {/* Grid / List View */}
-          <div className={viewMode === "grid" 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" 
-            : "space-y-4 max-w-5xl mx-auto"
-          }>
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="w-12 h-12 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : filteredCourses.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
+              <p className="text-slate-500">No courses found matching your criteria.</p>
+            </div>
+          ) : (
+            <div className={viewMode === "grid" 
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" 
+              : "space-y-4 max-w-5xl mx-auto"
+            }>
             {filteredCourses.map((course, i) => (
               <motion.div
                 key={course.id}
@@ -254,7 +174,7 @@ export default function CoursesPage() {
                   </h3>
                   {viewMode === 'grid' && (
                     <p className="text-slate-500 text-xs leading-relaxed mb-6 flex-grow line-clamp-2">
-                      {course.desc}
+                      {course.description}
                     </p>
                   )}
                   
@@ -262,7 +182,7 @@ export default function CoursesPage() {
                     <div className="flex items-center space-x-6">
                       <div>
                         <span className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5 tracking-tight">Investment</span>
-                        <span className="block text-lg font-bold text-navy">{course.price}</span>
+                        <span className="block text-lg font-bold text-navy">₹{Number(course.price).toLocaleString('en-IN')}</span>
                       </div>
                       <button className="flex items-center space-x-1.5 text-[10px] font-bold text-navy hover:text-primary transition-colors uppercase">
                         <BookOpen size={14} />
@@ -277,6 +197,7 @@ export default function CoursesPage() {
               </motion.div>
             ))}
           </div>
+          )}
         </div>
       </section>
 

@@ -20,6 +20,10 @@ export async function POST(req) {
 
     const { amount, enrollmentId } = await req.json();
 
+    if (!amount || amount < 1) {
+      return NextResponse.json({ success: false, message: "Invalid amount. Minimum is 1 INR." }, { status: 400 });
+    }
+
     const options = {
       amount: amount * 100, // Razorpay works in paise
       currency: "INR",

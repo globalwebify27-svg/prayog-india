@@ -54,6 +54,8 @@ export default function StudentDashboard() {
   const installments = data?.installments || [];
   const attendanceCount = data?.attendanceCount || 0;
 
+  const hasOnlineEnrollment = enrollments.some(e => e.mode === 'online');
+
   return (
     <div className="space-y-8 font-body">
       {/* Header Section */}
@@ -64,10 +66,12 @@ export default function StudentDashboard() {
           </h1>
           <p className="text-slate-500 text-sm mt-1">Student ID: PR-{10000 + (user.id || 0)} | {user.email}</p>
         </div>
-        <Link href="/dashboard/schedule" className="flex items-center space-x-2 bg-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm">
-          <Zap size={16} className="text-primary" />
-          <span>Join live session</span>
-        </Link>
+        {hasOnlineEnrollment && (
+          <Link href="/dashboard/schedule" className="flex items-center space-x-2 bg-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm">
+            <Zap size={16} className="text-primary" />
+            <span>Join live session</span>
+          </Link>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-12 gap-8">
@@ -115,10 +119,17 @@ export default function StudentDashboard() {
                     <Book size={24} />
                   </div>
                   <div className="flex-grow text-center md:text-left">
-                    <h3 className="text-base font-semibold text-slate-900 mb-1">{course.title}</h3>
+                    <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                      <h3 className="text-base font-semibold text-slate-900">{course.title}</h3>
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${course.mode === 'online' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                        {course.mode || 'Offline'}
+                      </span>
+                    </div>
                     <div className="flex items-center justify-center md:justify-start gap-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
-                      <span className="flex items-center gap-1.5"><Clock size={12} /> {course.duration}</span>
-                      <span className="flex items-center gap-1.5 text-emerald-600"><Play size={12} /> Live now</span>
+                      <span className="flex items-center gap-1.5"><Clock size={12} /> {course.duration || '6 Months'}</span>
+                      {course.mode === 'online' && (
+                        <span className="flex items-center gap-1.5 text-blue-600"><Play size={12} /> Live now</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -126,7 +137,7 @@ export default function StudentDashboard() {
                       <p className="text-[10px] font-bold text-slate-400 uppercase">Progress</p>
                       <p className="text-xs font-bold text-navy">20%</p>
                     </div>
-                    <Link href={`/dashboard/courses/${course.id}`} className="w-10 h-10 rounded-lg bg-slate-50 text-navy flex items-center justify-center hover:bg-navy hover:text-white transition-all">
+                    <Link href={`/dashboard/courses`} className="w-10 h-10 rounded-lg bg-slate-50 text-navy flex items-center justify-center hover:bg-navy hover:text-white transition-all">
                       <ChevronRight size={18} />
                     </Link>
                   </div>
@@ -168,7 +179,7 @@ export default function StudentDashboard() {
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
             <h3 className="text-base font-semibold text-slate-900 mb-6 px-1">Resources</h3>
             <div className="grid grid-cols-2 gap-4">
-              <Link href="/dashboard/resources" className="p-4 bg-slate-50 rounded-xl flex flex-col items-center gap-2 hover:bg-slate-100 transition-all group border border-slate-100">
+              <Link href="/dashboard/courses" className="p-4 bg-slate-50 rounded-xl flex flex-col items-center gap-2 hover:bg-slate-100 transition-all group border border-slate-100">
                 <FileText size={18} className="text-navy" />
                 <span className="text-[10px] font-semibold text-slate-600">Material</span>
               </Link>
@@ -196,9 +207,9 @@ export default function StudentDashboard() {
             <p className="text-navy/70 text-xs font-medium leading-relaxed mb-5">
               You've maintained a 94% attendance rate. Keep it up to qualify for the gold certification.
             </p>
-            <button className="text-[10px] font-bold text-navy uppercase flex items-center gap-1 hover:underline">
+            <Link href="/dashboard/attendance" className="inline-flex text-[10px] font-bold text-navy uppercase items-center gap-1 hover:underline">
               Analyze details <ChevronRight size={14} />
-            </button>
+            </Link>
           </div>
 
         </div>

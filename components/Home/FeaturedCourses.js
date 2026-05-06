@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Clock, BookOpen, Star, ArrowRight, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -11,70 +12,33 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-const courses = [
-  {
-    id: 1,
-    title: "Industrial Robotics Certification",
-    category: "Industrial",
-    duration: "6 Months",
-    lessons: "48 Lessons",
-    rating: 4.9,
-    price: "₹24,999",
-    image: "/assets/course1.png"
-  },
-  {
-    id: 5,
-    title: "Industrial Internship Program",
-    category: "Internship",
-    duration: "45 Days",
-    lessons: "Practical Training",
-    rating: 4.9,
-    price: "₹4,999",
-    image: "/assets/internship.png"
-  },
-  {
-    id: 6,
-    title: "Robotics Summer Camp 2026",
-    category: "Special",
-    duration: "15 Days",
-    lessons: "Hands-on Projects",
-    rating: 5.0,
-    price: "₹2,999",
-    image: "/assets/summer_camp.png"
-  },
-  {
-    id: 2,
-    title: "AI & Machine Learning BootCamp",
-    category: "AI / ML",
-    duration: "4 Months",
-    lessons: "32 Lessons",
-    rating: 4.8,
-    price: "₹19,999",
-    image: "/assets/course2.png"
-  },
-  {
-    id: 3,
-    title: "STEM Foundation for Kids",
-    category: "STEM",
-    duration: "3 Months",
-    lessons: "24 Lessons",
-    rating: 5.0,
-    price: "₹12,499",
-    image: "/assets/course3.png"
-  },
-  {
-    id: 4,
-    title: "Embedded Systems & IoT",
-    category: "Electronics",
-    duration: "5 Months",
-    lessons: "40 Lessons",
-    rating: 4.7,
-    price: "₹15,999",
-    image: "/assets/course4.png"
-  }
-];
-
 export default function FeaturedCourses() {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFeatured() {
+      try {
+        const res = await fetch("/api/courses");
+        const data = await res.json();
+        setCourses(data.slice(0, 6)); // Show first 6 as featured
+      } catch (err) {
+        console.error("Failed to fetch featured courses:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchFeatured();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="py-20 flex justify-center">
+        <div className="w-10 h-10 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <section className="py-10 md:py-16 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -135,9 +99,9 @@ export default function FeaturedCourses() {
                 <div className="p-6 flex flex-col flex-grow">
                   <div className="flex items-center space-x-1 text-yellow-500 mb-3">
                     {[...Array(5)].map((_, j) => (
-                      <Star key={j} size={12} fill={j < Math.floor(course.rating) ? "currentColor" : "none"} />
+                      <Star key={j} size={12} fill={j < Math.floor(course.rating || 5) ? "currentColor" : "none"} />
                     ))}
-                    <span className="text-slate-400 text-xs font-bold ml-1">{course.rating}</span>
+                    <span className="text-slate-400 text-xs font-bold ml-1">{course.rating || '5.0'}</span>
                   </div>
                   <h3 className="text-lg font-heading font-black text-slate-900 mb-3 group-hover:text-navy transition-colors line-clamp-1">
                     {course.title}
@@ -150,16 +114,16 @@ export default function FeaturedCourses() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <BookOpen size={14} className="text-navy" />
-                      <span>{course.lessons}</span>
+                      <span>{course.type === 'online' ? 'Live Session' : 'Practical Training'}</span>
                     </div>
                   </div>
 
                   <div className="mt-auto">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-xl font-heading font-black text-navy">{course.price}</span>
+                      <span className="text-xl font-heading font-black text-navy">₹{Number(course.price).toLocaleString('en-IN')}</span>
                       <div className="flex space-x-2">
                         <Link 
-                          href={`/register?course=${course.id}`}
+                          href={course.id === 6 ? "/summer-camp" : `/register?course=${course.id}`}
                           className="w-10 h-10 rounded-xl bg-slate-50 text-navy flex items-center justify-center hover:bg-primary hover:text-navy transition-all group-hover:rotate-[-45deg]"
                         >
                           <ArrowRight size={18} />

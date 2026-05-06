@@ -15,7 +15,8 @@ import {
   X,
   Bell,
   Search,
-  User
+  User,
+  FileText
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -23,6 +24,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: BookOpen, label: "My Courses", href: "/dashboard/courses" },
   { icon: CheckSquare, label: "Attendance", href: "/dashboard/attendance" },
+  { icon: FileText, label: "Examinations", href: "/dashboard/exams" },
   { icon: CreditCard, label: "Payments", href: "/dashboard/payments" },
   { icon: Award, label: "Certificates", href: "/dashboard/certificates" },
 ];

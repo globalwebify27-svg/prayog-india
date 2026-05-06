@@ -20,8 +20,23 @@ export default function AttendancePage() {
   const [location, setLocation] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [selfie, setSelfie] = useState(null);
+  const [enrollments, setEnrollments] = useState([]);
+  const [selectedEnrollment, setSelectedEnrollment] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    fetch("/api/student/dashboard")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data.enrollments) {
+          setEnrollments(data.data.enrollments);
+          if (data.data.enrollments.length > 0) {
+            setSelectedEnrollment(data.data.enrollments[0]);
+          }
+        }
+      });
+  }, []);
 
   // Initialize Geolocation
   const getLocation = () => {
@@ -80,8 +95,8 @@ export default function AttendancePage() {
         body: JSON.stringify({
           location,
           selfie,
-          courseId: 1, 
-          batchId: 1   
+          courseId: selectedEnrollment?.course_id || 1, 
+          batchId: selectedEnrollment?.batch_id || 1   
         })
       });
 
@@ -115,7 +130,22 @@ export default function AttendancePage() {
                 <MapPin size={32} />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">Location check</h3>
-              <p className="text-slate-500 text-sm mb-10 max-w-sm mx-auto leading-relaxed">We need to verify that you are physically present at the institutional hub before starting the session.</p>
+              <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto leading-relaxed">We need to verify that you are physically present at the institutional hub before starting the session.</p>
+              
+              {enrollments.length > 0 && (
+                <div className="mb-8 max-w-xs mx-auto text-left">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Select Session</label>
+                  <select 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-semibold focus:border-navy outline-none"
+                    onChange={(e) => setSelectedEnrollment(enrollments[e.target.value])}
+                  >
+                    {enrollments.map((e, idx) => (
+                      <option key={e.id} value={idx}>{e.title}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <button onClick={getLocation} className="bg-navy text-white px-8 py-3 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm flex items-center justify-center mx-auto space-x-2">
                 <span>Enable location services</span>
                 <Zap size={16} className="text-primary" />

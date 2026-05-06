@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Image as ImageIcon, 
@@ -17,28 +17,30 @@ import Footer from "@/components/Footer";
 
 const galleryCategories = ["All", "Robotics", "AI Workshops", "Drone Labs", "IoT Projects", "Institution"];
 
-const galleryImages = [
-  { id: 1, category: "Robotics", title: "Industrial Arm Training", location: "Mumbai Center", date: "Jan 2026" },
-  { id: 2, category: "AI Workshops", title: "Neural Network Seminar", location: "Pune Hub", date: "Feb 2026" },
-  { id: 3, category: "Drone Labs", title: "Flight Simulation Hub", location: "Science Park", date: "Mar 2026" },
-  { id: 4, category: "IoT Projects", title: "Smart City Prototype", location: "Innovation Lab", date: "Apr 2026" },
-  { id: 5, category: "Institution", title: "Campus Main Building", location: "Headquarters", date: "May 2026" },
-  { id: 6, category: "Robotics", title: "Mobile Robot Assembly", location: "Assembly Line", date: "Jun 2026" },
-  { id: 7, category: "AI Workshops", title: "Computer Vision Lab", location: "Delhi Tech Park", date: "Jul 2026" },
-  { id: 8, category: "Drone Labs", title: "Quadcopter Calibration", location: "Testing Field", date: "Aug 2026" },
-  { id: 9, category: "IoT Projects", title: "Sensor Network Array", location: "Research Wing", date: "Sep 2026" },
-  { id: 10, category: "Institution", title: "Student Graduation 2025", location: "Grand Hall", date: "Dec 2025" },
-  { id: 11, category: "Robotics", title: "PLC Programming Lab", location: "Industrial Wing", date: "Oct 2025" },
-  { id: 12, category: "AI Workshops", title: "Deep Learning Summit", location: "Global Hub", date: "Nov 2025" }
-];
-
 export default function GalleryPage() {
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const filteredImages = activeFilter === "All" 
-    ? galleryImages 
-    : galleryImages.filter(img => img.category === activeFilter);
+  useEffect(() => {
+    async function fetchGallery() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/gallery?category=${activeFilter}`);
+        const data = await res.json();
+        setGalleryImages(data);
+      } catch (err) {
+        console.error("Failed to fetch gallery:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchGallery();
+  }, [activeFilter]);
+
+
+  const filteredImages = galleryImages;
 
   return (
     <main className="min-h-screen bg-slate-50 font-body">
@@ -92,6 +94,16 @@ export default function GalleryPage() {
           </div>
 
           {/* Image Grid */}
+          <div className="min-h-[400px]">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-10 h-10 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : filteredImages.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
+              <p className="text-slate-500 font-medium">No images found in this category.</p>
+            </div>
+          ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
             <AnimatePresence mode="popLayout">
               {filteredImages.map((img, i) => (
@@ -106,7 +118,7 @@ export default function GalleryPage() {
                   onClick={() => setSelectedImage(img)}
                 >
                   <img 
-                    src={`/assets/course${(img.id % 2) + 1}.png`} 
+                    src={img.image_url} 
                     alt={img.title}
                     className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -124,6 +136,8 @@ export default function GalleryPage() {
                 </motion.div>
               ))}
             </AnimatePresence>
+          </div>
+          )}
           </div>
 
           {/* Load More */}
@@ -156,7 +170,7 @@ export default function GalleryPage() {
               onClick={e => e.stopPropagation()}
             >
               <img 
-                src={`/assets/course${(selectedImage.id % 2) + 1}.png`} 
+                src={selectedImage.image_url} 
                 alt={selectedImage.title}
                 className="max-h-[75vh] rounded-2xl shadow-2xl border border-white/10"
               />

@@ -53,14 +53,18 @@ export default function RegisterPage() {
   const handleRegister = async () => {
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          phone: formData.phone
+          phone: formData.phone,
+          course: formData.course,
+          mode: formData.mode,
+          batch: formData.batch,
+          isInstallment: formData.isInstallment
         })
       });
 
