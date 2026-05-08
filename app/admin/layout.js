@@ -148,6 +148,15 @@ export default function AdminLayout({ children }) {
     } catch (e) {}
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/login";
+    } catch (e) {
+      console.error("Logout failed", e);
+    }
+  };
+
   const filteredMenuItems = menuItems.filter(item => 
     !user || item.roles.includes(user.role)
   );
@@ -186,10 +195,13 @@ export default function AdminLayout({ children }) {
                     <span className="text-sm">Settings</span>
                   </Link>
                 )}
-                <Link href="/login" className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-rose-400 hover:bg-rose-400/5 transition-all">
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-rose-400 hover:bg-rose-400/5 transition-all outline-none"
+                >
                   <LogOut size={18} />
-                  <span className="text-sm">Logout</span>
-                </Link>
+                  <span className="text-sm font-semibold">Logout</span>
+                </button>
               </div>
 
               <div className="flex items-center space-x-3 px-2 py-1 pt-4 border-t border-white/5">
