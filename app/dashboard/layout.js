@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
@@ -31,7 +31,20 @@ const menuItems = [
 
 export default function StudentLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [user, setUser] = useState(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      if (data.success) setUser(data.user);
+    } catch (e) {}
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-body">
@@ -73,15 +86,27 @@ export default function StudentLayout({ children }) {
               })}
             </nav>
 
-            <div className="p-4 border-t border-white/5 space-y-1">
-              <Link href="/dashboard/profile" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-all">
-                <Settings size={18} />
-                <span className="text-sm">Account Settings</span>
-              </Link>
-              <Link href="/login" className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-rose-400 hover:bg-rose-400/5 transition-all">
-                <LogOut size={18} />
-                <span className="text-sm">Logout</span>
-              </Link>
+            <div className="p-4 border-t border-white/5 space-y-4 bg-navy mt-auto">
+              <div className="space-y-1">
+                <Link href="/dashboard/profile" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-all">
+                  <Settings size={18} />
+                  <span className="text-sm">Account Settings</span>
+                </Link>
+                <Link href="/login" className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-rose-400 hover:bg-rose-400/5 transition-all">
+                  <LogOut size={18} />
+                  <span className="text-sm">Logout</span>
+                </Link>
+              </div>
+
+              <div className="flex items-center space-x-3 px-2 py-1 pt-4 border-t border-white/5">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-bold text-sm border border-white/10">
+                  {user?.name?.substring(0, 1) || 'S'}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-white truncate w-32">{user?.name || 'Student'}</span>
+                  <span className="text-[10px] text-white/40 uppercase tracking-widest">{user?.role || 'Scholar'}</span>
+                </div>
+              </div>
             </div>
           </motion.aside>
         )}

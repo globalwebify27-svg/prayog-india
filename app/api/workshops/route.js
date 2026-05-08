@@ -12,12 +12,25 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { title, description, image_url, video_url, date, location } = await request.json();
+    const { title, description, image_url, video_url, date, location, category, client_name, content } = await request.json();
     const [result] = await pool.query(
-      "INSERT INTO workshops (title, description, image_url, video_url, date, location) VALUES (?, ?, ?, ?, ?, ?)",
-      [title, description, image_url, video_url, date, location]
+      "INSERT INTO workshops (title, description, image_url, video_url, date, location, category, client_name, content) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [title, description, image_url, video_url, date, location, category, client_name, JSON.stringify(content)]
     );
     return NextResponse.json({ success: true, id: result.insertId });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const { id, title, description, image_url, video_url, date, location, category, client_name, content } = await request.json();
+    await pool.query(
+      "UPDATE workshops SET title = ?, description = ?, image_url = ?, video_url = ?, date = ?, location = ?, category = ?, client_name = ?, content = ? WHERE id = ?",
+      [title, description, image_url, video_url, date, location, category, client_name, JSON.stringify(content), id]
+    );
+    return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

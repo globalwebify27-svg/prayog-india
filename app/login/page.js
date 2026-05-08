@@ -10,7 +10,9 @@ import {
   Mail,
   Zap,
   ArrowLeft,
-  ChevronRight
+  ChevronRight,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -18,6 +20,7 @@ import Footer from "../../components/Footer";
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -38,7 +41,8 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        window.location.href = data.user.role === "admin" ? "/admin" : "/dashboard";
+        const isAdminOrTeacher = data.user.role === "admin" || data.user.role === "teacher";
+        window.location.href = isAdminOrTeacher ? "/admin" : "/dashboard";
       } else {
         setError(data.message || "Authentication failed. Please check your credentials.");
       }
@@ -120,15 +124,22 @@ export default function LoginPage() {
                       <label className="text-xs font-bold text-slate-700">Security password</label>
                       <button type="button" className="text-[11px] font-bold text-navy hover:text-primary transition-colors">Forgot password?</button>
                     </div>
-                    <div className="relative">
-                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <div className="relative group">
+                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
                       <input 
-                        type="password" 
+                        type={showPassword ? "text" : "password"} 
                         name="password"
                         required
                         placeholder="••••••••"
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-navy focus:bg-white transition-all text-sm"
+                        className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-navy focus:bg-white transition-all text-sm"
                       />
+                      <button 
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
                     </div>
                   </div>
 

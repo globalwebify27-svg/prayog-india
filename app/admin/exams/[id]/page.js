@@ -16,7 +16,10 @@ import {
   ChevronUp,
   ChevronDown,
   Type,
-  ListOrdered
+  ListOrdered,
+  Upload,
+  FileSpreadsheet,
+  Download
 } from "lucide-react";
 
 export default function ExamQuestionsPage({ params }) {
@@ -24,6 +27,9 @@ export default function ExamQuestionsPage({ params }) {
   const [exam, setExam] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkFile, setBulkFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [newQuestion, setNewQuestion] = useState({
     question_text: "",
     type: "objective",
@@ -82,6 +88,62 @@ export default function ExamQuestionsPage({ params }) {
     if (result.success) fetchQuestions();
   };
 
+  const handleBulkUpload = async (e) => {
+    e.preventDefault();
+    if (!bulkFile) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target.result;
+        const rows = text.split("\n").slice(1); // Skip header
+        const parsedQuestions = rows.filter(row => row.trim()).map(row => {
+          const [question_text, type, optA, optB, optC, optD, correct_answer, marks] = row.split(",").map(i => i?.trim());
+          return {
+            question_text,
+            type: type?.toLowerCase() || 'objective',
+            options: [optA, optB, optC, optD].filter(o => o),
+            correct_answer,
+            marks: parseInt(marks) || 5,
+            order_num: 0
+          };
+        });
+
+        const res = await fetch(`/api/admin/exams/questions/bulk?exam_id=${id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ questions: parsedQuestions })
+        });
+        const result = await res.json();
+        if (result.success) {
+          setShowBulkModal(false);
+          fetchQuestions();
+          alert(result.message);
+        } else {
+          alert(result.message);
+        }
+      } catch (err) {
+        alert("Error parsing CSV file. Please ensure it follows the correct format.");
+      } finally {
+        setIsUploading(false);
+      }
+    };
+    reader.readAsText(bulkFile);
+  };
+
+  const downloadDemoSheet = () => {
+    const headers = "Question,Type,Option A,Option B,Option C,Option D,Correct Answer,Marks\n";
+    const sampleData = "What is the capital of India?,objective,New Delhi,Mumbai,Kolkata,Chennai,New Delhi,5\n" +
+                      "Explain the laws of motion.,subjective,,,,,,10";
+    const blob = new Blob([headers + sampleData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "exam_questions_demo.csv";
+    a.click();
+  };
+
   return (
     <div className="space-y-8 font-body max-w-5xl mx-auto pb-20">
       <div className="flex items-center justify-between">
@@ -94,13 +156,22 @@ export default function ExamQuestionsPage({ params }) {
             <p className="text-slate-500 text-sm mt-1">Question Bank & Marking Logic</p>
           </div>
         </div>
-        <button 
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-navy text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-black transition-all shadow-md"
-        >
-          <Plus size={18} />
-          <span>Add Question</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setShowBulkModal(true)}
+            className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all shadow-sm"
+          >
+            <Upload size={18} />
+            <span>Bulk Upload</span>
+          </button>
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 bg-navy text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-black transition-all shadow-md"
+          >
+            <Plus size={18} />
+            <span>Add Question</span>
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
@@ -275,6 +346,66 @@ export default function ExamQuestionsPage({ params }) {
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={() => setShowAddModal(false)} className="px-6 py-3 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Cancel</button>
                 <button type="submit" className="px-10 py-3 bg-navy text-white rounded-xl text-xs font-bold transition-all shadow-lg hover:bg-black">Save Question</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Bulk Upload Modal */}
+      {showBulkModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden"
+          >
+            <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Bulk Import Questions</h3>
+                <p className="text-slate-500 text-xs mt-1">Upload a CSV file to add multiple questions instantly.</p>
+              </div>
+              <button 
+                onClick={downloadDemoSheet}
+                className="flex items-center gap-2 text-navy hover:text-black transition-colors"
+              >
+                <Download size={16} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Demo Sheet</span>
+              </button>
+            </div>
+            <form onSubmit={handleBulkUpload} className="p-8 space-y-6">
+              <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl space-y-2">
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-2">
+                  <FileSpreadsheet size={14} /> CSV Format Requirements
+                </p>
+                <code className="text-[9px] text-blue-500 block leading-relaxed">
+                  Question, Type, OptA, OptB, OptC, OptD, Correct, Marks
+                </code>
+                <p className="text-[9px] text-blue-400 italic">Note: Type should be 'objective' or 'subjective'.</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Select CSV File</label>
+                <div className="relative group">
+                  <input 
+                    type="file" 
+                    accept=".csv"
+                    required
+                    onChange={e => setBulkFile(e.target.files[0])}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-navy file:text-white file:cursor-pointer transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button type="button" onClick={() => setShowBulkModal(false)} className="px-6 py-3 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Cancel</button>
+                <button 
+                  type="submit" 
+                  disabled={isUploading}
+                  className="px-8 py-3 bg-navy text-white rounded-xl text-xs font-bold shadow-lg hover:bg-black transition-all disabled:opacity-50"
+                >
+                  {isUploading ? 'Processing...' : 'Upload & Process'}
+                </button>
               </div>
             </form>
           </motion.div>

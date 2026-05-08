@@ -16,13 +16,14 @@ export async function GET() {
     const userId = decoded.id;
 
     // 1. Get User Info
-    const [user] = await pool.query("SELECT name, email, role FROM users WHERE id = ?", [userId]);
+    const [user] = await pool.query("SELECT id, name, email, role, phone, dob, address, blood_group, emergency_contact FROM users WHERE id = ?", [userId]);
     
-    // 2. Get Enrollments
+    // 2. Get Enrollments with Meeting Links
     const [enrollments] = await pool.query(`
-      SELECT e.*, c.title, c.duration, c.type as mode 
+      SELECT e.*, c.title, c.duration, c.type as mode, b.meeting_link 
       FROM enrollments e 
       JOIN courses c ON e.course_id = c.id 
+      LEFT JOIN batches b ON e.batch_id = b.id
       WHERE e.user_id = ?
     `, [userId]);
 

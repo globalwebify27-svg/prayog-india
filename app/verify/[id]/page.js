@@ -48,15 +48,58 @@ export default function VerifyCertificate() {
         backgroundColor: "#051329",
         windowWidth: 1123,
         windowHeight: 794,
-        onclone: (clonedDoc) => {
-          // Step 1: Disable all stylesheets to prevent Tailwind v4 lab()/oklch() color crash
+        onclone: (clonedDoc, element) => {
+          const dummyCanvas = document.createElement('canvas');
+          dummyCanvas.width = 1;
+          dummyCanvas.height = 1;
+          const ctx = dummyCanvas.getContext('2d', { willReadFrequently: true });
+          
+          const normalizeColorStr = (str) => {
+            if (!str || typeof str !== 'string') return str;
+            const matches = str.match(/(oklch|lab|oklab|lch|color)\([^)]+\)/g);
+            if (!matches) return str;
+            
+            let result = str;
+            matches.forEach(match => {
+              ctx.clearRect(0, 0, 1, 1);
+              ctx.fillStyle = 'rgba(0,0,0,0)';
+              ctx.fillStyle = match;
+              ctx.fillRect(0, 0, 1, 1);
+              const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+              const rgbaStr = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+              result = result.replace(match, rgbaStr);
+            });
+            return result;
+          };
+
+          const inlineStyles = (source, target) => {
+            const computed = window.getComputedStyle(source);
+            for (let i = 0; i < computed.length; i++) {
+              const key = computed[i];
+              let value = computed.getPropertyValue(key);
+              
+              if (value && (value.includes('oklch') || value.includes('lab') || value.includes('color('))) {
+                value = normalizeColorStr(value);
+              }
+              
+              target.style[key] = value;
+            }
+            
+            for (let i = 0; i < source.children.length; i++) {
+              if (target.children[i]) {
+                inlineStyles(source.children[i], target.children[i]);
+              }
+            }
+          };
+
+          if (certificateRef.current) {
+            inlineStyles(certificateRef.current, element);
+          }
+
           Array.from(clonedDoc.querySelectorAll('style, link[rel="stylesheet"]'))
             .forEach(s => { s.disabled = true; });
 
-          // Step 2: Serialize every SVG element (e.g. QR code) to a base64 <img>.
-          // html2canvas crashes when it parses computed styles on SVGElementContainer
-          // that inherit lab() / oklch() colors. Converting to an img avoids this entirely.
-          Array.from(clonedDoc.querySelectorAll('svg')).forEach(svg => {
+          Array.from(element.querySelectorAll('svg')).forEach(svg => {
             try {
               const w = svg.getAttribute('width') || svg.viewBox?.baseVal?.width || 100;
               const h = svg.getAttribute('height') || svg.viewBox?.baseVal?.height || 100;
@@ -64,11 +107,11 @@ export default function VerifyCertificate() {
               const b64 = btoa(unescape(encodeURIComponent(svgXml)));
               const img = clonedDoc.createElement('img');
               img.src = 'data:image/svg+xml;base64,' + b64;
-              img.width = w;
-              img.height = h;
-              img.style.display = svg.style.display || 'block';
+              img.width = parseFloat(w);
+              img.height = parseFloat(h);
+              img.style.cssText = svg.style.cssText;
               svg.parentNode?.replaceChild(img, svg);
-            } catch (e) { /* skip non-serialisable SVGs */ }
+            } catch (e) { console.warn("SVG to image failed", e); }
           });
         }
       });

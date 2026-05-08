@@ -29,8 +29,16 @@ export default function StudentLife() {
 
           {/* Activity Side */}
           <div>
-            <h4 className="text-navy font-bold uppercase tracking-widest text-xs mb-4">Life at Prayog</h4>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-8">Student Activity</h2>
+            <div className="inline-flex items-center space-x-2 text-primary font-black text-[10px] uppercase tracking-[0.3em] mb-4">
+              <span className="w-8 h-px bg-primary"></span>
+              <span>Life at Prayog</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-heading font-black text-slate-900 mb-6 leading-tight">
+              From Classroom Theories to <span className="text-navy">Industrial Reality</span>
+            </h2>
+            <p className="text-slate-500 text-sm leading-relaxed mb-10 max-w-xl">
+              Witness the daily hustle of our innovators. From brainstorming complex algorithms in our R&D labs to deploying real-world hardware, our students live and breathe technical excellence.
+            </p>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div className="rounded-2xl overflow-hidden h-48 shadow-lg">

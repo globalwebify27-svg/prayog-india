@@ -22,14 +22,16 @@ export default function AttendanceAdmin() {
   const [modeFilter, setModeFilter] = useState("all");
   const [courseFilter, setCourseFilter] = useState("all");
   const [batchFilter, setBatchFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [dateFilter]);
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch("/api/admin/attendance");
+      setIsLoading(true);
+      const res = await fetch(`/api/admin/attendance?date=${dateFilter}`);
       const data = await res.json();
       if (data.success) {
         setLogs(data.logs);
@@ -79,6 +81,15 @@ export default function AttendanceAdmin() {
       {/* Advanced Filters */}
       {showFilters && (
         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Attendance Date</label>
+            <input 
+              type="date" 
+              value={dateFilter} 
+              onChange={(e) => setDateFilter(e.target.value)} 
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:border-navy outline-none transition-all font-semibold"
+            />
+          </div>
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mode</label>
             <select value={modeFilter} onChange={(e) => setModeFilter(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:border-navy outline-none transition-all">

@@ -23,9 +23,22 @@ export default function StudentDashboard() {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [notices, setNotices] = useState([]);
+
   useEffect(() => {
     fetchDashboardData();
+    fetchNotices();
   }, []);
+
+  const fetchNotices = async () => {
+    try {
+      const res = await fetch("/api/student/notices");
+      const result = await res.json();
+      if (result.success) {
+        setNotices(result.notices);
+      }
+    } catch (error) {}
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -55,6 +68,7 @@ export default function StudentDashboard() {
   const attendanceCount = data?.attendanceCount || 0;
 
   const hasOnlineEnrollment = enrollments.some(e => e.mode === 'online');
+  const activeMeetingLink = enrollments.find(e => e.meeting_link)?.meeting_link;
 
   return (
     <div className="space-y-8 font-body">
@@ -66,11 +80,16 @@ export default function StudentDashboard() {
           </h1>
           <p className="text-slate-500 text-sm mt-1">Student ID: PR-{10000 + (user.id || 0)} | {user.email}</p>
         </div>
-        {hasOnlineEnrollment && (
-          <Link href="/dashboard/schedule" className="flex items-center space-x-2 bg-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm">
+        {activeMeetingLink && (
+          <a 
+            href={activeMeetingLink} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="flex items-center space-x-2 bg-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm animate-pulse"
+          >
             <Zap size={16} className="text-primary" />
             <span>Join live session</span>
-          </Link>
+          </a>
         )}
       </div>
 
@@ -100,6 +119,37 @@ export default function StudentDashboard() {
               </div>
             </div>
           </div>
+          
+          {/* Announcements Section */}
+          {notices.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 px-1">
+                <Bell size={16} className="text-navy" />
+                <h2 className="text-lg font-semibold text-slate-900">Latest Announcements</h2>
+              </div>
+              <div className="space-y-3">
+                {notices.map((notice, i) => (
+                  <motion.div 
+                    key={notice.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 border-l-navy"
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="text-sm font-bold text-slate-900">{notice.title}</h3>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                        {new Date(notice.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      {notice.content}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Programs Section */}
           <div className="space-y-5">
@@ -133,6 +183,16 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
+                    {course.meeting_link && (
+                      <a 
+                        href={course.meeting_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-navy text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2 shadow-md"
+                      >
+                        <Play size={10} fill="white" /> Join Live
+                      </a>
+                    )}
                     <div className="text-right hidden sm:block">
                       <p className="text-[10px] font-bold text-slate-400 uppercase">Progress</p>
                       <p className="text-xs font-bold text-navy">20%</p>

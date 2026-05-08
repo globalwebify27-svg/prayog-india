@@ -20,7 +20,12 @@ export default function Stats() {
       try {
         const res = await fetch("/api/stats");
         const data = await res.json();
-        setStats(data);
+        if (Array.isArray(data)) {
+          setStats(data);
+        } else {
+          console.error("Invalid stats data format:", data);
+          setStats([]);
+        }
       } catch (err) {
         console.error("Failed to fetch stats:", err);
       } finally {

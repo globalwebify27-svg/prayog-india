@@ -20,23 +20,64 @@ import {
   Square,
   XSquare,
   BadgeCheck,
-  X
+  X,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 export default function StudentsAdmin() {
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [user, setUser] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [modeFilter, setModeFilter] = useState("all");
   const [courseFilter, setCourseFilter] = useState("all");
   const [batchFilter, setBatchFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [menuOpen, setMenuOpen] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [newStudent, setNewStudent] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "Password@123",
+    course: "",
+    mode: "offline",
+    batch: "Morning (9AM - 11AM)",
+    isInstallment: true
+  });
 
   useEffect(() => {
     fetchStudents();
+    fetchCourses();
+    fetchUser();
   }, []);
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      if (data.success) setUser(data.user);
+    } catch (e) {}
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch("/api/courses");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setCourses(data);
+        if (data.length > 0) {
+          setNewStudent(prev => ({ ...prev, course: data[0].title }));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch courses:", err);
+    }
+  };
 
   const fetchStudents = async () => {
     try {
@@ -49,6 +90,36 @@ export default function StudentsAdmin() {
       console.error("Failed to fetch students:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddStudent = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newStudent)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsAddModalOpen(false);
+        fetchStudents();
+        setNewStudent({
+          name: "",
+          email: "",
+          phone: "",
+          password: "Password@123",
+          course: courses[0]?.title || "",
+          mode: "offline",
+          batch: "Morning (9AM - 11AM)",
+          isInstallment: true
+        });
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert("Failed to add student");
     }
   };
 
@@ -85,6 +156,15 @@ export default function StudentsAdmin() {
             <p className="text-slate-500 text-sm mt-1">Manage institutional enrollments and academic records.</p>
           </div>
           <div className="flex items-center space-x-3 w-full md:w-auto">
+            {user?.role === 'admin' && (
+              <button 
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-navy text-white px-4 py-2.5 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-black transition-all shadow-sm"
+              >
+                <Users size={16} />
+                <span>Add Student</span>
+              </button>
+            )}
             <div className="relative flex-grow md:flex-grow-0">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input 
@@ -285,6 +365,153 @@ export default function StudentsAdmin() {
           </button>
         </div>
       </div>
+      
+      {/* Add Student Modal */}
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200"
+            >
+              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Enroll New Student</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Academic Session 2026</p>
+                </div>
+                <button onClick={() => setIsAddModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                  <X size={20} className="text-slate-400" />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddStudent} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="e.g. John Doe"
+                      value={newStudent.name}
+                      onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                    <input 
+                      required
+                      type="email" 
+                      placeholder="john@example.com"
+                      value={newStudent.email}
+                      onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
+                    <input 
+                      required
+                      type="tel" 
+                      placeholder="9876543210"
+                      value={newStudent.phone}
+                      onChange={(e) => setNewStudent({...newStudent, phone: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Student Password</label>
+                    <div className="relative">
+                      <input 
+                        required
+                        type={showPassword ? "text" : "password"} 
+                        value={newStudent.password}
+                        onChange={(e) => setNewStudent({...newStudent, password: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all pr-10"
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-px bg-slate-100 my-2" />
+
+                <div className="space-y-4">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Enrollment Details</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-500">Course</label>
+                      <select 
+                        required
+                        value={newStudent.course}
+                        onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
+                      >
+                        <option value="">Select Course</option>
+                        {courses.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-500">Batch</label>
+                      <select 
+                        value={newStudent.batch}
+                        onChange={(e) => setNewStudent({...newStudent, batch: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
+                      >
+                        <option>Morning (9AM - 11AM)</option>
+                        <option>Evening (6PM - 8PM)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-500">Learning Mode</label>
+                      <select 
+                        value={newStudent.mode}
+                        onChange={(e) => setNewStudent({...newStudent, mode: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
+                      >
+                        <option value="offline">Offline Hub</option>
+                        <option value="online">Online Live</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-500">Payment Plan</label>
+                      <select 
+                        value={newStudent.isInstallment ? "true" : "false"}
+                        onChange={(e) => setNewStudent({...newStudent, isInstallment: e.target.value === "true"})}
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
+                      >
+                        <option value="true">Installments (EMI)</option>
+                        <option value="false">Lump-sum Payment</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6">
+                  <button type="submit" className="w-full bg-navy text-white py-3.5 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-navy/10 flex items-center justify-center gap-2">
+                    <BadgeCheck size={18} />
+                    Confirm Enrollment
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

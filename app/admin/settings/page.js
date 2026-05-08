@@ -12,7 +12,6 @@ import {
   Zap,
   Lock,
   Mail,
-  Smartphone,
   ChevronRight,
   Server
 } from "lucide-react";
@@ -134,16 +133,6 @@ export default function AdminSettings() {
                   </div>
 
                   <div className="grid gap-4">
-                    <div className="flex items-center justify-between p-5 bg-slate-50 rounded-xl border border-slate-100">
-                      <div className="flex items-center space-x-4">
-                        <Smartphone className="text-slate-400" size={20} />
-                        <div>
-                          <p className="text-sm font-bold text-slate-900">Two-Factor Auth</p>
-                          <p className="text-[10px] text-emerald-600 font-bold uppercase">Enforced</p>
-                        </div>
-                      </div>
-                      <button className="px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-navy hover:bg-slate-50 transition-all uppercase">Configure</button>
-                    </div>
                     <div className="flex items-center justify-between p-5 bg-slate-50 rounded-xl border border-slate-100">
                       <div className="flex items-center space-x-4">
                         <Lock className="text-slate-400" size={20} />

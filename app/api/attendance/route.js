@@ -17,7 +17,7 @@ export async function POST(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    const { location, selfie, courseId, batchId } = await req.json();
+    const { location, selfie, courseId = null, batchId = null } = await req.json();
 
     // 1. Save selfie to public/uploads/attendance (mocking file save)
     let selfieUrl = null;
@@ -37,7 +37,7 @@ export async function POST(req) {
     // 2. Insert into DB
     await pool.query(
       "INSERT INTO attendance (user_id, course_id, batch_id, date, type, latitude, longitude, selfie_url, status) VALUES (?, ?, ?, CURDATE(), 'offline', ?, ?, ?, 'present')",
-      [userId, courseId || 1, batchId || 1, location?.lat, location?.lng, selfieUrl]
+      [userId, courseId || null, batchId || null, location?.lat, location?.lng, selfieUrl]
     );
 
     return NextResponse.json({ success: true, message: "Attendance logged successfully" });

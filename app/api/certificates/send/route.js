@@ -32,10 +32,20 @@ export async function POST(request) {
       verificationLink
     );
 
+    // Generate the PDF certificate
+    const { generateCertificate } = require('@/lib/pdf');
+    const path = require('path');
+    const certUrl = await generateCertificate(cert.student_name, cert.course_name, cert.certificate_number);
+    const fullPath = path.join(process.cwd(), "public", certUrl);
+
     const result = await sendMail(
       cert.student_email,
       `Congratulations! Your Certificate for ${cert.course_name}`,
-      emailHtml
+      emailHtml,
+      [{
+        filename: `${cert.certificate_number}.pdf`,
+        path: fullPath
+      }]
     );
 
     if (result.success) {

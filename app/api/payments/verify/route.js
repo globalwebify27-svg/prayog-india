@@ -42,14 +42,15 @@ export async function POST(req) {
       );
 
       // 3. Generate PDF Receipt
-      // Fetch student name for receipt
+      // Fetch student name and email for receipt
       const [studentRows] = await pool.query(`
-        SELECT u.name FROM users u 
+        SELECT u.name, u.email FROM users u 
         JOIN enrollments e ON e.user_id = u.id 
         WHERE e.id = ?
       `, [enrollmentId]);
       
       const studentName = studentRows[0]?.name || "Student";
+      const studentEmail = studentRows[0]?.email;
       const receiptUrl = await generateReceipt(
         studentName, 
         amount, 
@@ -61,6 +62,32 @@ export async function POST(req) {
       // 4. Save receipt URL if installment
       if (installmentId) {
         await pool.query("UPDATE installments SET receipt_url = ? WHERE id = ?", [receiptUrl, installmentId]);
+      }
+
+      // 5. Send Email with Receipt
+      if (studentEmail) {
+        const path = require('path');
+        const fullPath = path.join(process.cwd(), "public", receiptUrl);
+        
+        const { sendMail } = require('@/lib/mailer');
+        await sendMail(
+          studentEmail,
+          "Payment Received - Prayog India",
+          `
+            <div style="font-family: sans-serif; padding: 20px;">
+              <h2 style="color: #0f172a;">Payment Confirmation</h2>
+              <p>Dear ${studentName},</p>
+              <p>We have successfully received your payment of <strong>INR ${amount}</strong>.</p>
+              <p>Your official fee receipt is attached to this email.</p>
+              <br/>
+              <p>Best Regards,<br/>Prayog India Team</p>
+            </div>
+          `,
+          [{
+            filename: `Receipt_${razorpay_payment_id}.pdf`,
+            path: fullPath
+          }]
+        );
       }
 
       return NextResponse.json({ 

@@ -5,8 +5,12 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
-  role ENUM('admin', 'student') DEFAULT 'student',
+  role ENUM('admin', 'student', 'teacher') DEFAULT 'student',
   phone VARCHAR(20),
+  dob DATE,
+  address TEXT,
+  blood_group VARCHAR(5),
+  emergency_contact VARCHAR(20),
   profile_img VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -120,4 +124,12 @@ CREATE TABLE IF NOT EXISTS exam_submissions (
   submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (exam_id) REFERENCES exams(id),
   FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS notices (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  target_role ENUM('all', 'student', 'teacher') DEFAULT 'all',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

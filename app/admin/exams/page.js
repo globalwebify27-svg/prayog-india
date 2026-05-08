@@ -14,7 +14,9 @@ import {
   MoreVertical,
   Trash2,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Hourglass,
+  Pencil
 } from "lucide-react";
 
 export default function AdminExamsPage() {
@@ -22,12 +24,17 @@ export default function AdminExamsPage() {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [newExam, setNewExam] = useState({
     title: "",
     description: "",
     course_id: "",
     duration: 60,
-    total_marks: 100
+    total_marks: 100,
+    type: "objective",
+    start_time: "",
+    end_time: ""
   });
 
   useEffect(() => {
@@ -49,17 +56,49 @@ export default function AdminExamsPage() {
 
   const handleCreateExam = async (e) => {
     e.preventDefault();
+    const method = isEditing ? "PUT" : "POST";
+    const payload = isEditing ? { ...newExam, id: editingId } : newExam;
+
     const res = await fetch("/api/admin/exams", {
-      method: "POST",
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newExam)
+      body: JSON.stringify(payload)
     });
     const result = await res.json();
     if (result.success) {
       setShowAddModal(false);
-      setNewExam({ title: "", description: "", course_id: "", duration: 60, total_marks: 100 });
+      setIsEditing(false);
+      setEditingId(null);
+      setNewExam({ title: "", description: "", course_id: "", duration: 60, total_marks: 100, type: "objective", start_time: "", end_time: "" });
       fetchExams();
     }
+  };
+
+  const handleEdit = (exam) => {
+    // Format dates for datetime-local (YYYY-MM-DDTHH:MM)
+    const start = exam.start_time ? new Date(exam.start_time).toISOString().slice(0, 16) : "";
+    const end = exam.end_time ? new Date(exam.end_time).toISOString().slice(0, 16) : "";
+
+    setNewExam({
+      title: exam.title,
+      description: exam.description || "",
+      course_id: exam.course_id,
+      duration: exam.duration,
+      total_marks: exam.total_marks,
+      type: exam.type,
+      start_time: start,
+      end_time: end
+    });
+    setEditingId(exam.id);
+    setIsEditing(true);
+    setShowAddModal(true);
+  };
+
+  const handleDeleteExam = async (id) => {
+    if (!confirm("Are you sure you want to delete this exam?")) return;
+    const res = await fetch(`/api/admin/exams?id=${id}`, { method: "DELETE" });
+    const result = await res.json();
+    if (result.success) fetchExams();
   };
 
   const filteredExams = exams.filter(e => 
@@ -116,9 +155,20 @@ export default function AdminExamsPage() {
                   <div className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${exam.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-100 text-slate-400 border border-slate-200'}`}>
                     {exam.is_active ? 'Live' : 'Draft'}
                   </div>
-                  <button className="p-1.5 text-slate-400 hover:text-navy transition-colors">
-                    <MoreVertical size={16} />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => handleEdit(exam)}
+                      className="p-1.5 text-slate-400 hover:text-navy transition-colors bg-white hover:bg-slate-50 rounded-lg border border-transparent hover:border-slate-100"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteExam(exam.id)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors bg-white hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-100"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
                 <h3 className="text-base font-bold text-slate-900 line-clamp-1">{exam.title}</h3>
                 <p className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-1.5">
@@ -164,8 +214,8 @@ export default function AdminExamsPage() {
             className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/20"
           >
             <div className="p-8 border-b border-slate-100 bg-slate-50/50">
-              <h3 className="text-xl font-bold text-slate-900">Initialize New Assessment</h3>
-              <p className="text-slate-500 text-xs mt-1">Set the basic parameters before adding questions.</p>
+              <h3 className="text-xl font-bold text-slate-900">{isEditing ? 'Update Assessment Details' : 'Initialize New Assessment'}</h3>
+              <p className="text-slate-500 text-xs mt-1">{isEditing ? 'Modify existing parameters and schedule.' : 'Set the basic parameters before adding questions.'}</p>
             </div>
             <form onSubmit={handleCreateExam} className="p-8 space-y-5">
               <div className="space-y-1.5">
@@ -183,13 +233,37 @@ export default function AdminExamsPage() {
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Associated Course</label>
                 <select 
                   required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none cursor-pointer focus:border-navy"
+                  disabled={isEditing}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none cursor-pointer focus:border-navy disabled:opacity-60"
                   value={newExam.course_id}
                   onChange={e => setNewExam({...newExam, course_id: e.target.value})}
                 >
                   <option value="">Select Course</option>
                   {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                 </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Start Date & Time</label>
+                  <input 
+                    type="datetime-local"
+                    required
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy"
+                    value={newExam.start_time}
+                    onChange={e => setNewExam({...newExam, start_time: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">End Date & Time</label>
+                  <input 
+                    type="datetime-local"
+                    required
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy"
+                    value={newExam.end_time}
+                    onChange={e => setNewExam({...newExam, end_time: e.target.value})}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
@@ -206,13 +280,17 @@ export default function AdminExamsPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Total Marks</label>
-                  <input 
-                    type="number"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy"
-                    value={newExam.total_marks}
-                    onChange={e => setNewExam({...newExam, total_marks: e.target.value})}
-                  />
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Exam Type</label>
+                  <select 
+                    required
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none cursor-pointer focus:border-navy"
+                    value={newExam.type}
+                    onChange={e => setNewExam({...newExam, type: e.target.value})}
+                  >
+                    <option value="objective">Objective (MCQ)</option>
+                    <option value="subjective">Subjective (Written)</option>
+                    <option value="mixed">Mixed Format</option>
+                  </select>
                 </div>
               </div>
 
@@ -228,8 +306,13 @@ export default function AdminExamsPage() {
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setShowAddModal(false)} className="px-6 py-3 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Cancel</button>
-                <button type="submit" className="px-8 py-3 bg-navy text-white rounded-xl text-xs font-bold transition-all shadow-lg hover:bg-black">Create Exam</button>
+                <button type="button" onClick={() => {
+                  setShowAddModal(false);
+                  setIsEditing(false);
+                  setEditingId(null);
+                  setNewExam({ title: "", description: "", course_id: "", duration: 60, total_marks: 100, type: "objective", start_time: "", end_time: "" });
+                }} className="px-6 py-3 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Cancel</button>
+                <button type="submit" className="px-8 py-3 bg-navy text-white rounded-xl text-xs font-bold transition-all shadow-lg hover:bg-black">{isEditing ? 'Save Changes' : 'Create Exam'}</button>
               </div>
             </form>
           </motion.div>

@@ -95,8 +95,8 @@ export default function AttendancePage() {
         body: JSON.stringify({
           location,
           selfie,
-          courseId: selectedEnrollment?.course_id || 1, 
-          batchId: selectedEnrollment?.batch_id || 1   
+          courseId: selectedEnrollment?.course_id || null, 
+          batchId: selectedEnrollment?.batch_id || null   
         })
       });
 

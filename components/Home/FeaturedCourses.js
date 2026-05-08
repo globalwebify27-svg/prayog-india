@@ -19,9 +19,20 @@ export default function FeaturedCourses() {
   useEffect(() => {
     async function fetchFeatured() {
       try {
-        const res = await fetch("/api/courses");
+        const res = await fetch(`/api/courses?t=${Date.now()}`);
+        if (!res.ok) {
+          console.error(`Fetch failed with status: ${res.status}`);
+          setCourses([]);
+          return;
+        }
         const data = await res.json();
-        setCourses(data.slice(0, 6)); // Show first 6 as featured
+        console.log("FeaturedCourses data received:", data);
+        if (Array.isArray(data)) {
+          setCourses(data.slice(0, 6)); // Show first 6 as featured
+        } else {
+          console.error("Invalid data format for courses. Expected array, got:", typeof data, data);
+          setCourses([]);
+        }
       } catch (err) {
         console.error("Failed to fetch featured courses:", err);
       } finally {

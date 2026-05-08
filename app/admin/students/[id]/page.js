@@ -1,6 +1,7 @@
-import { ArrowLeft, Mail, Phone, Calendar } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, Droplet, AlertCircle, MapPin } from "lucide-react";
 import Link from "next/link";
 import pool from "@/lib/db";
+import EditStudentForm from "@/components/admin/EditStudentForm";
 
 export default async function StudentProfilePage({ params }) {
   const resolvedParams = await params;
@@ -27,14 +28,18 @@ export default async function StudentProfilePage({ params }) {
   return (
     <div className="space-y-8 font-body">
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link href="/admin/students" className="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-navy hover:bg-slate-50 transition-all shadow-sm">
-          <ArrowLeft size={18} />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Student Profile</h1>
-          <p className="text-slate-500 text-sm mt-1">ID: PR-{10000 + user.id}</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex items-center space-x-4">
+          <Link href="/admin/students" className="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-navy hover:bg-slate-50 transition-all shadow-sm">
+            <ArrowLeft size={18} />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Student Profile</h1>
+            <p className="text-slate-500 text-sm mt-1">ID: PR-{10000 + user.id}</p>
+          </div>
         </div>
+        
+        <EditStudentForm student={user} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -47,7 +52,7 @@ export default async function StudentProfilePage({ params }) {
             <h2 className="text-xl font-bold text-slate-900 mb-1">{user.name}</h2>
             <p className="text-xs font-bold text-emerald-600 mb-6 uppercase tracking-wider">Active Enrollment</p>
             
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="flex items-start gap-3">
                 <Mail size={16} className="text-slate-400 mt-0.5" />
                 <div>
@@ -65,8 +70,38 @@ export default async function StudentProfilePage({ params }) {
               <div className="flex items-start gap-3">
                 <Calendar size={16} className="text-slate-400 mt-0.5" />
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Registration Date</p>
-                  <p className="text-sm font-semibold text-slate-700">{new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Date of Birth</p>
+                  <p className="text-sm font-semibold text-slate-700">{user.dob ? new Date(user.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Droplet size={16} className="text-slate-400 mt-0.5" />
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Blood Group</p>
+                  <p className="text-sm font-semibold text-slate-700">{user.blood_group || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <AlertCircle size={16} className="text-slate-400 mt-0.5" />
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Emergency Contact</p>
+                  <p className="text-sm font-semibold text-slate-700">{user.emergency_contact || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <MapPin size={16} className="text-slate-400 mt-0.5" />
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Mailing Address</p>
+                  <p className="text-sm font-semibold text-slate-700 leading-relaxed">{user.address || 'No address registered'}</p>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-slate-50">
+                <div className="flex items-start gap-3 opacity-60">
+                  <Calendar size={16} className="text-slate-400 mt-0.5" />
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Registration Date</p>
+                    <p className="text-sm font-semibold text-slate-700">{new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
                 </div>
               </div>
             </div>

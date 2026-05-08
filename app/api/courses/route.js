@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
+  console.log("GET /api/courses hit");
   try {
     const [rows] = await pool.query("SELECT * FROM courses ORDER BY created_at DESC");
-    return NextResponse.json(rows);
+    console.log("Fetched courses rows count:", rows?.length);
+    return NextResponse.json(Array.isArray(rows) ? rows : []);
   } catch (error) {
     console.error("Error fetching courses:", error);
     return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 });

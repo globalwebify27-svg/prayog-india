@@ -31,17 +31,23 @@ async function seedStudents() {
 
       // Enroll in a random course
       const course = courses[Math.floor(Math.random() * courses.length)];
+      const initialPayment = Math.min(course.price, 5000);
+      const balance = course.price - initialPayment;
+      const paymentStatus = balance > 0 ? 'partial' : 'paid';
+
       const [enrollResult] = await pool.query(
         "INSERT INTO enrollments (user_id, course_id, total_amount, amount_paid, payment_status) VALUES (?, ?, ?, ?, ?)",
-        [userId, course.id, course.price, 5000, 'partial']
+        [userId, course.id, course.price, initialPayment, paymentStatus]
       );
       const enrollmentId = enrollResult.insertId;
 
-      // Create Installments
-      await pool.query(
-        "INSERT INTO installments (enrollment_id, amount, due_date, status) VALUES (?, ?, DATE_ADD(CURDATE(), INTERVAL 1 MONTH), 'pending')",
-        [enrollmentId, (course.price - 5000) / 2]
-      );
+      // Create Installments if there's a balance
+      if (balance > 0) {
+        await pool.query(
+          "INSERT INTO installments (enrollment_id, amount, due_date, status) VALUES (?, ?, DATE_ADD(CURDATE(), INTERVAL 1 MONTH), 'pending')",
+          [enrollmentId, balance / 2]
+        );
+      }
 
       // Add dummy attendance
       await pool.query(

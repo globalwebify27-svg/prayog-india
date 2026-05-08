@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   User, 
@@ -16,7 +16,9 @@ import {
   Globe,
   ChevronRight,
   ArrowLeft,
-  ChevronLeft
+  ChevronLeft,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import Link from "next/link";
 import Header from "../../components/Header";
@@ -30,17 +32,39 @@ const STEPS = [
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [courses, setCourses] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
-    course: "Industrial Robotics",
+    specialization: "Robotics",
+    courseId: "",
     mode: "Offline",
     batch: "Morning (9AM - 11AM)",
     isInstallment: true
   });
+
+  useEffect(() => {
+    fetch("/api/courses")
+      .then(res => res.json())
+      .then(data => setCourses(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  const categoryMap = {
+    "Robotics": "Robotics",
+    "AI & ML": "Artificial Intelligence",
+    "Drone Tech": "Aviation",
+    "IoT": "Electronics"
+  };
+
+  const filteredCourses = courses.filter(c => 
+    c.category === categoryMap[formData.specialization] && 
+    c.type.toLowerCase() === formData.mode.toLowerCase()
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -61,7 +85,7 @@ export default function RegisterPage() {
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
-          course: formData.course,
+          course_id: formData.courseId,
           mode: formData.mode,
           batch: formData.batch,
           isInstallment: formData.isInstallment
@@ -175,7 +199,21 @@ export default function RegisterPage() {
                           <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Secure password</label>
                           <div className="relative group">
                             <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
-                            <input type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="••••••••" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" />
+                            <input 
+                              type={showPassword ? "text" : "password"} 
+                              name="password" 
+                              value={formData.password} 
+                              onChange={handleInputChange} 
+                              placeholder="••••••••" 
+                              className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
+                            />
+                            <button 
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
+                            >
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -194,13 +232,33 @@ export default function RegisterPage() {
                           {["Robotics", "AI & ML", "Drone Tech", "IoT"].map(c => (
                             <button 
                               key={c} 
-                              onClick={() => setFormData({...formData, course: c})} 
-                              className={`p-3 rounded-xl border transition-all text-xs font-bold uppercase ${formData.course === c ? "bg-navy text-white border-navy shadow-md" : "bg-white text-slate-400 border-slate-200 hover:border-navy"}`}
+                              type="button"
+                              onClick={() => setFormData({...formData, specialization: c, courseId: ""})} 
+                              className={`p-3 rounded-xl border transition-all text-xs font-bold uppercase ${formData.specialization === c ? "bg-navy text-white border-navy shadow-md" : "bg-white text-slate-400 border-slate-200 hover:border-navy"}`}
                             >
                               {c}
                             </button>
                           ))}
                         </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Select Specific Program</label>
+                        <select 
+                          required
+                          name="courseId" 
+                          value={formData.courseId} 
+                          onChange={handleInputChange} 
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy text-sm font-semibold"
+                        >
+                          <option value="">-- Choose Course --</option>
+                          {filteredCourses.map(c => (
+                            <option key={c.id} value={c.id}>{c.title}</option>
+                          ))}
+                        </select>
+                        {filteredCourses.length === 0 && (
+                          <p className="text-[10px] text-amber-600 font-bold ml-1 italic">No {formData.mode} courses available for this specialization.</p>
+                        )}
                       </div>
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
@@ -232,7 +290,9 @@ export default function RegisterPage() {
                         <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                           <div className="text-center md:text-left">
                             <p className="text-primary font-bold text-[9px] uppercase tracking-widest mb-1.5">Certification enrollment</p>
-                            <h3 className="text-lg font-bold">{formData.course} Specialization</h3>
+                            <h3 className="text-lg font-bold">
+                              {courses.find(c => c.id == formData.courseId)?.title || formData.specialization}
+                            </h3>
                             <p className="text-white/40 text-[10px] font-medium uppercase mt-1">{formData.mode} • Session 2026</p>
                           </div>
                           <div className="text-center md:text-right">

@@ -14,7 +14,12 @@ export default function WorkshopStories() {
       try {
         const res = await fetch("/api/workshops");
         const data = await res.json();
-        setStories(data.slice(0, 3)); // Only show top 3 on home
+        if (Array.isArray(data)) {
+          setStories(data.slice(0, 3)); // Only show top 3 on home
+        } else {
+          console.error("Invalid workshops data format:", data);
+          setStories([]);
+        }
       } catch (err) {
         console.error("Failed to fetch workshops:", err);
       } finally {
@@ -37,7 +42,7 @@ export default function WorkshopStories() {
               Workshop <span className="text-navy">Stories</span>
             </h2>
           </div>
-          <Link href="/gallery" className="bg-navy text-white px-5 md:px-8 py-2.5 md:py-4 rounded-xl font-bold text-[10px] md:text-sm hover:bg-navy/90 transition-all flex items-center space-x-2 shadow-lg shadow-navy/10 group">
+          <Link href="/stories" className="bg-navy text-white px-5 md:px-8 py-2.5 md:py-4 rounded-xl font-bold text-[10px] md:text-sm hover:bg-navy/90 transition-all flex items-center space-x-2 shadow-lg shadow-navy/10 group">
             <span>View All 100+ Stories</span>
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
@@ -76,7 +81,7 @@ export default function WorkshopStories() {
                 <h3 className="text-[11px] md:text-lg font-heading font-black text-slate-900 mb-3 md:mb-4 group-hover:text-navy transition-colors line-clamp-2">
                   {story.title}
                 </h3>
-                <Link href="/gallery" className="text-navy font-bold text-[9px] md:text-xs uppercase tracking-widest flex items-center hover:text-primary transition-colors">
+                <Link href={`/stories/${story.id}`} className="text-navy font-bold text-[9px] md:text-xs uppercase tracking-widest flex items-center hover:text-primary transition-colors">
                   <span>Read Full Story</span> 
                   <ArrowRight size={12} className="ml-1 md:ml-2" />
                 </Link>
