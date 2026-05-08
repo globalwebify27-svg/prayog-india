@@ -133,3 +133,17 @@ CREATE TABLE IF NOT EXISTS notices (
   target_role ENUM('all', 'student', 'teacher') DEFAULT 'all',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS workshops (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  image_url VARCHAR(255),
+  video_url VARCHAR(255),
+  date DATE,
+  location VARCHAR(255),
+  category VARCHAR(100) DEFAULT 'Industrial',
+  client_name VARCHAR(255),
+  content JSON,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
