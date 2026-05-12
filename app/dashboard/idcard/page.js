@@ -114,6 +114,7 @@ export default function StudentIdCardPage() {
             studentName={user.name}
             studentId={`PR-${10000 + user.id}`}
             courseName={enrollment?.title || "Professional Student"}
+            photo={user.image}
             validity="2026 - 2027"
             qrCodeData={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com'}/verify/${user.id}`}
             bloodGroup={user.blood_group}

@@ -24,7 +24,7 @@ export async function POST(req) {
     // Insert submission
     const [result] = await pool.query(
       "INSERT INTO exam_submissions (exam_id, user_id, answers, status) VALUES (?, ?, ?, 'pending')",
-      [exam_id, userId, JSON.stringify(answers)]
+      [parseInt(exam_id), userId, JSON.stringify(answers)]
     );
 
     return NextResponse.json({ 

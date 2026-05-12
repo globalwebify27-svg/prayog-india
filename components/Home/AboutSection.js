@@ -34,7 +34,7 @@ export default function AboutSection() {
             transition={{ duration: 0.8 }}
             className="w-full lg:w-1/2"
           >
-            <h4 className="text-navy font-bold uppercase tracking-widest text-[10px] md:text-xs mb-3">About Prayog India</h4>
+            <h4 className="text-navy font-bold uppercase tracking-widest text-[10px] md:text-xs mb-3">PRAYOG INDIA ROBOTICS PVT. LTD.</h4>
             <h2 className="text-2xl md:text-5xl font-heading font-black text-slate-900 mb-6 leading-tight">
               Bridging the Gap Between <span className="text-navy">Theory & Practice</span>
             </h2>

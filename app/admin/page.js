@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { 
   Users, 
   BookOpen, 
@@ -142,8 +143,8 @@ export default function AdminOverview() {
               <div className={`p-2.5 rounded-xl ${card.bg} ${card.color}`}>
                 {card.icon}
               </div>
-              <span className="flex items-center text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
-                <ArrowUpRight size={10} className="mr-0.5" /> 12%
+              <span className={`flex items-center text-[11px] font-semibold ${stats.growth >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'} px-2 py-0.5 rounded-md`}>
+                <ArrowUpRight size={10} className={`mr-0.5 ${stats.growth < 0 ? 'rotate-90' : ''}`} /> {Math.abs(stats.growth || 0)}%
               </span>
             </div>
             <h3 className="text-slate-500 text-xs font-medium mb-1">{card.title}</h3>
@@ -157,55 +158,190 @@ export default function AdminOverview() {
         <div className="lg:col-span-8 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-base font-semibold text-slate-900">Enrollment Trends</h3>
-            <select className="bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium px-3 py-1.5 outline-none cursor-pointer">
-              <option>Last 30 Days</option>
-              <option>Last 6 Months</option>
-            </select>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-md border border-slate-100">
+                <div className="w-2 h-2 rounded-full bg-navy" />
+                <span className="text-[9px] font-bold text-slate-500 uppercase">New Students</span>
+              </div>
+            </div>
           </div>
-          <div className="h-64 bg-slate-50 rounded-xl flex flex-col items-center justify-center border border-dashed border-slate-200">
-            <Activity size={32} className="text-slate-300 mb-2" />
-            <p className="text-slate-400 text-xs font-medium">Visualization interface loading...</p>
+          
+          <div className="h-72 relative mt-4">
+            {!stats.enrollmentTrends || stats.enrollmentTrends.length === 0 ? (
+              <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
+                <Activity size={24} className="text-slate-200 mb-2 animate-pulse" />
+                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Initialising analytics...</p>
+              </div>
+            ) : (
+              <div className="w-full h-full relative px-4">
+                {/* Background Grid */}
+                <div className="absolute inset-0 grid grid-rows-4 pointer-events-none">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="border-b border-slate-50 relative">
+                      <span className="absolute -left-6 -top-2 text-[8px] font-bold text-slate-300 uppercase">
+                        {Math.round(((4-i)/4) * Math.max(...stats.enrollmentTrends.map(t => t.count), 10))}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Dot Grid Pattern */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+                  style={{ backgroundImage: 'radial-gradient(#01254d 1px, transparent 1px)', backgroundSize: '20px 20px' }} 
+                />
+
+                <div className="w-full h-full relative mt-4">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full overflow-visible">
+                    <defs>
+                      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="2" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#01254d" stopOpacity="0.12" />
+                        <stop offset="100%" stopColor="#01254d" stopOpacity="0" />
+                      </linearGradient>
+                      <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#01254d" />
+                        <stop offset="100%" stopColor="#2563eb" />
+                      </linearGradient>
+                    </defs>
+
+                    {(() => {
+                      const trends = stats.enrollmentTrends;
+                      const maxVal = Math.max(...trends.map(t => t.count), 10);
+                      const n = trends.length;
+                      const points = trends.map((t, i) => ({
+                        x: n > 1 ? (i / (n - 1)) * 100 : 50,
+                        y: 90 - (t.count / maxVal) * 80
+                      }));
+
+                      let d = "";
+                      if (n > 1) {
+                        d = `M ${points[0].x} ${points[0].y}`;
+                        for (let i = 1; i < n; i++) {
+                          const prev = points[i-1];
+                          const curr = points[i];
+                          const cp1x = prev.x + (curr.x - prev.x) / 2;
+                          d += ` C ${cp1x} ${prev.y}, ${cp1x} ${curr.y}, ${curr.x} ${curr.y}`;
+                        }
+                        const areaD = `${d} L 100 100 L 0 100 Z`;
+                        return (
+                          <>
+                            <motion.path initial={{ opacity: 0 }} animate={{ opacity: 1 }} d={areaD} fill="url(#areaGradient)" />
+                            <motion.path 
+                              initial={{ pathLength: 0, opacity: 0 }} 
+                              animate={{ pathLength: 1, opacity: 1 }} 
+                              transition={{ duration: 2, ease: "circOut" }}
+                              d={d} fill="none" stroke="url(#lineGradient)" strokeWidth="2.5" strokeLinecap="round" 
+                              filter="url(#glow)"
+                            />
+                          </>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </svg>
+
+                  <div className="absolute inset-0 pointer-events-none">
+                    {(() => {
+                      const trends = stats.enrollmentTrends;
+                      const maxVal = Math.max(...trends.map(t => t.count), 10);
+                      const n = trends.length;
+                      return trends.map((t, i) => {
+                        const x = n > 1 ? (i / (n - 1)) * 100 : 50;
+                        const y = 90 - (t.count / maxVal) * 80;
+                        return (
+                          <div 
+                            key={i} 
+                            className="absolute group/point pointer-events-auto"
+                            style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+                          >
+                            {/* Animated Pulse Ring */}
+                            <div className="absolute inset-0 w-8 h-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-navy/5 scale-0 group-hover/point:scale-100 transition-transform duration-500" />
+                            
+                            <motion.div 
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.5 + i * 0.1 }}
+                              className="w-3.5 h-3.5 bg-white border-[3px] border-navy rounded-full shadow-lg group-hover/point:scale-125 group-hover/point:border-blue-600 transition-all cursor-pointer relative z-10"
+                            >
+                              {/* Premium Floating Tooltip */}
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover/point:opacity-100 transition-all duration-300 pointer-events-none">
+                                <div className="bg-slate-900 backdrop-blur-md text-white px-3 py-1.5 rounded-xl shadow-2xl border border-white/10 flex items-center space-x-2">
+                                  <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                                  <span className="text-[11px] font-bold whitespace-nowrap">{t.count} New Students</span>
+                                </div>
+                                <div className="w-2 h-2 bg-slate-900 rotate-45 mx-auto -mt-1" />
+                              </div>
+                            </motion.div>
+                            
+                            <div className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                              <div className="flex flex-col items-center">
+                                <div className="w-1 h-1 bg-slate-200 rounded-full mb-1" />
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+                                  {t.month}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* System Health Area (Admin Only) */}
+        {/* Recent Payments Area (Admin Only) */}
         {user?.role === 'admin' && (
           <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-            <div className="flex items-center space-x-2 mb-8">
-              <Shield size={18} className="text-navy" />
-              <h3 className="text-base font-semibold text-slate-900">System Health</h3>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-2">
+                <CreditCard size={18} className="text-navy" />
+                <h3 className="text-base font-semibold text-slate-900">Recent Activity</h3>
+              </div>
+              <Link href="/admin/payments" className="text-[10px] font-bold text-navy uppercase tracking-widest hover:underline">View All</Link>
             </div>
             
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <Server size={16} className="text-slate-400" />
-                  <span className="text-xs font-medium text-slate-600">Primary Server</span>
+            <div className="space-y-5">
+              {!stats.recentPayments || stats.recentPayments.length === 0 ? (
+                <div className="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                  <TrendingUp size={24} className="text-slate-200 mx-auto mb-2" />
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">No recent transactions</p>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100/50 px-2 py-0.5 rounded-full uppercase tracking-tighter">Live</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <Database size={16} className="text-slate-400" />
-                  <span className="text-xs font-medium text-slate-600">Database Engine</span>
-                </div>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100/50 px-2 py-0.5 rounded-full uppercase tracking-tighter">Stable</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <RefreshCcw size={16} className="text-slate-400" />
-                  <span className="text-xs font-medium text-slate-600">Last Backup</span>
-                </div>
-                <span className="text-xs font-semibold text-navy">2h ago</span>
-              </div>
+              ) : (
+                stats.recentPayments.map((payment, i) => (
+                  <div key={i} className="flex items-center justify-between group cursor-default">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-navy font-bold text-[10px] border border-slate-100 group-hover:bg-navy group-hover:text-white transition-all">
+                        {payment.student_name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900 leading-tight">{payment.student_name}</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{payment.course_name}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-emerald-600">₹{payment.amount}</p>
+                      <p className="text-[9px] text-slate-400 font-medium">
+                        {new Date(payment.paid_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-100">
-              <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
-                <span>Instance: v1.0.4-stable</span>
-                <span className="hover:text-navy cursor-pointer">View Logs &rarr;</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live Financial Sync</span>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium italic">Instance: v1.0.4-stable</p>
               </div>
             </div>
           </div>

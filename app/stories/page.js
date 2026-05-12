@@ -29,7 +29,7 @@ export default function WorkshopStoriesPage() {
 
   const fetchStories = async () => {
     try {
-      const res = await fetch("/api/workshops");
+      const res = await fetch("/api/stories");
       const data = await res.json();
       setStories(data);
     } catch (error) {
@@ -106,9 +106,9 @@ export default function WorkshopStoriesPage() {
                 >
                   <Link href={`/stories/${story.id}`}>
                     <div className="relative h-[400px] rounded-3xl overflow-hidden mb-8 shadow-lg border border-slate-200 cursor-pointer">
-                      {story.image_url ? (
+                      {story.thumbnail ? (
                         <img 
-                          src={story.image_url} 
+                          src={story.thumbnail} 
                           alt={story.title} 
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                         />

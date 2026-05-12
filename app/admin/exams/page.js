@@ -273,6 +273,7 @@ export default function AdminExamsPage() {
                     <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       type="number"
+                      required
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm outline-none focus:border-navy"
                       value={newExam.duration}
                       onChange={e => setNewExam({...newExam, duration: e.target.value})}
@@ -280,18 +281,33 @@ export default function AdminExamsPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Exam Type</label>
-                  <select 
-                    required
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none cursor-pointer focus:border-navy"
-                    value={newExam.type}
-                    onChange={e => setNewExam({...newExam, type: e.target.value})}
-                  >
-                    <option value="objective">Objective (MCQ)</option>
-                    <option value="subjective">Subjective (Written)</option>
-                    <option value="mixed">Mixed Format</option>
-                  </select>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Max Marks</label>
+                  <div className="relative">
+                    <CheckCircle2 size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input 
+                      type="number"
+                      required
+                      placeholder="e.g. 100"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm outline-none focus:border-navy"
+                      value={newExam.total_marks}
+                      onChange={e => setNewExam({...newExam, total_marks: e.target.value})}
+                    />
+                  </div>
                 </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Exam Format</label>
+                <select 
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none cursor-pointer focus:border-navy"
+                  value={newExam.type}
+                  onChange={e => setNewExam({...newExam, type: e.target.value})}
+                >
+                  <option value="objective">Objective (MCQ)</option>
+                  <option value="subjective">Subjective (Written)</option>
+                  <option value="mixed">Mixed Format</option>
+                </select>
               </div>
 
               <div className="space-y-1.5">

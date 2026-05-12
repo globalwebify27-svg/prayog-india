@@ -184,14 +184,20 @@ export default function CoursesPage() {
                         <span className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5 tracking-tight">Investment</span>
                         <span className="block text-lg font-bold text-navy">₹{Number(course.price).toLocaleString('en-IN')}</span>
                       </div>
-                      <button className="flex items-center space-x-1.5 text-[10px] font-bold text-navy hover:text-primary transition-colors uppercase">
+                      <Link href={`/courses/${course.id}`} className="flex items-center space-x-1.5 text-[10px] font-bold text-navy hover:text-primary transition-colors uppercase">
                         <BookOpen size={14} />
-                        <span>Syllabus</span>
-                      </button>
+                        <span>Learning Path</span>
+                      </Link>
                     </div>
-                    <Link href={`/register?course=${course.id}`} className="w-10 h-10 rounded-lg bg-slate-50 text-navy flex items-center justify-center hover:bg-navy hover:text-white transition-all shadow-sm">
-                      <ArrowUpRight size={18} />
-                    </Link>
+                    {course.modules ? (
+                      <Link href={`/register?course=${course.id}`} className="w-10 h-10 rounded-lg bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm">
+                        <ArrowUpRight size={18} />
+                      </Link>
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-300 flex items-center justify-center cursor-not-allowed" title="Learning Path pending">
+                        <ArrowUpRight size={18} />
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>

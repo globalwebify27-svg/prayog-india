@@ -11,9 +11,12 @@ export default function Footer() {
             <Link href="/" className="inline-block">
               <img src="/assets/logo.png" alt="Prayog India" className="h-10 object-contain" />
             </Link>
-            <p className="text-blue-100/40 text-sm leading-relaxed font-medium">
-              India's premier institutional hub for industrial robotics, AI, and hardware innovation. Empowering the next generation of engineers through technical mastery.
-            </p>
+            <div className="space-y-1">
+              <h3 className="text-white font-bold text-xs uppercase tracking-widest">PRAYOG INDIA ROBOTICS PVT. LTD.</h3>
+              <p className="text-blue-100/40 text-sm leading-relaxed font-medium">
+                India's premier institutional hub for industrial robotics, AI, and hardware innovation. Empowering the next generation of engineers through technical mastery.
+              </p>
+            </div>
             <div className="flex items-center space-x-5 pt-2">
               <Link href="https://www.facebook.com/share/p/1CEiWdZKuo/" target="_blank" className="text-white/30 hover:text-primary transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3.61l.39-4H14V7a1 1 0 0 1 1-1h3z"/></svg>
@@ -79,7 +82,7 @@ export default function Footer() {
 
         {/* Legal Bar */}
         <div className="border-t border-white/5 mt-20 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold uppercase tracking-widest text-white/20 space-y-4 md:space-y-0">
-          <p>© {new Date().getFullYear()} Prayog India Institutional Portal. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} PRAYOG INDIA ROBOTICS PVT. LTD. All rights reserved.</p>
           <div className="flex space-x-8">
             <Link href="/terms" className="hover:text-white transition-colors">Privacy protocol</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of service</Link>

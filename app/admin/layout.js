@@ -49,7 +49,8 @@ const menuItems = [
       { label: "Academic Programs", href: "/admin/courses", icon: Layout },
       { label: "Timing Master", href: "/admin/timings", icon: Clock },
       { label: "Live Virtual Sessions", href: "/admin/batches", icon: Video },
-      { label: "Exams & Assessments", href: "/admin/exams", icon: FileText }
+      { label: "Exams & Assessments", href: "/admin/exams", icon: FileText },
+      { label: "Submission Review", href: "/admin/exams/submissions", icon: CheckSquare }
     ]
   },
   { icon: Users, label: "Faculties", href: "/admin/faculties", roles: ["admin"] },
@@ -75,6 +76,7 @@ const menuItems = [
   { icon: Layout, label: "Workshops", href: "/admin/workshops", roles: ["admin"] },
   { icon: Image, label: "Media Gallery", href: "/admin/gallery", roles: ["admin"] },
   { icon: Award, label: "Certificates", href: "/admin/certificates", roles: ["admin"] },
+  { icon: BookOpen, label: "Success Narratives", href: "/admin/stories", roles: ["admin"] },
 ];
 
 function SidebarItem({ item, pathname }) {

@@ -27,6 +27,12 @@ export async function POST(req) {
       [values]
     );
 
+    // Sync total_marks in exams table
+    await pool.query(
+      "UPDATE exams SET total_marks = (SELECT SUM(marks) FROM exam_questions WHERE exam_id = ?) WHERE id = ?",
+      [exam_id, exam_id]
+    );
+
     return NextResponse.json({ success: true, message: `${questions.length} questions added successfully` });
   } catch (error) {
     console.error("Bulk Upload Error:", error);

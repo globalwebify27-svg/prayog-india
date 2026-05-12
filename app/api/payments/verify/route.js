@@ -59,9 +59,11 @@ export async function POST(req) {
         razorpay_payment_id
       );
 
-      // 4. Save receipt URL if installment
+      // 4. Save receipt URL
       if (installmentId) {
         await pool.query("UPDATE installments SET receipt_url = ? WHERE id = ?", [receiptUrl, installmentId]);
+      } else {
+        await pool.query("UPDATE enrollments SET receipt_url = ?, payment_status = 'paid' WHERE id = ?", [receiptUrl, enrollmentId]);
       }
 
       // 5. Send Email with Receipt

@@ -35,6 +35,7 @@ const menuItems = [
   },
   { icon: FileText, label: "Examinations", href: "/dashboard/exams" },
   { icon: CreditCard, label: "Payments", href: "/dashboard/payments" },
+  { icon: LayoutDashboard, label: "Identity Card", href: "/dashboard/idcard" },
   { icon: Award, label: "Certificates", href: "/dashboard/certificates" },
 ];
 

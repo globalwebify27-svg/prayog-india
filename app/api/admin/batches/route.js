@@ -46,7 +46,7 @@ export async function GET() {
 
 export async function PUT(req) {
   try {
-    const { id, name, course_id, schedule, meeting_link, start_date, end_date, timing_id } = await req.json();
+    const { id, name, course_id, schedule, meeting_link, start_date, end_date, timing_id, start_time, end_time } = await req.json();
 
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
@@ -65,8 +65,8 @@ export async function PUT(req) {
 
     if (name) {
       await pool.query(
-        "UPDATE batches SET name = ?, course_id = ?, timing_id = ?, schedule = ?, meeting_link = ?, start_date = ?, end_date = ? WHERE id = ?",
-        [name, course_id, timing_id || null, schedule, meeting_link, start_date, end_date, id]
+        "UPDATE batches SET name = ?, course_id = ?, timing_id = ?, schedule = ?, meeting_link = ?, start_date = ?, end_date = ?, start_time = ?, end_time = ? WHERE id = ?",
+        [name, course_id, timing_id || null, schedule, meeting_link, start_date || null, end_date || null, start_time || null, end_time || null, id]
       );
     } else {
       await pool.query("UPDATE batches SET meeting_link = ? WHERE id = ?", [meeting_link, id]);
@@ -74,6 +74,32 @@ export async function PUT(req) {
 
     return NextResponse.json({ success: true, message: "Batch updated successfully" });
   } catch (error) {
+    console.error("Batch update error:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(req) {
+  try {
+    const { name, course_id, schedule, type, meeting_link, start_date, end_date, timing_id, start_time, end_time } = await req.json();
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.role === 'teacher') {
+      const [course] = await pool.query("SELECT id FROM courses WHERE id = ? AND teacher_id = ?", [course_id, decoded.id]);
+      if (course.length === 0) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
+    }
+
+    const [result] = await pool.query(
+      "INSERT INTO batches (name, course_id, timing_id, schedule, type, meeting_link, start_date, end_date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [name, course_id, timing_id || null, schedule, type || 'online', meeting_link || '', start_date || null, end_date || null, start_time || null, end_time || null]
+    );
+
+    return NextResponse.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error("Batch creation error:", error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
@@ -103,30 +129,6 @@ export async function DELETE(req) {
 
     await pool.query("DELETE FROM batches WHERE id = ?", [id]);
     return NextResponse.json({ success: true, message: "Batch deleted" });
-  } catch (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
-  }
-}
-
-export async function POST(req) {
-  try {
-    const { name, course_id, schedule, type, meeting_link, start_date, end_date, timing_id } = await req.json();
-
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (decoded.role === 'teacher') {
-      const [course] = await pool.query("SELECT id FROM courses WHERE id = ? AND teacher_id = ?", [course_id, decoded.id]);
-      if (course.length === 0) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
-    }
-
-    const [result] = await pool.query(
-      "INSERT INTO batches (name, course_id, timing_id, schedule, type, meeting_link, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [name, course_id, timing_id || null, schedule, type || 'online', meeting_link || '', start_date || null, end_date || null]
-    );
-
-    return NextResponse.json({ success: true, id: result.insertId });
   } catch (error) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }

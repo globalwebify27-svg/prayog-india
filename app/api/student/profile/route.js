@@ -15,12 +15,40 @@ export async function POST(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    const { name, phone, dob, address, blood_group, emergency_contact } = await req.json();
+    const { 
+      name, phone, dob, address, blood_group, emergency_contact, image,
+      father_name, mother_name, gender, qualification, school_college,
+      last_qualification_year, id_type, id_number, id_image
+    } = await req.json();
+
+    // Check if profile is complete (Strict institutional requirements)
+    const isComplete = (
+      father_name && 
+      mother_name && 
+      gender && 
+      qualification && 
+      address && 
+      dob && 
+      id_number && 
+      image // Profile photo is mandatory for ID cards
+    ) ? 1 : 0;
 
     // Update profile
     await pool.query(
-      "UPDATE users SET name = ?, phone = ?, dob = ?, address = ?, blood_group = ?, emergency_contact = ? WHERE id = ?",
-      [name, phone, dob, address, blood_group, emergency_contact, userId]
+      `UPDATE users SET 
+        name = ?, phone = ?, dob = ?, address = ?, blood_group = ?, 
+        emergency_contact = ?, image = ?, father_name = ?, mother_name = ?, 
+        gender = ?, qualification = ?, school_college = ?, 
+        last_qualification_year = ?, id_type = ?, id_number = ?, 
+        id_image = ?, profile_completed = ? 
+       WHERE id = ?`,
+      [
+        name, phone, dob || null, address, blood_group, 
+        emergency_contact, image || null, father_name, mother_name, 
+        gender, qualification, school_college, 
+        last_qualification_year, id_type, id_number, 
+        id_image || null, isComplete, userId
+      ]
     );
 
     return NextResponse.json({

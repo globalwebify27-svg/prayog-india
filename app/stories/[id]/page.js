@@ -12,41 +12,35 @@ import {
   Lightbulb, 
   TrendingUp, 
   FileText,
-  PlayCircle
+  PlayCircle,
+  Quote,
+  Image as ImageIcon,
+  Layout,
+  Clock,
+  ArrowRight
 } from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const SECTION_ICONS = {
-  overview: { icon: FileText, color: "bg-blue-50 text-blue-500" },
-  challenge: { icon: Target, color: "bg-rose-50 text-rose-500" },
-  solution: { icon: Lightbulb, color: "bg-emerald-50 text-emerald-500" },
-  result: { icon: TrendingUp, color: "bg-amber-50 text-amber-500" }
-};
-
-export default function CaseStudyDetail() {
+export default function StoryDetailPage() {
   const { id } = useParams();
-  const [workshop, setWorkshop] = useState(null);
+  const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchWorkshop = async () => {
+    const fetchStory = async () => {
       try {
-        const res = await fetch("/api/workshops");
+        const res = await fetch(`/api/stories/${id}`);
         const data = await res.json();
-        const found = data.find(w => w.id === parseInt(id));
-        if (found) {
-          found.content = typeof found.content === 'string' ? JSON.parse(found.content) : (found.content || []);
-          setWorkshop(found);
-        }
+        setStory(data);
       } catch (error) {
-        console.error("Failed to fetch workshop:", error);
+        console.error("Failed to fetch story:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchWorkshop();
+    fetchStory();
   }, [id]);
 
   if (loading) return (
@@ -55,10 +49,10 @@ export default function CaseStudyDetail() {
     </div>
   );
 
-  if (!workshop) return (
+  if (!story) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
-      <h1 className="text-2xl font-bold text-slate-900">Case Study Not Found</h1>
-      <Link href="/stories" className="text-navy font-bold hover:underline">&larr; Back to Stories</Link>
+      <h1 className="text-2xl font-bold text-slate-900 font-display">Success Story Not Found</h1>
+      <Link href="/stories" className="text-navy font-bold hover:underline font-display">&larr; Back to Stories</Link>
     </div>
   );
 
@@ -66,142 +60,181 @@ export default function CaseStudyDetail() {
     <main className="min-h-screen bg-white font-body">
       <Header />
       
-      {/* Premium Hero Header */}
-      <section className="relative pt-32 pb-24 bg-navy overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-        
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
+      {/* Immersive Hero Section */}
+      <section className="relative min-h-[80vh] flex items-center pt-32 pb-20 bg-navy overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          {story.banner_image ? (
+            <img 
+              src={story.banner_image} 
+              className="w-full h-full object-cover opacity-40"
+              alt={story.title} 
+            />
+          ) : story.thumbnail && (
+            <img 
+              src={story.thumbnail} 
+              className="w-full h-full object-cover opacity-40 blur-sm scale-110"
+              alt={story.title} 
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/90 to-white" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
           <Link 
             href="/stories" 
-            className="inline-flex items-center space-x-2 text-white/60 hover:text-primary transition-colors mb-12 text-sm font-bold uppercase tracking-widest"
+            className="inline-flex items-center space-x-2 text-white/60 hover:text-primary transition-colors mb-12 text-xs font-bold uppercase tracking-[0.2em]"
           >
             <ChevronLeft size={16} />
-            <span>Success Stories</span>
+            <span>Success Narrative</span>
           </Link>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="max-w-4xl">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
             >
-              <div className="flex items-center space-x-3 mb-6">
-                <span className="px-4 py-1 bg-primary text-navy text-[10px] font-bold uppercase tracking-widest rounded-full">
-                  {workshop.category}
+              <div className="flex items-center space-x-3 mb-8">
+                <span className="px-5 py-1.5 bg-primary/20 backdrop-blur-md text-primary text-[10px] font-bold uppercase tracking-[0.2em] rounded-full border border-primary/20">
+                  {story.category}
                 </span>
-                <span className="text-white/40 text-xs font-bold uppercase tracking-widest">
-                  Case ID: #PR-WS-{workshop.id}
+                <span className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+                  {new Date(story.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
-                {workshop.title}
-              </h1>
-              <p className="text-xl text-blue-100/60 leading-relaxed mb-10 max-w-xl">
-                {workshop.description}
-              </p>
               
-              <div className="flex flex-wrap items-center gap-8 pt-8 border-t border-white/10">
-                <div className="space-y-1">
-                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Organization</p>
-                  <p className="text-white font-bold">{workshop.client_name || "Internal Innovation"}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Location</p>
-                  <div className="flex items-center gap-2 text-white font-bold">
-                    <MapPin size={14} className="text-primary" /> {workshop.location}
+              <h1 className="text-5xl md:text-8xl font-bold text-white mb-10 leading-[1.05] tracking-tight font-display">
+                {story.title}
+              </h1>
+              
+              <p className="text-2xl text-blue-100/60 leading-relaxed mb-12 max-w-2xl font-medium">
+                {story.excerpt}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
+                    PI
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-0.5">Author</p>
+                    <p className="text-white font-bold text-sm">{story.author || "Prayog India Labs"}</p>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Timeline</p>
-                  <div className="flex items-center gap-2 text-white font-bold">
-                    <Calendar size={14} className="text-primary" /> {new Date(workshop.date).toLocaleDateString()}
+                <div className="h-10 w-px bg-white/10 hidden sm:block" />
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2 text-white/60 font-bold text-xs">
+                    <Clock size={16} className="text-primary" /> 8 min read
+                  </div>
+                  <div className="flex items-center gap-2 text-white/60 font-bold text-xs">
+                    <TrendingUp size={16} className="text-primary" /> Verified Case
                   </div>
                 </div>
               </div>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/10 group"
-            >
-              {workshop.image_url ? (
-                <img 
-                  src={workshop.image_url} 
-                  className="w-full h-full object-cover" 
-                  alt={workshop.title} 
-                />
-              ) : (
-                <div className="w-full h-full bg-slate-800 flex items-center justify-center text-white/10">
-                  <Layout size={80} />
-                </div>
-              )}
-              {workshop.video_url && (
-                <a 
-                  href={workshop.video_url} 
-                  target="_blank" 
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all"
-                >
-                  <div className="w-20 h-20 bg-primary text-navy rounded-full flex items-center justify-center shadow-2xl scale-110">
-                    <PlayCircle size={32} fill="currentColor" />
-                  </div>
-                </a>
-              )}
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Case Study Content */}
-      <section className="py-24 bg-white relative">
+      {/* Dynamic Content Sections */}
+      <section className="pb-32 bg-white">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="space-y-24">
-            {workshop.content?.map((section, idx) => {
-              const config = SECTION_ICONS[section.type] || SECTION_ICONS.overview;
-              return (
+          <div className="space-y-20 -mt-10 relative z-20">
+            {story.content && story.content.length > 0 ? (
+              story.content.map((section, idx) => (
                 <motion.div 
                   key={idx}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="group"
+                  className="w-full"
                 >
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className={`p-4 rounded-2xl ${config.color} shadow-sm group-hover:scale-110 transition-transform`}>
-                      <config.icon size={24} />
+                  {section.type === 'text' && (
+                    <div className="prose prose-slate prose-lg max-w-none">
+                      <h2 className="text-3xl font-bold text-slate-900 mb-8 font-display">{section.title}</h2>
+                      <div className="text-slate-600 leading-[1.8] text-lg font-medium whitespace-pre-wrap">
+                        {section.value}
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Investigation {idx + 1}</h2>
-                      <h3 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">{section.title}</h3>
+                  )}
+
+                  {section.type === 'image' && (
+                    <figure className="my-16">
+                      <div className="rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100">
+                        <img src={section.value} className="w-full h-auto" alt={section.caption || "Story Image"} />
+                      </div>
+                      {section.caption && (
+                        <figcaption className="mt-6 text-center text-slate-400 text-xs font-bold uppercase tracking-widest italic">
+                          &mdash; {section.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  )}
+
+                  {section.type === 'quote' && (
+                    <div className="my-20 relative p-12 bg-slate-50 rounded-[3rem] border border-slate-100 overflow-hidden">
+                      <Quote className="absolute -top-4 -left-4 text-slate-200" size={120} />
+                      <div className="relative z-10">
+                        <blockquote className="text-3xl md:text-4xl font-bold text-navy leading-tight mb-8 font-display italic">
+                          "{section.value}"
+                        </blockquote>
+                        {section.author && (
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-px bg-primary" />
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{section.author}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="pl-0 md:pl-20">
-                    <p className="text-lg text-slate-600 leading-relaxed font-medium whitespace-pre-wrap">
-                      {section.text}
-                    </p>
-                  </div>
+                  )}
+
+                  {section.type === 'video' && (
+                    <div className="my-16 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 bg-black aspect-video relative group">
+                      <iframe 
+                        src={section.value.replace("watch?v=", "embed/")} 
+                        className="w-full h-full"
+                        allowFullScreen
+                      />
+                    </div>
+                  )}
+
+                  {section.type === 'gallery' && (
+                    <div className="my-16 grid grid-cols-2 gap-6">
+                      {section.value.map((url, gIdx) => (
+                        <div key={gIdx} className={`rounded-3xl overflow-hidden shadow-xl border border-slate-100 ${gIdx % 3 === 0 ? 'col-span-2 aspect-[21/9]' : 'aspect-square'}`}>
+                          <img src={url} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" alt="Gallery item" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
-              );
-            })}
+              ))
+            ) : (
+              <div className="py-20 text-center border-2 border-dashed border-slate-100 rounded-[3rem]">
+                <Layout size={48} className="mx-auto text-slate-200 mb-4" />
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Story development in progress...</p>
+              </div>
+            )}
           </div>
 
-          {/* Social Interaction */}
-          <div className="mt-32 pt-16 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-navy text-white flex items-center justify-center font-bold">
+          {/* Social Interaction & Navigation */}
+          <div className="mt-32 pt-16 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-full bg-navy text-white flex items-center justify-center font-bold text-lg border-4 border-slate-50">
                 PI
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-900 uppercase tracking-widest">Prayog India Labs</p>
-                <p className="text-xs text-slate-400">Institutional Success Narrative</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Published By</p>
+                <p className="text-lg font-bold text-slate-900 font-display">Prayog India Communications</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 px-6 py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold text-xs hover:bg-slate-100 transition-all uppercase tracking-widest">
+            
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <button className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-slate-50 text-slate-900 rounded-2xl font-bold text-xs hover:bg-slate-100 transition-all uppercase tracking-widest border border-slate-200">
                 <Share2 size={16} /> Share Story
               </button>
-              <Link href="/stories" className="px-8 py-3 bg-navy text-white rounded-2xl font-bold text-xs hover:bg-black transition-all uppercase tracking-widest shadow-xl shadow-navy/10">
-                Back to Stories
+              <Link href="/stories" className="flex-1 md:flex-none flex items-center justify-center gap-3 px-10 py-4 bg-navy text-white rounded-2xl font-bold text-xs hover:bg-black transition-all uppercase tracking-widest shadow-2xl shadow-navy/20">
+                <span>View More</span>
+                <ArrowRight size={16} />
               </Link>
             </div>
           </div>

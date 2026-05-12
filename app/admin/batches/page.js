@@ -12,7 +12,8 @@ import {
   Users, 
   ExternalLink,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Timer
 } from "lucide-react";
 import Link from "next/link";
 
@@ -35,7 +36,9 @@ export default function LiveSessionsPage() {
     type: "online",
     meeting_link: "",
     start_date: "",
-    end_date: ""
+    end_date: "",
+    start_time: "",
+    end_time: ""
   });
 
   useEffect(() => {
@@ -73,7 +76,9 @@ export default function LiveSessionsPage() {
       type: batch.type || "online",
       meeting_link: batch.meeting_link || "",
       start_date: batch.start_date ? new Date(batch.start_date).toISOString().split('T')[0] : "",
-      end_date: batch.end_date ? new Date(batch.end_date).toISOString().split('T')[0] : ""
+      end_date: batch.end_date ? new Date(batch.end_date).toISOString().split('T')[0] : "",
+      start_time: batch.start_time || "",
+      end_time: batch.end_time || ""
     });
     setSelectedDays(batch.schedule ? batch.schedule.split(', ') : []);
     setShowAddModal(true);
@@ -101,7 +106,7 @@ export default function LiveSessionsPage() {
       setShowAddModal(false);
       setIsEditing(false);
       setEditingId(null);
-      setNewBatch({ name: "", course_id: "", timing_id: "", schedule: "", type: "online", meeting_link: "", start_date: "", end_date: "" });
+      setNewBatch({ name: "", course_id: "", timing_id: "", schedule: "", type: "online", meeting_link: "", start_date: "", end_date: "", start_time: "", end_time: "" });
       setSelectedDays([]);
       fetchBatches();
     }
@@ -134,7 +139,7 @@ export default function LiveSessionsPage() {
         <button 
           onClick={() => {
             setIsEditing(false);
-            setNewBatch({ name: "", course_id: "", timing_id: "", schedule: "", type: "online", meeting_link: "", start_date: "", end_date: "" });
+            setNewBatch({ name: "", course_id: "", timing_id: "", schedule: "", type: "online", meeting_link: "", start_date: "", end_date: "", start_time: "", end_time: "" });
             setSelectedDays([]);
             setShowAddModal(true);
           }}
@@ -171,8 +176,10 @@ export default function LiveSessionsPage() {
                 <div className="flex items-center gap-3 text-slate-600 bg-slate-50 p-3 rounded-2xl border border-slate-100">
                   <Clock size={16} className="text-navy" />
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">Timing Slot</p>
-                    <p className="text-xs font-bold text-slate-900">{batch.timing_name || 'Flexible Timing'} <span className="text-slate-400 font-medium">({batch.timing_slot || 'No slot'})</span></p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">Session Timing</p>
+                    <p className="text-xs font-bold text-slate-900">
+                      {batch.start_time ? `${batch.start_time.substring(0, 5)} - ${batch.end_time?.substring(0, 5)}` : 'Flexible Timing'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-slate-600 bg-slate-50 p-3 rounded-2xl border border-slate-100">
@@ -232,9 +239,9 @@ export default function LiveSessionsPage() {
                 <button onClick={() => setShowAddModal(false)} className="p-3 hover:bg-white rounded-2xl transition-all shadow-sm"><X size={20} /></button>
               </div>
               
-              <form onSubmit={handleSaveBatch} className="p-8 space-y-6">
+              <form onSubmit={handleSaveBatch} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto no-scrollbar">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 col-span-full">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Session Name</label>
                     <input 
                       required
@@ -256,8 +263,9 @@ export default function LiveSessionsPage() {
                       {courses.filter(c => c.type === 'online').map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                   </div>
+                  
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Preferred Slot</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Timing Slot (Reference)</label>
                     <select 
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none cursor-pointer focus:border-navy"
                       value={newBatch.timing_id}
@@ -266,6 +274,32 @@ export default function LiveSessionsPage() {
                       <option value="">Select Timing</option>
                       {timings.map(t => <option key={t.id} value={t.id}>{t.name} ({t.slot})</option>)}
                     </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1 flex items-center gap-1">
+                      <Clock size={10} /> Start Time
+                    </label>
+                    <input 
+                      type="time"
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none"
+                      value={newBatch.start_time}
+                      onChange={e => setNewBatch({...newBatch, start_time: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1 flex items-center gap-1">
+                      <Timer size={10} /> End Time
+                    </label>
+                    <input 
+                      type="time"
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none"
+                      value={newBatch.end_time}
+                      onChange={e => setNewBatch({...newBatch, end_time: e.target.value})}
+                    />
                   </div>
 
                   <div className="space-y-2 col-span-full">

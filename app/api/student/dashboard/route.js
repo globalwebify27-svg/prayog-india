@@ -16,7 +16,13 @@ export async function GET() {
     const userId = decoded.id;
 
     // 1. Get User Info
-    const [user] = await pool.query("SELECT id, name, email, role, phone, dob, address, blood_group, emergency_contact, id_card_issued FROM users WHERE id = ?", [userId]);
+    const [user] = await pool.query(`
+      SELECT id, name, email, role, phone, dob, address, blood_group, 
+             emergency_contact, id_card_issued, image, profile_completed,
+             father_name, mother_name, gender, qualification,
+             school_college, last_qualification_year, id_type, id_number, id_image
+      FROM users WHERE id = ?
+    `, [userId]);
     
     // 2. Get Enrollments with Meeting Links
     const [enrollments] = await pool.query(`
@@ -33,10 +39,21 @@ export async function GET() {
       FROM installments i 
       JOIN enrollments e ON i.enrollment_id = e.id 
       WHERE e.user_id = ?
+      ORDER BY i.due_date ASC
     `, [userId]);
 
     // 4. Get Attendance Stats
-    const [attendance] = await pool.query("SELECT COUNT(*) as count FROM attendance WHERE user_id = ? AND status = 'present'", [userId]);
+    const [attendancePresent] = await pool.query("SELECT COUNT(*) as count FROM attendance WHERE user_id = ? AND status = 'present'", [userId]);
+    const [attendanceTotal] = await pool.query("SELECT COUNT(*) as count FROM attendance WHERE user_id = ?", [userId]);
+
+    // 5. Get Certificate Count
+    const [certificates] = await pool.query("SELECT COUNT(*) as count FROM certificates WHERE user_id = ?", [userId]);
+
+    // 6. Calculate Progress (Mock logic: based on attendance vs estimated duration or total classes)
+    // For now, we'll return a dynamic number based on attendance consistency
+    const attendancePercentage = attendanceTotal[0].count > 0 
+      ? Math.round((attendancePresent[0].count / attendanceTotal[0].count) * 100) 
+      : 0;
 
     return NextResponse.json({
       success: true,
@@ -44,11 +61,16 @@ export async function GET() {
         user: user[0],
         enrollments,
         installments,
-        attendanceCount: attendance[0].count
+        attendanceCount: attendancePresent[0].count,
+        totalAttendance: attendanceTotal[0].count,
+        attendancePercentage,
+        certificateCount: certificates[0].count,
+        session: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1)
       }
     });
 
   } catch (error) {
+    console.error("Dashboard API Error:", error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }

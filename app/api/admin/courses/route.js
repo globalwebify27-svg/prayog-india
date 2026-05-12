@@ -66,11 +66,11 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Only admins can create courses" }, { status: 403 });
     }
 
-    const { title, description, price, type, duration, image, teacher_id, selectedTimings, allow_partial_payment, installments_count } = await req.json();
+    const { title, description, price, type, duration, image, teacher_id, selectedTimings, allow_partial_payment, installments_count, rating, level, category } = await req.json();
 
     const [result] = await pool.query(
-      "INSERT INTO courses (title, description, price, type, duration, image, teacher_id, allow_partial_payment, installments_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1]
+      "INSERT INTO courses (title, description, price, type, duration, image, teacher_id, allow_partial_payment, installments_count, rating, level, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1, rating || "4.5", level || "Beginner", category || "Robotics"]
     );
 
     const courseId = result.insertId;
@@ -101,11 +101,11 @@ export async function PUT(req) {
       return NextResponse.json({ success: false, message: "Only admins can edit courses" }, { status: 403 });
     }
 
-    const { id, title, description, price, type, duration, image, teacher_id, selectedTimings, allow_partial_payment, installments_count } = await req.json();
+    const { id, title, description, price, type, duration, image, teacher_id, selectedTimings, allow_partial_payment, installments_count, rating, level, category } = await req.json();
 
     await pool.query(
-      "UPDATE courses SET title = ?, description = ?, price = ?, type = ?, duration = ?, image = ?, teacher_id = ?, allow_partial_payment = ?, installments_count = ? WHERE id = ?",
-      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1, id]
+      "UPDATE courses SET title = ?, description = ?, price = ?, type = ?, duration = ?, image = ?, teacher_id = ?, allow_partial_payment = ?, installments_count = ?, rating = ?, level = ?, category = ? WHERE id = ?",
+      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1, rating, level, category, id]
     );
 
     // Update timings: Delete old and insert new

@@ -12,6 +12,8 @@ import {
   HelpCircle,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
+  Unlock,
   Hash,
   ChevronUp,
   ChevronDown,
@@ -23,7 +25,9 @@ import {
   Users,
   Eye,
   FileText,
-  ExternalLink
+  ExternalLink,
+  Calculator,
+  Lock
 } from "lucide-react";
 
 export default function ExamQuestionsPage({ params }) {
@@ -36,6 +40,7 @@ export default function ExamQuestionsPage({ params }) {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [questionScores, setQuestionScores] = useState({});
   const [bulkFile, setBulkFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [newQuestion, setNewQuestion] = useState({
@@ -52,6 +57,19 @@ export default function ExamQuestionsPage({ params }) {
     fetchQuestions();
     fetchSubmissions();
   }, [id]);
+
+  useEffect(() => {
+    if (selectedSubmission) {
+      // Initialize scores from existing answers if they contain score info, 
+      // or just set to 0. For now we assume we just want to calculate it.
+      const initialScores = {};
+      const answers = JSON.parse(selectedSubmission.answers || "{}");
+      Object.keys(answers).forEach(qId => {
+        initialScores[qId] = answers[qId].awarded_score || 0;
+      });
+      setQuestionScores(initialScores);
+    }
+  }, [selectedSubmission]);
 
   const fetchExam = async () => {
     const res = await fetch("/api/admin/exams");
@@ -159,17 +177,37 @@ export default function ExamQuestionsPage({ params }) {
     a.click();
   };
 
-  const handleGrade = async (subId, score) => {
+  const handleGrade = async () => {
+    const totalScore = Object.values(questionScores).reduce((acc, score) => acc + (parseFloat(score) || 0), 0);
+    
+    // Also update the answers JSON with awarded scores for persistence
+    const updatedAnswers = JSON.parse(selectedSubmission.answers);
+    Object.keys(questionScores).forEach(qId => {
+      if (updatedAnswers[qId]) {
+        updatedAnswers[qId].awarded_score = parseFloat(questionScores[qId]);
+      }
+    });
+
     const res = await fetch("/api/admin/exams/submissions", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: subId, score, status: 'graded' })
+      body: JSON.stringify({ 
+        id: selectedSubmission.id, 
+        score: totalScore, 
+        status: 'graded',
+        answers: JSON.stringify(updatedAnswers) 
+      })
     });
     const result = await res.json();
     if (result.success) {
       fetchSubmissions();
       setShowViewModal(false);
+      alert(`Grading completed. Total Score: ${totalScore}`);
     }
+  };
+
+  const calculateTotalAwarded = () => {
+    return Object.values(questionScores).reduce((acc, score) => acc + (parseFloat(score) || 0), 0);
   };
 
   return (
@@ -334,15 +372,32 @@ export default function ExamQuestionsPage({ params }) {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button 
-                            onClick={() => {
-                              setSelectedSubmission(sub);
-                              setShowViewModal(true);
-                            }}
-                            className="p-2 rounded-xl bg-navy/5 text-navy hover:bg-navy hover:text-white transition-all inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"
-                          >
-                            <Eye size={14} /> Review
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              onClick={() => {
+                                setSelectedSubmission(sub);
+                                setShowViewModal(true);
+                              }}
+                              className={`p-2 rounded-xl transition-all inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${
+                                sub.status === 'graded' 
+                                ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' 
+                                : 'bg-navy/5 text-navy hover:bg-navy hover:text-white'
+                              }`}
+                            >
+                              {sub.status === 'graded' ? <Lock size={14} /> : <Eye size={14} />}
+                              {sub.status === 'graded' ? 'View Graded' : 'Review'}
+                            </button>
+                            <button 
+                              onClick={async () => {
+                                if (!confirm("Delete this submission? This cannot be undone.")) return;
+                                const res = await fetch(`/api/admin/exams/submissions?id=${sub.id}`, { method: "DELETE" });
+                                if ((await res.json()).success) fetchSubmissions();
+                              }}
+                              className="p-2 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -360,7 +415,7 @@ export default function ExamQuestionsPage({ params }) {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]"
           >
             <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-4">
@@ -368,7 +423,12 @@ export default function ExamQuestionsPage({ params }) {
                   {selectedSubmission.student_name.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">{selectedSubmission.student_name}</h3>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-xl font-bold text-slate-900">{selectedSubmission.student_name}</h3>
+                    {selectedSubmission.status === 'graded' && (
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[9px] font-bold uppercase tracking-widest">Locked</span>
+                    )}
+                  </div>
                   <p className="text-slate-500 text-xs mt-0.5">{selectedSubmission.student_email} • Submitted {new Date(selectedSubmission.submitted_at).toLocaleDateString()}</p>
                 </div>
               </div>
@@ -377,49 +437,117 @@ export default function ExamQuestionsPage({ params }) {
               </button>
             </div>
 
-            <div className="flex-grow overflow-y-auto p-8 space-y-8 custom-scrollbar">
-              <div className="grid grid-cols-1 gap-6">
+            <div className="flex-grow overflow-y-auto p-8 space-y-8 custom-scrollbar bg-slate-50/30">
+              {selectedSubmission.status === 'graded' && (
+                <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 text-amber-800 text-xs font-medium">
+                    <Lock size={16} />
+                    This submission has already been graded and finalized.
+                  </div>
+                  <button 
+                    onClick={() => setSelectedSubmission({...selectedSubmission, status: 'pending'})}
+                    className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg text-[9px] font-bold text-amber-700 uppercase tracking-widest border border-amber-200 hover:bg-amber-100 transition-all shadow-sm"
+                  >
+                    <Unlock size={12} /> Unlock for Correction
+                  </button>
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-8">
                 {Object.entries(JSON.parse(selectedSubmission.answers)).map(([qId, response], idx) => {
                   const question = questions.find(q => q.id === parseInt(qId));
+                  const isCorrectMCQ = question?.type === 'objective' && response.text === question?.correct_answer;
+                  
                   return (
-                    <div key={qId} className="p-6 rounded-3xl border border-slate-100 bg-white shadow-sm space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-[10px] font-black">{idx + 1}</span>
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${question?.type === 'objective' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
-                            {question?.type}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{question?.marks} Marks</span>
-                      </div>
-                      <h4 className="text-sm font-bold text-slate-900 leading-relaxed">{question?.question_text}</h4>
-                      
-                      <div className="pt-4 border-t border-slate-50 space-y-4">
-                        <div className="p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Student Response</p>
-                          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{response.text || "No written response provided."}</p>
-                        </div>
-                        
-                        {response.file_url && (
-                          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-600 shadow-sm">
-                                <FileText size={18} />
-                              </div>
-                              <div>
-                                <p className="text-[11px] font-bold text-emerald-800">Attached Answer Sheet</p>
-                                <p className="text-[9px] text-emerald-600 mt-0.5 uppercase tracking-widest">Document / Image</p>
+                    <div key={qId} className="p-8 rounded-[2rem] border border-slate-200 bg-white shadow-sm hover:shadow-md transition-all">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                        <div className="flex-grow space-y-4">
+                          <div className="flex items-center gap-3">
+                            <span className="w-7 h-7 rounded-xl bg-navy text-white flex items-center justify-center text-[10px] font-black shadow-sm">{idx + 1}</span>
+                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider ${question?.type === 'objective' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
+                              {question?.type}
+                            </span>
+                          </div>
+                          <h4 className="text-base font-bold text-slate-900 leading-relaxed">{question?.question_text}</h4>
+                          
+                          {question?.type === 'objective' && (
+                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Correct Answer</p>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 size={14} className="text-emerald-500" />
+                                <span className="text-sm font-bold text-slate-700">{question.correct_answer}</span>
                               </div>
                             </div>
-                            <a 
-                              href={response.file_url} 
-                              target="_blank" 
-                              className="flex items-center gap-2 bg-white text-emerald-700 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
-                            >
-                              <ExternalLink size={14} /> Open File
-                            </a>
+                          )}
+
+                          <div className="pt-4 space-y-4">
+                            <div className={`p-6 rounded-2xl border transition-all ${isCorrectMCQ ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50/50 border-slate-100'}`}>
+                              <div className="flex items-center justify-between mb-3">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student Response</p>
+                                {question?.type === 'objective' && (
+                                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${isCorrectMCQ ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
+                                    {isCorrectMCQ ? 'Match' : 'Mismatch'}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">{response.text || "No written response provided."}</p>
+                            </div>
+                            
+                            {response.file_url && (
+                              <div className="p-5 rounded-2xl bg-navy/5 border border-navy/10 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-navy shadow-sm border border-navy/5">
+                                    <FileText size={20} />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs font-bold text-slate-900">Attached Answer Sheet</p>
+                                    <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-widest font-medium">Original Document</p>
+                                  </div>
+                                </div>
+                                <a 
+                                  href={response.file_url} 
+                                  target="_blank" 
+                                  className="flex items-center gap-2 bg-navy text-white px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-md"
+                                >
+                                  <ExternalLink size={14} /> View File
+                                </a>
+                              </div>
+                            )}
                           </div>
-                        )}
+                        </div>
+
+                        <div className="shrink-0 w-full md:w-48 bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100 flex flex-col items-center justify-center gap-3 self-stretch">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Allot Marks</label>
+                          <div className="relative w-full">
+                            <input 
+                              type="number" 
+                              step="0.5"
+                              max={question?.marks}
+                              min="0"
+                              placeholder="0"
+                              disabled={selectedSubmission.status === 'graded'}
+                              className={`w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 text-center text-lg font-black text-navy outline-none focus:border-navy transition-all shadow-sm ${selectedSubmission.status === 'graded' ? 'opacity-70 cursor-not-allowed bg-slate-50' : ''}`}
+                              value={questionScores[qId] || ""}
+                              onChange={(e) => setQuestionScores({
+                                ...questionScores,
+                                [qId]: e.target.value
+                              })}
+                            />
+                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-tighter shadow-sm">
+                              Max: {question?.marks}
+                            </div>
+                          </div>
+                          {question?.type === 'objective' && selectedSubmission.status !== 'graded' && (
+                            <button 
+                              onClick={() => setQuestionScores({
+                                ...questionScores,
+                                [qId]: isCorrectMCQ ? question.marks : 0
+                              })}
+                              className="text-[9px] font-bold text-navy uppercase underline hover:text-black transition-colors"
+                            >
+                              Auto-Fill Marks
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -427,38 +555,40 @@ export default function ExamQuestionsPage({ params }) {
               </div>
             </div>
 
-            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Award Score</label>
-                  <input 
-                    type="number" 
-                    placeholder="0"
-                    className="w-24 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-navy outline-none focus:border-navy transition-all"
-                    defaultValue={selectedSubmission.score || 0}
-                    id="score-input"
-                  />
+            <div className="p-8 border-t border-slate-200 bg-white flex flex-col md:flex-row items-center justify-between gap-6 shrink-0 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+              <div className="flex items-center gap-8">
+                <div className="p-4 bg-navy/5 rounded-2xl border border-navy/10 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center shadow-lg">
+                    <Calculator size={20} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Calculated Total</p>
+                    <p className="text-xl font-black text-navy">{calculateTotalAwarded()} <span className="text-slate-300 font-medium">/ {questions.reduce((acc, q) => acc + q.marks, 0)}</span></p>
+                  </div>
                 </div>
-                <div className="pt-5">
-                  <span className="text-xs text-slate-400 font-medium">/ {questions.reduce((acc, q) => acc + q.marks, 0)} Total Marks</span>
+                
+                <div className="hidden md:block h-10 w-px bg-slate-100" />
+                
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                  Grading individual questions automatically<br/>updates the final scorecard.
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              
+              <div className="flex items-center gap-3 w-full md:w-auto">
                 <button 
                   onClick={() => setShowViewModal(false)}
-                  className="px-6 py-3 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-2xl transition-all"
+                  className="flex-1 md:flex-none px-8 py-3.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-2xl transition-all border border-slate-100"
                 >
-                  Close
+                  {selectedSubmission.status === 'graded' ? 'Close View' : 'Discard Changes'}
                 </button>
-                <button 
-                  onClick={() => {
-                    const score = document.getElementById("score-input").value;
-                    handleGrade(selectedSubmission.id, score);
-                  }}
-                  className="px-10 py-3 bg-navy text-white rounded-2xl text-xs font-bold shadow-lg hover:bg-black transition-all"
-                >
-                  Complete Grading
-                </button>
+                {selectedSubmission.status !== 'graded' && (
+                  <button 
+                    onClick={handleGrade}
+                    className="flex-1 md:flex-none px-12 py-3.5 bg-navy text-white rounded-2xl text-xs font-bold shadow-xl hover:bg-black transition-all hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    Finalize Scorecard
+                  </button>
+                )}
               </div>
             </div>
           </motion.div>

@@ -22,7 +22,8 @@ import {
   BadgeCheck,
   X,
   Eye,
-  EyeOff
+  EyeOff,
+  Trash2
 } from "lucide-react";
 
 export default function StudentsAdmin() {
@@ -120,6 +121,29 @@ export default function StudentsAdmin() {
       }
     } catch (error) {
       alert("Failed to add student");
+    }
+  };
+
+  const handleDeleteStudent = async (studentId, studentName) => {
+    if (!confirm(`Are you absolutely sure you want to delete ${studentName}? This will permanently remove all their enrollments, payments, attendance, and certificates. This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/students/${studentId}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Student record and all associated data deleted successfully.");
+        fetchStudents();
+        setMenuOpen(null);
+      } else {
+        alert(data.message || "Failed to delete student");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("An error occurred while deleting the student record.");
     }
   };
 
@@ -339,8 +363,15 @@ export default function StudentsAdmin() {
                           <Phone size={14} /> Call Student
                         </a>
                         <div className="h-px bg-slate-100 my-1" />
-                        <button onClick={() => alert('Account suspended')} className="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors">
+                        <button onClick={() => alert('Account suspended')} className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors">
                           <ShieldAlert size={14} /> Suspend Account
+                        </button>
+                        <div className="h-px bg-slate-100 my-1" />
+                        <button 
+                          onClick={() => handleDeleteStudent(student.id, student.name)}
+                          className="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors font-bold"
+                        >
+                          <Trash2 size={14} /> Delete Record
                         </button>
                       </div>
                     )}

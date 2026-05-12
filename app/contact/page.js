@@ -81,9 +81,10 @@ export default function ContactPage() {
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-semibold text-white mb-6 leading-tight tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-semibold text-white mb-4 leading-tight tracking-tight">
               Institutional <span className="text-primary">Engagement</span>
             </h1>
+            <p className="text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-8">PRAYOG INDIA ROBOTICS PVT. LTD.</p>
             <p className="text-blue-100/60 text-lg md:text-xl leading-relaxed">
               Connect with our regional hubs or admissions team for inquiries regarding industrial workshops, residency, and specialized courses.
             </p>
