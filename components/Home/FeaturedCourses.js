@@ -133,21 +133,12 @@ export default function FeaturedCourses() {
                     <div className="flex items-center justify-between gap-4">
                       <span className="text-xl font-heading font-black text-navy">₹{Number(course.price).toLocaleString('en-IN')}</span>
                       <div className="flex space-x-2">
-                        {course.modules ? (
-                          <Link 
-                            href={course.id === 6 ? "/summer-camp" : `/register?course=${course.id}`}
-                            className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all group-hover:rotate-[-45deg] shadow-lg shadow-navy/20"
-                          >
-                            <ArrowRight size={18} />
-                          </Link>
-                        ) : (
-                          <div 
-                            className="w-10 h-10 rounded-xl bg-slate-100 text-slate-300 flex items-center justify-center cursor-not-allowed border border-slate-200"
-                            title="Learning Path pending"
-                          >
-                            <ArrowRight size={18} />
-                          </div>
-                        )}
+                        <Link 
+                          href={course.id === 6 ? "/summer-camp" : `/register?course=${course.id}`}
+                          className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all group-hover:rotate-[-45deg] shadow-lg shadow-navy/20"
+                        >
+                          <ArrowRight size={18} />
+                        </Link>
                       </div>
                     </div>
                   </div>

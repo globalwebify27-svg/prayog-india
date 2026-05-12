@@ -189,15 +189,9 @@ export default function CoursesPage() {
                         <span>Learning Path</span>
                       </Link>
                     </div>
-                    {course.modules ? (
-                      <Link href={`/register?course=${course.id}`} className="w-10 h-10 rounded-lg bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm">
-                        <ArrowUpRight size={18} />
-                      </Link>
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-300 flex items-center justify-center cursor-not-allowed" title="Learning Path pending">
-                        <ArrowUpRight size={18} />
-                      </div>
-                    )}
+                    <Link href={`/register?course=${course.id}`} className="w-10 h-10 rounded-lg bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm">
+                      <ArrowUpRight size={18} />
+                    </Link>
                   </div>
                 </div>
               </motion.div>

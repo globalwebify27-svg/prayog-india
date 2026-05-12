@@ -65,15 +65,9 @@ export default function CourseDetailPage() {
               {course.tagline || course.description}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              {course.modules ? (
-                <Link href={`/register?course=${course.id}&lock=true`} className="bg-primary text-navy px-10 py-4 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all text-center">
-                  Enroll in program
-                </Link>
-              ) : (
-                <div className="bg-white/10 text-white/40 px-10 py-4 rounded-xl font-bold text-sm border border-white/5 cursor-not-allowed text-center">
-                  Enrollment Pending
-                </div>
-              )}
+              <Link href={`/register?course=${course.id}&lock=true`} className="bg-primary text-navy px-10 py-4 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all text-center">
+                Enroll in program
+              </Link>
               <button className="flex items-center justify-center space-x-3 bg-white/5 text-white px-10 py-4 rounded-xl border border-white/10 font-bold text-sm hover:bg-white/10 transition-all">
                 <PlayCircle size={18} />
                 <span>Path walkthrough</span>
@@ -165,16 +159,10 @@ export default function CourseDetailPage() {
                     </div>
                   </div>
 
-                  {course.modules ? (
-                    <Link href={`/register?course=${course.id}&lock=true`} className="mt-10 w-full flex items-center justify-center space-x-2 bg-navy text-white py-3.5 rounded-xl font-bold text-sm hover:bg-black transition-all shadow-lg shadow-navy/10">
-                      <span>Start enrollment</span>
-                      <ArrowRight size={18} />
-                    </Link>
-                  ) : (
-                    <div className="mt-10 w-full flex items-center justify-center space-x-2 bg-slate-100 text-slate-400 py-3.5 rounded-xl font-bold text-sm cursor-not-allowed border border-slate-200">
-                      <span>Path Pending</span>
-                    </div>
-                  )}
+                  <Link href={`/register?course=${course.id}&lock=true`} className="mt-10 w-full flex items-center justify-center space-x-2 bg-navy text-white py-3.5 rounded-xl font-bold text-sm hover:bg-black transition-all shadow-lg shadow-navy/10">
+                    <span>Start enrollment</span>
+                    <ArrowRight size={18} />
+                  </Link>
                 </div>
 
                 {/* Cohort Enrollment Card */}
