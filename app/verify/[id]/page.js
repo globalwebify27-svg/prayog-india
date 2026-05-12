@@ -48,7 +48,7 @@ export default function VerifyCertificate() {
         backgroundColor: "#051329",
         windowWidth: 1123,
         windowHeight: 794,
-        onclone: (clonedDoc, element) => {
+        onclone: (clonedDoc, elementNode) => {
           const dummyCanvas = document.createElement('canvas');
           dummyCanvas.width = 1;
           dummyCanvas.height = 1;
@@ -56,7 +56,8 @@ export default function VerifyCertificate() {
           
           const normalizeColorStr = (str) => {
             if (!str || typeof str !== 'string') return str;
-            const matches = str.match(/(oklch|lab|oklab|lch|color)\([^)]+\)/g);
+            // Regex matching color functions with up to one level of nested parentheses
+            const matches = str.match(/(?:oklch|lab|oklab|lch|color)\((?:[^)(]+|\([^)(]*\))*\)/g);
             if (!matches) return str;
             
             let result = str;
@@ -67,12 +68,31 @@ export default function VerifyCertificate() {
               ctx.fillRect(0, 0, 1, 1);
               const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
               const rgbaStr = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
-              result = result.replace(match, rgbaStr);
+              result = result.split(match).join(rgbaStr);
             });
             return result;
           };
 
+          // Sanitize style tags
+          const styleTags = clonedDoc.querySelectorAll('style');
+          styleTags.forEach(tag => {
+            try {
+              if (tag.innerHTML && tag.innerHTML.match(/(oklch|lab|oklab|lch|color)\(/)) {
+                tag.innerHTML = normalizeColorStr(tag.innerHTML);
+              }
+            } catch (e) {}
+          });
+
+          // Remove external stylesheets to prevent parsing errors, preserving fonts
+          const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
+          linkTags.forEach(tag => {
+            if (tag.href && !tag.href.includes('fonts.googleapis.com')) {
+              tag.remove();
+            }
+          });
+
           const inlineStyles = (source, target) => {
+            if (!source || !target) return;
             const computed = window.getComputedStyle(source);
             for (let i = 0; i < computed.length; i++) {
               const key = computed[i];
@@ -81,8 +101,9 @@ export default function VerifyCertificate() {
               if (value && (value.includes('oklch') || value.includes('lab') || value.includes('color('))) {
                 value = normalizeColorStr(value);
               }
-              
-              target.style[key] = value;
+              try {
+                target.style[key] = value;
+              } catch (e) {}
             }
             
             for (let i = 0; i < source.children.length; i++) {
@@ -92,14 +113,22 @@ export default function VerifyCertificate() {
             }
           };
 
-          if (certificateRef.current) {
-            inlineStyles(certificateRef.current, element);
+          // Use the actual element passed to html2canvas as the source for inlining
+          const originalElement = document.getElementById("certificate-to-print");
+          if (originalElement && elementNode) {
+            inlineStyles(originalElement, elementNode);
+            
+            // Ignore extraneous elements
+            const allElements = clonedDoc.body.querySelectorAll('*');
+            allElements.forEach(el => {
+              if (!elementNode.contains(el) && el !== elementNode && !el.contains(elementNode) && el.tagName !== 'STYLE' && el.tagName !== 'LINK') {
+                el.setAttribute('data-html2canvas-ignore', 'true');
+              }
+            });
           }
 
-          Array.from(clonedDoc.querySelectorAll('style, link[rel="stylesheet"]'))
-            .forEach(s => { s.disabled = true; });
-
-          Array.from(element.querySelectorAll('svg')).forEach(svg => {
+          // SVG to image conversion for better compatibility
+          Array.from(elementNode.querySelectorAll('svg')).forEach(svg => {
             try {
               const w = svg.getAttribute('width') || svg.viewBox?.baseVal?.width || 100;
               const h = svg.getAttribute('height') || svg.viewBox?.baseVal?.height || 100;

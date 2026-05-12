@@ -15,7 +15,7 @@ export async function GET(request) {
       FROM certificates c 
       JOIN users u ON c.user_id = u.id 
       JOIN courses cr ON c.course_id = cr.id
-      WHERE c.certificate_number = ?
+      WHERE LOWER(TRIM(c.certificate_number)) = LOWER(TRIM(?))
     `, [certNo]);
 
     if (rows.length === 0) {

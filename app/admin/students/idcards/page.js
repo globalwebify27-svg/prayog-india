@@ -66,11 +66,7 @@ export default function IdCardManagement() {
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
-        onclone: (clonedDoc, element) => {
-          const originalElement = document.getElementById("id-card-element");
-          const clonedElement = clonedDoc.getElementById("id-card-element");
-          if (!originalElement || !clonedElement) return;
-
+        onclone: (clonedDoc, elementNode) => {
           const dummyCanvas = document.createElement('canvas');
           dummyCanvas.width = 1;
           dummyCanvas.height = 1;
@@ -78,7 +74,8 @@ export default function IdCardManagement() {
           
           const normalizeColorStr = (str) => {
             if (!str || typeof str !== 'string') return str;
-            const matches = str.match(/(oklch|lab|oklab|lch|color)\([^)]+\)/g);
+            // Regex matching color functions with up to one level of nested parentheses
+            const matches = str.match(/(?:oklch|lab|oklab|lch|color)\((?:[^)(]+|\([^)(]*\))*\)/g);
             if (!matches) return str;
             
             let result = str;
@@ -89,29 +86,63 @@ export default function IdCardManagement() {
               ctx.fillRect(0, 0, 1, 1);
               const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
               const rgbaStr = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
-              result = result.replace(match, rgbaStr);
+              result = result.split(match).join(rgbaStr);
             });
             return result;
           };
 
+          // Sanitize style tags to prevent parser crashes
+          const styleTags = clonedDoc.querySelectorAll('style');
+          styleTags.forEach(tag => {
+            try {
+              if (tag.innerHTML && tag.innerHTML.match(/(oklch|lab|oklab|lch|color)\(/)) {
+                tag.innerHTML = normalizeColorStr(tag.innerHTML);
+              }
+            } catch (e) {}
+          });
+
+          // Remove external stylesheets to prevent parsing errors, preserving fonts
+          const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
+          linkTags.forEach(tag => {
+            if (tag.href && !tag.href.includes('fonts.googleapis.com')) {
+              tag.remove();
+            }
+          });
+
           const inlineStyles = (source, target) => {
+            if (!source || !target) return;
             const computed = window.getComputedStyle(source);
             for (let i = 0; i < computed.length; i++) {
               const key = computed[i];
               let value = computed.getPropertyValue(key);
               
-              if (key.includes('color') || key.includes('background') || key.includes('border') || key.includes('fill') || key.includes('stroke')) {
+              if (value && (value.includes('oklch') || value.includes('lab') || value.includes('color('))) {
                 value = normalizeColorStr(value);
               }
-              target.style[key] = value;
+              try {
+                target.style[key] = value;
+              } catch (e) {}
             }
             
             for (let i = 0; i < source.children.length; i++) {
-              inlineStyles(source.children[i], target.children[i]);
+              if (target.children[i]) {
+                inlineStyles(source.children[i], target.children[i]);
+              }
             }
           };
 
-          inlineStyles(originalElement, clonedElement);
+          const originalElement = document.getElementById("id-card-element");
+          if (originalElement && elementNode) {
+            inlineStyles(originalElement, elementNode);
+            
+            // Ignore extraneous elements
+            const allElements = clonedDoc.body.querySelectorAll('*');
+            allElements.forEach(el => {
+              if (!elementNode.contains(el) && el !== elementNode && !el.contains(elementNode) && el.tagName !== 'STYLE' && el.tagName !== 'LINK') {
+                el.setAttribute('data-html2canvas-ignore', 'true');
+              }
+            });
+          }
         }
       });
 
@@ -276,7 +307,7 @@ export default function IdCardManagement() {
                       studentId={`PR-${10000 + selectedStudent.id}`}
                       courseName={selectedStudent.enrollments?.[0]?.course_name || "Professional Student"}
                       validity="2026 - 2027"
-                      qrCodeData={`https://prayogindia.in/verify/${selectedStudent.id}`}
+                      qrCodeData={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com'}/verify/${selectedStudent.id}`}
                       bloodGroup={selectedStudent.blood_group}
                       emergencyContact={selectedStudent.emergency_contact}
                     />

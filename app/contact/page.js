@@ -27,7 +27,7 @@ const contactInfo = [
   {
     icon: <Mail size={20} />,
     title: "Institutional Mail",
-    details: ["info@prayogindia.in", "trainingcell@prayogindia.in"],
+    details: ["info@prayogindiarobotics.com", "trainingcell@prayogindiarobotics.com"],
     color: "bg-emerald-50 text-emerald-600 border-emerald-100"
   },
   {

@@ -69,8 +69,8 @@ export default function Footer() {
               <li className="flex items-start space-x-3">
                 <Mail size={16} className="text-primary/50 shrink-0 mt-0.5" />
                 <div className="flex flex-col space-y-1">
-                  <span>info@prayogindia.in</span>
-                  <span>trainingcell@prayogindia.in</span>
+                  <span>info@prayogindiarobotics.com</span>
+                  <span>trainingcell@prayogindiarobotics.com</span>
                 </div>
               </li>
             </ul>
