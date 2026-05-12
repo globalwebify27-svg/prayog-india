@@ -22,7 +22,8 @@ import {
   Image,
   ChevronDown,
   Clock,
-  IdCard
+  IdCard,
+  Tag
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
@@ -61,7 +62,16 @@ const menuItems = [
       { label: "Attendance Log", href: "/admin/attendance", icon: FileText },
     ]
   },
-  { icon: CreditCard, label: "Payments", href: "/admin/payments", roles: ["admin"] },
+  { 
+    icon: CreditCard, 
+    label: "Payments", 
+    href: "/admin/payments", 
+    roles: ["admin"],
+    subItems: [
+      { label: "Payment Ledger", href: "/admin/payments", icon: CreditCard },
+      { label: "Promo Codes", href: "/admin/promos", icon: Tag },
+    ]
+  },
   { icon: Layout, label: "Workshops", href: "/admin/workshops", roles: ["admin"] },
   { icon: Image, label: "Media Gallery", href: "/admin/gallery", roles: ["admin"] },
   { icon: Award, label: "Certificates", href: "/admin/certificates", roles: ["admin"] },

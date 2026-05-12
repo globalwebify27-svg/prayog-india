@@ -16,7 +16,7 @@ export async function GET() {
     const userId = decoded.id;
 
     // 1. Get User Info
-    const [user] = await pool.query("SELECT id, name, email, role, phone, dob, address, blood_group, emergency_contact FROM users WHERE id = ?", [userId]);
+    const [user] = await pool.query("SELECT id, name, email, role, phone, dob, address, blood_group, emergency_contact, id_card_issued FROM users WHERE id = ?", [userId]);
     
     // 2. Get Enrollments with Meeting Links
     const [enrollments] = await pool.query(`

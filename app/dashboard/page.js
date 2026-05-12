@@ -12,6 +12,7 @@ import {
   FileText, 
   Play, 
   Award,
+  IdCard,
   Zap,
   TrendingUp,
   Settings,
@@ -255,6 +256,12 @@ export default function StudentDashboard() {
                 <Settings size={18} className="text-navy" />
                 <span className="text-[10px] font-semibold text-slate-600">Profile</span>
               </Link>
+              {user.id_card_issued === 1 && (
+                <Link href="/dashboard/idcard" className="p-4 bg-emerald-50 rounded-xl flex flex-col items-center gap-2 hover:bg-emerald-100 transition-all group border border-emerald-100 md:col-span-2">
+                  <IdCard size={18} className="text-emerald-700" />
+                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">Identity Card Issued</span>
+                </Link>
+              )}
             </div>
           </div>
 

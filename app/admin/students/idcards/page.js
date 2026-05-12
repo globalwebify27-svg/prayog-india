@@ -24,8 +24,11 @@ export default function IdCardManagement() {
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [issuedFilter, setIssuedFilter] = useState("all"); // all, issued, pending
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedBulk, setSelectedBulk] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isIssuing, setIsIssuing] = useState(false);
   const idCardRef = useRef(null);
 
   useEffect(() => {
@@ -74,7 +77,6 @@ export default function IdCardManagement() {
           
           const normalizeColorStr = (str) => {
             if (!str || typeof str !== 'string') return str;
-            // Regex matching color functions with up to one level of nested parentheses
             const matches = str.match(/(?:oklch|lab|oklab|lch|color)\((?:[^)(]+|\([^)(]*\))*\)/g);
             if (!matches) return str;
             
@@ -91,7 +93,6 @@ export default function IdCardManagement() {
             return result;
           };
 
-          // Sanitize style tags to prevent parser crashes
           const styleTags = clonedDoc.querySelectorAll('style');
           styleTags.forEach(tag => {
             try {
@@ -101,7 +102,6 @@ export default function IdCardManagement() {
             } catch (e) {}
           });
 
-          // Remove external stylesheets to prevent parsing errors, preserving fonts
           const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
           linkTags.forEach(tag => {
             if (tag.href && !tag.href.includes('fonts.googleapis.com')) {
@@ -134,8 +134,6 @@ export default function IdCardManagement() {
           const originalElement = document.getElementById("id-card-element");
           if (originalElement && elementNode) {
             inlineStyles(originalElement, elementNode);
-            
-            // Ignore extraneous elements
             const allElements = clonedDoc.body.querySelectorAll('*');
             allElements.forEach(el => {
               if (!elementNode.contains(el) && el !== elementNode && !el.contains(elementNode) && el.tagName !== 'STYLE' && el.tagName !== 'LINK') {
@@ -165,10 +163,8 @@ export default function IdCardManagement() {
 
   const handlePrint = () => {
     if (!selectedStudent) return;
-    
     const printWindow = window.open("", "_blank");
     const element = document.getElementById("id-card-element");
-    
     if (!printWindow || !element) return;
 
     const printHtml = `
@@ -199,16 +195,57 @@ export default function IdCardManagement() {
         </body>
       </html>
     `;
-
     printWindow.document.write(printHtml);
     printWindow.document.close();
   };
 
-  const filteredStudents = students.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s.enrollments?.[0]?.course_name || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleIssueId = async (studentIds, issue = true) => {
+    setIsIssuing(true);
+    try {
+      const res = await fetch("/api/admin/students/idcards/issue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentIds, issue })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchStudents();
+        if (selectedBulk.length > 0) setSelectedBulk([]);
+      } else {
+        alert(data.message);
+      }
+    } catch (e) {
+      alert("Failed to update ID status");
+    } finally {
+      setIsIssuing(false);
+    }
+  };
+
+  const toggleBulk = (id) => {
+    setSelectedBulk(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const selectAll = () => {
+    if (selectedBulk.length === filteredStudents.length) {
+      setSelectedBulk([]);
+    } else {
+      setSelectedBulk(filteredStudents.map(s => s.id));
+    }
+  };
+
+  const filteredStudents = students.filter(s => {
+    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (s.enrollments?.[0]?.course_name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesFilter = issuedFilter === "all" || 
+                         (issuedFilter === "issued" && s.id_card_issued) ||
+                         (issuedFilter === "pending" && !s.id_card_issued);
+    
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <div className="space-y-8 font-body">
@@ -243,11 +280,47 @@ export default function IdCardManagement() {
                     className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-navy transition-all shadow-sm"
                   />
                 </div>
-                <button className="flex items-center space-x-2 px-4 py-2 text-slate-500 hover:text-navy transition-colors text-xs font-semibold">
-                   <Filter size={14} />
-                   <span>Filters</span>
-                </button>
+                <div className="flex items-center space-x-2">
+                  <select 
+                    value={issuedFilter}
+                    onChange={(e) => setIssuedFilter(e.target.value)}
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold uppercase tracking-wider outline-none cursor-pointer hover:border-navy transition-all shadow-sm"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="issued">Issued</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                  <button 
+                    onClick={selectAll}
+                    className="flex items-center space-x-2 px-4 py-2 text-slate-500 hover:text-navy transition-colors text-xs font-semibold"
+                  >
+                    {selectedBulk.length === filteredStudents.length ? "Deselect All" : "Select All"}
+                  </button>
+                </div>
              </div>
+
+             {selectedBulk.length > 0 && (
+               <div className="bg-navy text-white px-6 py-3 flex items-center justify-between">
+                 <div className="flex items-center space-x-3">
+                   <span className="text-xs font-bold">{selectedBulk.length} Selected</span>
+                 </div>
+                 <div className="flex items-center space-x-3">
+                   <button 
+                    onClick={() => handleIssueId(selectedBulk, true)}
+                    disabled={isIssuing}
+                    className="px-4 py-1.5 bg-primary text-navy rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-all disabled:opacity-50"
+                   >
+                     {isIssuing ? "Processing..." : "Issue ID Cards"}
+                   </button>
+                   <button 
+                    onClick={() => setSelectedBulk([])}
+                    className="px-4 py-1.5 bg-white/10 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-white/20 transition-all"
+                   >
+                     Cancel
+                   </button>
+                 </div>
+               </div>
+             )}
 
              <div className="divide-y divide-slate-50 max-h-[600px] overflow-y-auto scrollbar-hide">
                 {isLoading ? (
@@ -262,46 +335,63 @@ export default function IdCardManagement() {
                    </div>
                  ) : (
                    filteredStudents.map((student) => (
-                     <div 
-                       key={student.id}
-                       onClick={() => setSelectedStudent(student)}
-                       className={`p-4 flex items-center justify-between cursor-pointer transition-all group ${
-                         selectedStudent?.id === student.id ? "bg-navy text-white" : "hover:bg-slate-50"
-                       }`}
-                     >
-                       <div className="flex items-center space-x-4">
-                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-sm shadow-sm transition-all ${
-                           selectedStudent?.id === student.id ? "bg-primary text-navy" : "bg-slate-100 text-slate-500 group-hover:bg-white"
-                         }`}>
-                           {student.name.substring(0, 2).toUpperCase()}
-                         </div>
-                         <div>
-                           <p className={`text-sm font-bold leading-none ${selectedStudent?.id === student.id ? "text-white" : "text-slate-900"}`}>
-                             {student.name}
-                           </p>
-                           <p className={`text-[10px] mt-1 font-medium ${selectedStudent?.id === student.id ? "text-white/60" : "text-slate-400"}`}>
-                             {student.email} • {student.phone || 'No Contact'}
-                           </p>
-                         </div>
-                       </div>
-                       <ChevronRight size={18} className={`transition-transform ${selectedStudent?.id === student.id ? "text-primary translate-x-1" : "text-slate-300"}`} />
-                     </div>
-                   ))
+                    <div 
+                      key={student.id}
+                      className={`mx-2 my-1 rounded-xl p-3 flex items-center justify-between cursor-pointer transition-all ${
+                        selectedStudent?.id === student.id ? "bg-navy/5" : "hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-4 flex-grow" onClick={() => setSelectedStudent(student)}>
+                        <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                          <input 
+                            type="checkbox"
+                            checked={selectedBulk.includes(student.id)}
+                            onChange={() => toggleBulk(student.id)}
+                            className="w-4 h-4 rounded border-slate-300 text-navy focus:ring-navy cursor-pointer mr-3"
+                          />
+                        </div>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-sm shadow-sm transition-all ${
+                          selectedStudent?.id === student.id ? "bg-navy text-white" : "bg-slate-100 text-slate-500 group-hover:bg-white"
+                        }`}>
+                          {student.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <p className="text-sm font-bold leading-none text-slate-900">
+                              {student.name}
+                            </p>
+                            {student.id_card_issued ? (
+                              <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded text-[8px] font-bold uppercase">Issued</span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 bg-slate-100 text-slate-400 border border-slate-200 rounded text-[8px] font-bold uppercase tracking-tight">Pending</span>
+                            )}
+                          </div>
+                          <p className="text-[10px] mt-1 font-medium text-slate-400">
+                            {student.email} • {student.phone || 'No Contact'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <ChevronRight size={18} className={`transition-transform ${selectedStudent?.id === student.id ? "text-navy translate-x-1" : "text-slate-300"}`} />
+                      </div>
+                    </div>
+                  ))
                  )}
               </div>
            </div>
         </div>
 
-        <div className="lg:col-span-5 space-y-6">
-           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col items-center">
-              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8 self-start flex items-center">
+        <div className="lg:col-span-5 relative">
+           <div className="sticky top-8 space-y-6">
+             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col items-center">
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 self-start flex items-center">
                  <ShieldCheck size={14} className="mr-2 text-primary" />
                  Credential Real-time Preview
               </h4>
 
               {selectedStudent ? (
-                <div className="relative group">
-                  <div className="scale-[0.8] origin-top">
+                <div className="relative group w-full flex flex-col items-center">
+                  <div className="scale-[0.75] origin-top -mb-16">
                     <IdCardTemplate 
                       studentName={selectedStudent.name}
                       studentId={`PR-${10000 + selectedStudent.id}`}
@@ -313,19 +403,35 @@ export default function IdCardManagement() {
                     />
                   </div>
                   
-                  <div className="mt-8 space-y-3 w-full">
-                    <button 
-                      onClick={downloadIdCard}
-                      disabled={isGenerating}
-                      className="w-full py-4 bg-navy text-white rounded-2xl font-bold text-sm hover:bg-black transition-all flex items-center justify-center space-x-3 shadow-xl shadow-navy/10 disabled:opacity-70"
-                    >
-                      {isGenerating ? <Loader2 size={18} className="animate-spin text-primary" /> : <Download size={18} className="text-primary" />}
-                      <span>{isGenerating ? "Processing Graphics..." : "Export High-Res ID Card"}</span>
-                    </button>
+                  <div className="space-y-2 w-full">
+                    <div className="flex flex-col gap-3 w-full">
+                      <button 
+                        onClick={() => handleIssueId([selectedStudent.id], !selectedStudent.id_card_issued)}
+                        disabled={isIssuing}
+                        className={`w-full py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-center space-x-3 shadow-lg ${
+                          selectedStudent.id_card_issued 
+                            ? "bg-slate-100 text-slate-500 hover:bg-slate-200" 
+                            : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/10"
+                        }`}
+                      >
+                        {isIssuing ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />}
+                        <span>{selectedStudent.id_card_issued ? "Revoke ID Access" : "Issue & Authorize ID Card"}</span>
+                      </button>
+
+                      <button 
+                        onClick={downloadIdCard}
+                        disabled={isGenerating || !selectedStudent.id_card_issued}
+                        className="w-full py-4 bg-navy text-white rounded-2xl font-bold text-sm hover:bg-black transition-all flex items-center justify-center space-x-3 shadow-xl shadow-navy/10 disabled:opacity-30"
+                      >
+                        {isGenerating ? <Loader2 size={18} className="animate-spin text-primary" /> : <Download size={18} className="text-primary" />}
+                        <span>{isGenerating ? "Processing Graphics..." : "Export High-Res ID Card"}</span>
+                      </button>
+                    </div>
                     
                     <button 
                       onClick={handlePrint}
-                      className="w-full py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all flex items-center justify-center space-x-3"
+                      disabled={!selectedStudent.id_card_issued}
+                      className="w-full py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all flex items-center justify-center space-x-3 disabled:opacity-30"
                     >
                       <Printer size={18} />
                       <span>Direct Print (CR80)</span>
@@ -340,12 +446,14 @@ export default function IdCardManagement() {
               )}
            </div>
 
-           <div className="bg-primary rounded-3xl p-8 relative overflow-hidden group">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl transition-transform group-hover:scale-150 duration-700"></div>
-              <Award className="text-navy mb-4" size={28} />
-              <h3 className="text-lg font-bold text-navy mb-2">Security Standard</h3>
-              <p className="text-navy/60 text-xs leading-relaxed">
-                Prayog India ID cards use embedded QR verification and tamper-proof layout designs to ensure document integrity across all academic programs.
+           <div className="bg-primary rounded-2xl p-6 relative overflow-hidden group shadow-sm border border-primary/20">
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-white/20 rounded-full blur-2xl transition-transform group-hover:scale-150 duration-700"></div>
+              <h3 className="text-sm font-bold text-navy mb-1 flex items-center">
+                <Award size={16} className="mr-2" />
+                Security Standard
+              </h3>
+              <p className="text-navy/60 text-[10px] leading-relaxed">
+                Prayog India ID cards use embedded QR verification and tamper-proof layout designs.
               </p>
               <button className="mt-6 flex items-center space-x-2 text-[10px] font-bold text-navy uppercase tracking-widest border-b border-navy/20 pb-1 hover:border-navy transition-all">
                  <span>View Verification Logs</span>
@@ -353,6 +461,7 @@ export default function IdCardManagement() {
               </button>
            </div>
         </div>
+      </div>
       </div>
     </div>
   );
