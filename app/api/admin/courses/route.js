@@ -66,11 +66,11 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Only admins can create courses" }, { status: 403 });
     }
 
-    const { title, description, price, type, duration, image, teacher_id, selectedTimings } = await req.json();
+    const { title, description, price, type, duration, image, teacher_id, selectedTimings, allow_partial_payment, installments_count } = await req.json();
 
     const [result] = await pool.query(
-      "INSERT INTO courses (title, description, price, type, duration, image, teacher_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [title, description, price, type, duration, image, teacher_id || null]
+      "INSERT INTO courses (title, description, price, type, duration, image, teacher_id, allow_partial_payment, installments_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1]
     );
 
     const courseId = result.insertId;
@@ -101,11 +101,11 @@ export async function PUT(req) {
       return NextResponse.json({ success: false, message: "Only admins can edit courses" }, { status: 403 });
     }
 
-    const { id, title, description, price, type, duration, image, teacher_id, selectedTimings } = await req.json();
+    const { id, title, description, price, type, duration, image, teacher_id, selectedTimings, allow_partial_payment, installments_count } = await req.json();
 
     await pool.query(
-      "UPDATE courses SET title = ?, description = ?, price = ?, type = ?, duration = ?, image = ?, teacher_id = ? WHERE id = ?",
-      [title, description, price, type, duration, image, teacher_id || null, id]
+      "UPDATE courses SET title = ?, description = ?, price = ?, type = ?, duration = ?, image = ?, teacher_id = ?, allow_partial_payment = ?, installments_count = ? WHERE id = ?",
+      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1, id]
     );
 
     // Update timings: Delete old and insert new

@@ -19,6 +19,16 @@ export async function POST(req) {
 
     const { location, selfie, courseId = null, batchId = null } = await req.json();
 
+    // Check if attendance already marked for today
+    const [existing] = await pool.query(
+      "SELECT id FROM attendance WHERE user_id = ? AND course_id = ? AND date = CURDATE()",
+      [userId, courseId]
+    );
+
+    if (existing.length > 0) {
+      return NextResponse.json({ success: false, message: "Attendance already marked for this course today" }, { status: 400 });
+    }
+
     // 1. Save selfie to public/uploads/attendance (mocking file save)
     let selfieUrl = null;
     if (selfie) {
@@ -34,13 +44,27 @@ export async function POST(req) {
       selfieUrl = `/uploads/attendance/${fileName}`;
     }
 
-    // 2. Insert into DB
+    // 2. Reverse Geocode Location
+    let locationName = "Unknown Location";
+    if (location?.lat && location?.lng) {
+      try {
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.lat}&lon=${location.lng}`, {
+          headers: { "User-Agent": "PrayogIndia/1.0" }
+        });
+        const geoData = await geoRes.json();
+        locationName = geoData.display_name || `${location.lat}, ${location.lng}`;
+      } catch (e) {
+        console.error("Geocoding failed:", e);
+      }
+    }
+
+    // 3. Insert into DB
     await pool.query(
-      "INSERT INTO attendance (user_id, course_id, batch_id, date, type, latitude, longitude, selfie_url, status) VALUES (?, ?, ?, CURDATE(), 'offline', ?, ?, ?, 'present')",
-      [userId, courseId || null, batchId || null, location?.lat, location?.lng, selfieUrl]
+      "INSERT INTO attendance (user_id, course_id, batch_id, date, type, latitude, longitude, location_name, selfie_url, status) VALUES (?, ?, ?, CURDATE(), 'offline', ?, ?, ?, ?, 'present')",
+      [userId, courseId || null, batchId || null, location?.lat, location?.lng, locationName, selfieUrl]
     );
 
-    return NextResponse.json({ success: true, message: "Attendance logged successfully" });
+    return NextResponse.json({ success: true, message: "Attendance logged successfully", locationName });
 
   } catch (error) {
     console.error("Attendance error:", error);

@@ -41,7 +41,9 @@ export default function AdminCoursesPage() {
     duration: "6 Months",
     image: "",
     teacher_id: "",
-    selectedTimings: []
+    selectedTimings: [],
+    allow_partial_payment: false,
+    installments_count: 1
   });
 
   useEffect(() => {
@@ -112,7 +114,7 @@ export default function AdminCoursesPage() {
     const result = await res.json();
     if (result.success) {
       setShowAddModal(false);
-      setNewCourse({ title: "", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [] });
+      setNewCourse({ title: "", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1 });
       fetchCourses();
     } else {
       setError(result.message);
@@ -294,7 +296,8 @@ export default function AdminCoursesPage() {
             <div className="p-6 border-b border-slate-100 bg-slate-50">
               <h3 className="text-lg font-bold text-slate-900">Add New Course</h3>
             </div>
-            <form onSubmit={handleAddCourse} className="p-6 space-y-4">
+            <div className="max-h-[80vh] overflow-y-auto">
+              <form onSubmit={handleAddCourse} className="p-6 space-y-4">
               <div>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Course Title</label>
                 <input 
@@ -404,6 +407,48 @@ export default function AdminCoursesPage() {
                   ))}
                 </div>
               </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">Payment Configuration</label>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-slate-700">Allow Partial Payment</p>
+                      <p className="text-[9px] text-slate-500">Enable installments for this course</p>
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => setNewCourse({...newCourse, allow_partial_payment: !newCourse.allow_partial_payment})}
+                      className={`w-10 h-5 rounded-full transition-all relative ${newCourse.allow_partial_payment ? 'bg-navy' : 'bg-slate-300'}`}
+                    >
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${newCourse.allow_partial_payment ? 'left-6' : 'left-1'}`} />
+                    </button>
+                  </div>
+
+                  {newCourse.allow_partial_payment && (
+                    <div className="pt-3 border-t border-slate-200 animate-in fade-in slide-in-from-top-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-grow">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase tracking-tight block mb-1">Number of Installments</label>
+                          <input 
+                            type="number" 
+                            min="2"
+                            max="12"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none"
+                            value={newCourse.installments_count}
+                            onChange={e => setNewCourse({...newCourse, installments_count: parseInt(e.target.value) || 1})}
+                          />
+                        </div>
+                        <div className="w-24 text-right">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mb-1">Per Installment</p>
+                          <p className="text-sm font-bold text-navy">
+                            ₹{Math.round(newCourse.price / (newCourse.installments_count || 1)).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Short Description</label>
@@ -414,14 +459,15 @@ export default function AdminCoursesPage() {
                   onChange={e => setNewCourse({...newCourse, description: e.target.value})}
                 />
               </div>
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-4 pb-2">
                 <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-lg transition-all">Cancel</button>
                 <button type="submit" className="px-5 py-2.5 bg-navy text-white rounded-lg text-xs font-bold transition-all shadow-md hover:bg-black">Create Course</button>
               </div>
             </form>
           </div>
         </div>
-      )}
+      </div>
+    )}
 
       {/* Edit Modal */}
       {showEditModal && courseToEdit && (
@@ -430,7 +476,8 @@ export default function AdminCoursesPage() {
             <div className="p-6 border-b border-slate-100 bg-slate-50">
               <h3 className="text-lg font-bold text-slate-900">Edit Course</h3>
             </div>
-            <form onSubmit={handleUpdateCourse} className="p-6 space-y-4">
+            <div className="max-h-[80vh] overflow-y-auto">
+              <form onSubmit={handleUpdateCourse} className="p-6 space-y-4">
               {error && <p className="text-xs font-bold text-rose-500 bg-rose-50 p-3 rounded-lg border border-rose-100">{error}</p>}
               <div>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Course Title</label>
@@ -563,6 +610,49 @@ export default function AdminCoursesPage() {
               </div>
 
               <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">Payment Configuration</label>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-slate-700">Allow Partial Payment</p>
+                      <p className="text-[9px] text-slate-500">Enable installments for this course</p>
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => setCourseToEdit({...courseToEdit, allow_partial_payment: !courseToEdit.allow_partial_payment})}
+                      className={`w-10 h-5 rounded-full transition-all relative ${courseToEdit.allow_partial_payment ? 'bg-navy' : 'bg-slate-300'}`}
+                    >
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${courseToEdit.allow_partial_payment ? 'left-6' : 'left-1'}`} />
+                    </button>
+                  </div>
+
+                  {courseToEdit.allow_partial_payment && (
+                    <div className="pt-3 border-t border-slate-200 animate-in fade-in slide-in-from-top-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-grow">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase tracking-tight block mb-1">Number of Installments</label>
+                          <input 
+                            type="number" 
+                            min="2"
+                            max="12"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none"
+                            value={courseToEdit.installments_count}
+                            onChange={e => setCourseToEdit({...courseToEdit, installments_count: parseInt(e.target.value) || 1})}
+                          />
+                        </div>
+                        <div className="w-24 text-right">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mb-1">Per Installment</p>
+                          <p className="text-sm font-bold text-navy">
+                            ₹{Math.round(courseToEdit.price / (courseToEdit.installments_count || 1)).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Short Description</label>
                 <textarea 
                   rows={1}
@@ -571,14 +661,15 @@ export default function AdminCoursesPage() {
                   onChange={e => setCourseToEdit({...courseToEdit, description: e.target.value})}
                 />
               </div>
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-4 pb-2">
                 <button type="button" onClick={() => setShowEditModal(false)} className="px-5 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-lg transition-all">Cancel</button>
                 <button type="submit" className="px-5 py-2.5 bg-navy text-white rounded-lg text-xs font-bold transition-all shadow-md hover:bg-black">Save Changes</button>
               </div>
             </form>
           </div>
         </div>
-      )}
+      </div>
+    )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && courseToDelete && (

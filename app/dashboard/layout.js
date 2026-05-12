@@ -16,18 +16,99 @@ import {
   Bell,
   Search,
   User,
-  FileText
+  FileText,
+  ChevronDown
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: BookOpen, label: "My Courses", href: "/dashboard/courses" },
-  { icon: CheckSquare, label: "Attendance", href: "/dashboard/attendance" },
+  { 
+    icon: CheckSquare, 
+    label: "Attendance", 
+    href: "/dashboard/attendance",
+    subItems: [
+      { label: "Mark Attendance", href: "/dashboard/attendance", icon: CheckSquare },
+      { label: "Attendance Log", href: "/dashboard/attendance/log", icon: FileText },
+    ]
+  },
   { icon: FileText, label: "Examinations", href: "/dashboard/exams" },
   { icon: CreditCard, label: "Payments", href: "/dashboard/payments" },
   { icon: Award, label: "Certificates", href: "/dashboard/certificates" },
 ];
+
+function SidebarItem({ item, pathname }) {
+  const isActive = pathname === item.href || (item.subItems && item.subItems.some(sub => pathname.startsWith(sub.href)));
+  const [isOpen, setIsOpen] = useState(isActive || pathname.startsWith(item.href));
+
+  if (item.subItems) {
+    return (
+      <div className="space-y-1">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group ${
+            isActive
+              ? "bg-white/10 text-white font-semibold" 
+              : "text-white/60 hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          <div className="flex items-center space-x-3">
+            <item.icon 
+              size={18} 
+              className={isActive ? "text-primary" : "group-hover:text-primary transition-colors"} 
+            />
+            <span className="text-sm">{item.label}</span>
+          </div>
+          <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+        
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden space-y-1 ml-4 border-l border-white/5 pl-2"
+            >
+              {item.subItems.map((sub) => {
+                const isSubActive = pathname === sub.href;
+                return (
+                  <Link
+                    key={sub.href}
+                    href={sub.href}
+                    className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl transition-all ${
+                      isSubActive 
+                        ? "bg-primary text-navy font-bold shadow-lg shadow-primary/10" 
+                        : "text-white/40 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <sub.icon size={14} className={isSubActive ? "text-navy" : "text-white/20 group-hover:text-white"} />
+                    <span className="text-[10px] uppercase tracking-wider font-bold">{sub.label}</span>
+                  </Link>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href}
+      className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all group ${
+        isActive 
+          ? "bg-primary text-navy font-semibold shadow-lg shadow-primary/10" 
+          : "text-white/60 hover:bg-white/5 hover:text-white"
+      }`}
+    >
+      <item.icon size={18} className={isActive ? "text-navy" : "group-hover:text-primary transition-colors"} />
+      <span className="text-sm">{item.label}</span>
+    </Link>
+  );
+}
 
 export default function StudentLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -76,23 +157,9 @@ export default function StudentLayout({ children }) {
             </div>
 
             <nav className="flex-grow px-3 py-6 space-y-1">
-              {menuItems.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all group ${
-                      isActive 
-                        ? "bg-primary text-navy font-semibold" 
-                        : "text-white/60 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <item.icon size={18} className={isActive ? "text-navy" : "group-hover:text-primary transition-colors"} />
-                    <span className="text-sm">{item.label}</span>
-                  </Link>
-                );
-              })}
+              {menuItems.map((item) => (
+                <SidebarItem key={item.label} item={item} pathname={pathname} />
+              ))}
             </nav>
 
             <div className="p-4 border-t border-white/5 space-y-4 bg-navy mt-auto">

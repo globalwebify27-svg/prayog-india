@@ -18,10 +18,13 @@ import Link from "next/link";
 export default function AttendancePage() {
   const [step, setStep] = useState(1);
   const [location, setLocation] = useState(null);
+  const [locationName, setLocationName] = useState("Resolving location...");
   const [isCapturing, setIsCapturing] = useState(false);
   const [selfie, setSelfie] = useState(null);
   const [enrollments, setEnrollments] = useState([]);
   const [selectedEnrollment, setSelectedEnrollment] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -36,15 +39,44 @@ export default function AttendancePage() {
           }
         }
       });
+    fetchHistory();
   }, []);
+
+  const fetchHistory = async () => {
+    try {
+      setIsHistoryLoading(true);
+      const res = await fetch("/api/student/attendance/history");
+      const data = await res.json();
+      if (data.success) {
+        setHistory(data.logs);
+      }
+    } catch (error) {
+      console.error("Failed to fetch history:", error);
+    } finally {
+      setIsHistoryLoading(false);
+    }
+  };
 
   // Initialize Geolocation
   const getLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setLocation({ lat, lng });
           setStep(2);
+          
+          // Reverse geocode
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+              headers: { "User-Agent": "PrayogIndia/1.0" }
+            });
+            const data = await res.json();
+            setLocationName(data.display_name || "Location resolved");
+          } catch (e) {
+            setLocationName(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+          }
         },
         (err) => alert("Please enable location access to mark attendance.")
       );
@@ -103,6 +135,7 @@ export default function AttendancePage() {
       const data = await res.json();
       if (data.success) {
         setStep(4);
+        fetchHistory(); // Refresh history after successful submission
       } else {
         alert(data.message || "Failed to log attendance");
       }
@@ -195,9 +228,12 @@ export default function AttendancePage() {
                   <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">Ready</span>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-3 text-slate-600">
-                    <MapPin size={14} className="text-navy" />
-                    <span className="text-[11px] font-semibold">Coords: {location?.lat.toFixed(4)}, {location?.lng.toFixed(4)}</span>
+                  <div className="flex items-start space-x-3 text-slate-600">
+                    <MapPin size={14} className="text-navy mt-0.5 shrink-0" />
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-bold text-slate-900 leading-tight">{locationName}</span>
+                      <span className="text-[9px] text-slate-400 font-medium">Coords: {location?.lat.toFixed(4)}, {location?.lng.toFixed(4)}</span>
+                    </div>
                   </div>
                   <div className="flex items-center space-x-3 text-slate-600">
                     <Clock size={14} className="text-navy" />
@@ -244,6 +280,7 @@ export default function AttendancePage() {
         <ShieldCheck size={12} />
         <span>End-to-end encrypted session tracking</span>
       </div>
+
     </div>
   );
 }

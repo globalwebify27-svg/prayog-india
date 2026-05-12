@@ -12,7 +12,8 @@ import {
   ArrowRight,
   ExternalLink,
   RefreshCcw,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Search
 } from "lucide-react";
 
 export default function AttendanceAdmin() {
@@ -22,6 +23,7 @@ export default function AttendanceAdmin() {
   const [modeFilter, setModeFilter] = useState("all");
   const [courseFilter, setCourseFilter] = useState("all");
   const [batchFilter, setBatchFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
@@ -44,7 +46,9 @@ export default function AttendanceAdmin() {
   };
 
   const filteredLogs = logs.filter(log => {
-    return (modeFilter === "all" || log.mode === modeFilter) &&
+    const matchesSearch = log.student_name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch &&
+           (modeFilter === "all" || log.mode === modeFilter) &&
            (courseFilter === "all" || log.course_name === courseFilter) &&
            (batchFilter === "all" || log.batch_name === batchFilter);
   });
@@ -112,6 +116,19 @@ export default function AttendanceAdmin() {
               {uniqueBatches.map(b => <option key={b} value={b}>{b}</option>)}
             </select>
           </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search Student</label>
+            <div className="relative">
+              <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs focus:border-navy outline-none transition-all font-semibold"
+              />
+            </div>
+          </div>
         </motion.div>
       )}
 
@@ -174,12 +191,17 @@ export default function AttendanceAdmin() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2 text-slate-600">
-                      <MapPin size={12} className="text-navy" />
-                      <span className="text-[11px] font-medium">
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex items-center space-x-2 text-slate-600">
+                        <MapPin size={12} className="text-navy" />
+                        <span className="text-[11px] font-bold text-slate-900 line-clamp-1 max-w-[200px]" title={log.location_name}>
+                          {log.location_name || "Unknown Location"}
+                        </span>
+                      </div>
+                      <span className="text-[9px] text-slate-400 font-medium ml-5">
                         {log.latitude && log.longitude 
                           ? `${Number(log.latitude).toFixed(4)}, ${Number(log.longitude).toFixed(4)}`
-                          : "Location N/A"}
+                          : "Coords N/A"}
                       </span>
                     </div>
                   </td>

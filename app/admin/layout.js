@@ -36,7 +36,6 @@ const menuItems = [
     roles: ["admin", "teacher"],
     subItems: [
       { label: "Student Directory", href: "/admin/students", icon: Users },
-      { label: "Attendance Ledger", href: "/admin/attendance", icon: CheckSquare },
       { label: "ID Card Generation", href: "/admin/students/idcards", icon: IdCard }
     ]
   },
@@ -53,6 +52,15 @@ const menuItems = [
     ]
   },
   { icon: Users, label: "Faculties", href: "/admin/faculties", roles: ["admin"] },
+  { 
+    icon: CheckSquare, 
+    label: "Attendance", 
+    href: "/admin/attendance", 
+    roles: ["admin", "teacher"],
+    subItems: [
+      { label: "Attendance Log", href: "/admin/attendance", icon: FileText },
+    ]
+  },
   { icon: CreditCard, label: "Payments", href: "/admin/payments", roles: ["admin"] },
   { icon: Layout, label: "Workshops", href: "/admin/workshops", roles: ["admin"] },
   { icon: Image, label: "Media Gallery", href: "/admin/gallery", roles: ["admin"] },
