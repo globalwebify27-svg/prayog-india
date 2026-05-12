@@ -396,6 +396,7 @@ export default function IdCardManagement() {
                       studentName={selectedStudent.name}
                       studentId={`PR-${10000 + selectedStudent.id}`}
                       courseName={selectedStudent.enrollments?.[0]?.course_name || "Professional Student"}
+                      photo={selectedStudent.image}
                       validity="2026 - 2027"
                       qrCodeData={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com'}/verify/${selectedStudent.id}`}
                       bloodGroup={selectedStudent.blood_group}

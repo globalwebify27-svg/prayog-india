@@ -19,7 +19,7 @@ export async function GET() {
     }
 
     let studentsQuery = `
-      SELECT DISTINCT u.id, u.name, u.email, u.phone, u.role, u.created_at, u.blood_group, u.emergency_contact, u.id_card_issued
+      SELECT DISTINCT u.id, u.name, u.email, u.phone, u.role, u.created_at, u.blood_group, u.emergency_contact, u.id_card_issued, u.image
       FROM users u
     `;
     let studentsParams = [];
