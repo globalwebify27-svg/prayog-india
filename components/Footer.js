@@ -84,8 +84,9 @@ export default function Footer() {
         <div className="border-t border-white/5 mt-20 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold uppercase tracking-widest text-white/20 space-y-4 md:space-y-0">
           <p>© {new Date().getFullYear()} PRAYOG INDIA ROBOTICS PVT. LTD. All rights reserved.</p>
           <div className="flex space-x-8">
-            <Link href="/terms" className="hover:text-white transition-colors">Privacy protocol</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms of service</Link>
+            <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms-and-conditions" className="hover:text-white transition-colors">Terms & Conditions</Link>
+            <Link href="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link>
           </div>
         </div>
       </div>
