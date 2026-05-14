@@ -12,13 +12,22 @@ import {
   TrendingUp as TrendIcon,
   RefreshCcw,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Filter as FilterIcon,
+  Calendar as CalendarIcon,
+  X as XIcon,
+  ChevronDown
 } from "lucide-react";
 
 export default function PaymentManagement() {
   const [installments, setInstallments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [courseFilter, setCourseFilter] = useState("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   useEffect(() => {
     fetchPayments();
@@ -39,9 +48,36 @@ export default function PaymentManagement() {
     }
   };
 
-  const filteredData = filter === "All" 
-    ? installments 
-    : installments.filter(i => i.status.toLowerCase() === filter.toLowerCase());
+  const uniqueCourses = [...new Set(installments.map(i => i.course_name))].filter(Boolean);
+
+  const filteredData = installments.filter(i => {
+    // Status Filter
+    const matchesStatus = statusFilter === "All" || i.status.toLowerCase() === statusFilter.toLowerCase();
+    
+    // Search Filter
+    const matchesSearch = i.student_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         i.course_name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Course Filter
+    const matchesCourse = courseFilter === "all" || i.course_name === courseFilter;
+    
+    // Date Filter
+    const dueDate = new Date(i.due_date);
+    const matchesFromDate = !fromDate || dueDate >= new Date(fromDate);
+    const matchesToDate = !toDate || dueDate <= new Date(toDate);
+
+    return matchesStatus && matchesSearch && matchesCourse && matchesFromDate && matchesToDate;
+  });
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setCourseFilter("all");
+    setFromDate("");
+    setToDate("");
+    setStatusFilter("All");
+  };
+
+  const isFiltered = searchTerm || courseFilter !== "all" || fromDate || toDate || statusFilter !== "All";
 
   return (
     <div className="space-y-8 font-body">
@@ -103,28 +139,101 @@ export default function PaymentManagement() {
 
       {/* Payment Table Container */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative flex-grow max-w-md">
-            <SearchIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search by student or ID..." 
-              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-xs font-medium"
-            />
-          </div>
-          <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-            {["All", "Paid", "Pending"].map((s) => (
-              <button
-                key={s}
-                onClick={() => setFilter(s)}
-                className={`px-5 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
-                  filter === s ? "bg-white text-navy shadow-sm" : "text-slate-500 hover:text-slate-700"
-                }`}
+        <div className="p-6 border-b border-slate-100 space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative flex-grow max-w-md">
+              <SearchIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search by student or program..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-xs font-medium"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                {["All", "Paid", "Pending"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setStatusFilter(s)}
+                    className={`px-5 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
+                      statusFilter === s ? "bg-white text-navy shadow-sm" : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+              <button 
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className={`p-2.5 rounded-lg border transition-all ${showAdvancedFilters ? 'bg-navy text-white border-navy' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
               >
-                {s}
+                <FilterIcon size={18} />
               </button>
-            ))}
+              {isFiltered && (
+                <button 
+                  onClick={clearFilters}
+                  className="p-2.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 transition-all"
+                  title="Clear all filters"
+                >
+                  <XIcon size={18} />
+                </button>
+              )}
+            </div>
           </div>
+
+          <AnimatePresence>
+            {showAdvancedFilters && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-100 mt-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Filter by Course</label>
+                    <div className="relative">
+                      <select 
+                        value={courseFilter} 
+                        onChange={(e) => setCourseFilter(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-xs font-semibold focus:border-navy outline-none appearance-none"
+                      >
+                        <option value="all">All Academic Programs</option>
+                        {uniqueCourses.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">From Date</label>
+                    <div className="relative">
+                      <CalendarIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input 
+                        type="date" 
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-xs font-semibold focus:border-navy outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To Date</label>
+                    <div className="relative">
+                      <CalendarIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input 
+                        type="date" 
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-xs font-semibold focus:border-navy outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="overflow-x-auto">
@@ -148,11 +257,15 @@ export default function PaymentManagement() {
                 </tr>
               ) : filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-20 text-center">
-                    <p className="text-slate-400 font-medium text-sm italic">No payment records found.</p>
+                  <td colSpan="5" className="px-6 py-24 text-center">
+                    <div className="bg-slate-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FilterIcon size={24} className="text-slate-300" />
+                    </div>
+                    <p className="text-slate-500 font-bold text-sm">No payment records match your filters.</p>
+                    <button onClick={clearFilters} className="text-navy text-xs font-bold mt-2 hover:underline">Clear all filters</button>
                   </td>
                 </tr>
-              ) : filteredData.map((inst, i) => (
+              ) : filteredData.map((inst) => (
                 <tr key={inst.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
@@ -195,3 +308,4 @@ export default function PaymentManagement() {
     </div>
   );
 }
+

@@ -18,11 +18,27 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 
-    const { name, email, phone, dob, address, blood_group, emergency_contact } = await req.json();
+    const { 
+      name, email, phone, dob, address, blood_group, emergency_contact,
+      father_name, mother_name, gender, qualification, school_college,
+      last_qualification_year, id_type, id_number, school_id_number
+    } = await req.json();
 
     await pool.query(
-      "UPDATE users SET name = ?, email = ?, phone = ?, dob = ?, address = ?, blood_group = ?, emergency_contact = ? WHERE id = ?",
-      [name, email, phone, dob, address, blood_group, emergency_contact, id]
+      `UPDATE users SET 
+        name = ?, email = ?, phone = ?, dob = ?, address = ?, blood_group = ?, 
+        emergency_contact = ?, father_name = ?, mother_name = ?, 
+        gender = ?, qualification = ?, school_college = ?, 
+        last_qualification_year = ?, id_type = ?, id_number = ?, 
+        school_id_number = ? 
+       WHERE id = ?`,
+      [
+        name, email, phone, dob || null, address, blood_group, 
+        emergency_contact, father_name, mother_name, 
+        gender, qualification, school_college, 
+        last_qualification_year, id_type, id_number, 
+        school_id_number, id
+      ]
     );
 
     return NextResponse.json({
