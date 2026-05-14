@@ -31,6 +31,8 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import Script from "next/script";
 
+import CustomModal from "../../components/CustomModal";
+
 const STEPS = [
   { id: 1, title: "Program", sub: "Batch & Course selection" },
   { id: 2, title: "Identity", sub: "Basic profile details" },
@@ -53,6 +55,27 @@ function RegisterForm() {
   const [couponCode, setCouponCode] = useState("");
   const [couponDetails, setCouponDetails] = useState(null);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -121,11 +144,11 @@ function RegisterForm() {
       if (data.success) {
         setCouponDetails(data);
       } else {
-        alert(data.message);
+        showAlert("Invalid Coupon", data.message || "The entered coupon code is not applicable for this program.", "warning");
         setCouponDetails(null);
       }
     } catch (error) {
-      alert("Failed to validate coupon");
+      showAlert("Technical Error", "Failed to validate coupon due to a network issue.", "error");
     } finally {
       setIsValidatingCoupon(false);
     }
@@ -286,10 +309,10 @@ function RegisterForm() {
           window.location.href = "/dashboard?alert=payment_pending";
         }
       } else {
-        alert("Registration Failed: " + data.message);
+        showAlert("Registration Failed", data.message || "We were unable to process your enrollment at this time.", "error");
       }
     } catch (error) {
-      alert("Error: " + error.message);
+      showAlert("System Error", "An unexpected error occurred: " + error.message, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -723,6 +746,16 @@ function RegisterForm() {
           </button>
         </div>
       </div>
+
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

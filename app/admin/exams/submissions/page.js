@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Users, 
-  Eye, 
-  FileText, 
-  ExternalLink, 
-  Calculator, 
+import {
+  Users,
+  Eye,
+  FileText,
+  ExternalLink,
+  Calculator,
   ArrowLeft,
   CheckCircle2,
   Search,
@@ -18,6 +18,7 @@ import {
   Trash2,
   AlertTriangle
 } from "lucide-react";
+import CustomModal from "@/components/CustomModal";
 
 export default function SubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
@@ -28,6 +29,27 @@ export default function SubmissionsPage() {
   const [questionScores, setQuestionScores] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => { }
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => { }, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   useEffect(() => {
     fetchSubmissions();
@@ -50,29 +72,43 @@ export default function SubmissionsPage() {
     try {
       const res = await fetch(`/api/admin/exams/questions?exam_id=${examId}`);
       const result = await res.json();
-      if (result.success) setQuestions(result.data);
+      if (result.success) {
+        setQuestions(result.data);
+        return result.data;
+      }
     } catch (e) {
       console.error(e);
     }
+    return [];
   };
 
   const openReviewModal = async (sub) => {
     setSelectedSubmission(sub);
     await fetchQuestions(sub.exam_id);
-    
-    // Initialize scores
-    const initialScores = {};
-    const answers = JSON.parse(sub.answers || "{}");
-    Object.keys(answers).forEach(qId => {
-      initialScores[qId] = answers[qId].awarded_score || 0;
-    });
-    setQuestionScores(initialScores);
     setShowViewModal(true);
   };
 
+  useEffect(() => {
+    if (!selectedSubmission || questions.length === 0) return;
+    const initialScores = {};
+    const answers = JSON.parse(selectedSubmission.answers || "{}");
+    Object.entries(answers).forEach(([qId, response]) => {
+      const q = questions.find(question => question.id === parseInt(qId));
+      if (q?.type === 'objective') {
+        // Normalize comparison for MCQ
+        const studentAns = (response.text || "").toString().trim().toLowerCase();
+        const correctAns = (q.correct_answer || "").toString().trim().toLowerCase();
+        initialScores[qId] = studentAns === correctAns ? q.marks : 0;
+      } else {
+        initialScores[qId] = response.awarded_score || 0;
+      }
+    });
+    setQuestionScores(initialScores);
+  }, [selectedSubmission, questions]);
+
   const handleGrade = async () => {
     const totalScore = Object.values(questionScores).reduce((acc, score) => acc + (parseFloat(score) || 0), 0);
-    
+
     const updatedAnswers = JSON.parse(selectedSubmission.answers);
     Object.keys(questionScores).forEach(qId => {
       if (updatedAnswers[qId]) {
@@ -83,33 +119,40 @@ export default function SubmissionsPage() {
     const res = await fetch("/api/admin/exams/submissions", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        id: selectedSubmission.id, 
-        score: totalScore, 
+      body: JSON.stringify({
+        id: selectedSubmission.id,
+        score: totalScore,
         status: 'graded',
         answers: JSON.stringify(updatedAnswers)
       })
     });
-    const result = await res.json();
-    if (result.success) {
+    const data = await res.json();
+    if (data.success) {
       fetchSubmissions();
       setShowViewModal(false);
-      alert(`Grading finalized. Total Score: ${totalScore}`);
+      showAlert("Grading Finalized", `The submission has been successfully graded. Total Score: ${totalScore}`, "success");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this student's submission? This action cannot be undone.")) return;
-    try {
-      const res = await fetch(`/api/admin/exams/submissions?id=${id}`, { method: "DELETE" });
-      const result = await res.json();
-      if (result.success) {
-        fetchSubmissions();
-        alert("Submission deleted successfully.");
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    showAlert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this student's submission? This action cannot be undone.",
+      "warning",
+      async () => {
+        try {
+          const res = await fetch(`/api/admin/exams/submissions?id=${id}`, { method: "DELETE" });
+          const result = await res.json();
+          if (result.success) {
+            fetchSubmissions();
+            showAlert("Deleted", "Submission deleted successfully.", "success");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      },
+      "Delete Now"
+    );
   };
 
   const unlockSubmission = () => {
@@ -124,8 +167,8 @@ export default function SubmissionsPage() {
   };
 
   const filteredSubmissions = submissions.filter(s => {
-    const matchesSearch = s.student_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         s.exam_title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = s.student_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.exam_title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'all' || s.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -137,19 +180,19 @@ export default function SubmissionsPage() {
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Submission Review</h1>
           <p className="text-slate-500 text-sm mt-1">Review and grade student exam responses across all programs.</p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search by student or exam..."
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-navy transition-all shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <select 
+          <select
             className="w-full sm:w-auto bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-navy shadow-sm"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -229,18 +272,17 @@ export default function SubmissionsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button 
+                        <button
                           onClick={() => openReviewModal(sub)}
-                          className={`p-2.5 rounded-xl transition-all inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest shadow-sm ${
-                            sub.status === 'graded' 
-                            ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' 
-                            : 'bg-navy text-white hover:bg-black'
-                          }`}
+                          className={`p-2.5 rounded-xl transition-all inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest shadow-sm ${sub.status === 'graded'
+                              ? 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                              : 'bg-navy text-white hover:bg-black'
+                            }`}
                         >
                           {sub.status === 'graded' ? <Lock size={14} /> : <Eye size={14} />}
                           {sub.status === 'graded' ? 'View Graded' : 'Review Work'}
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDelete(sub.id)}
                           className="p-2.5 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
                         >
@@ -259,7 +301,7 @@ export default function SubmissionsPage() {
       {/* Review Submission Modal */}
       {showViewModal && selectedSubmission && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]"
@@ -291,7 +333,7 @@ export default function SubmissionsPage() {
                     <Lock size={16} />
                     This submission has already been graded and finalized.
                   </div>
-                  <button 
+                  <button
                     onClick={unlockSubmission}
                     className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg text-[9px] font-bold text-amber-700 uppercase tracking-widest border border-amber-200 hover:bg-amber-100 transition-all shadow-sm"
                   >
@@ -304,7 +346,7 @@ export default function SubmissionsPage() {
                 {Object.entries(JSON.parse(selectedSubmission.answers)).map(([qId, response], idx) => {
                   const question = questions.find(q => q.id === parseInt(qId));
                   const isCorrectMCQ = question?.type === 'objective' && response.text === question?.correct_answer;
-                  
+
                   return (
                     <div key={qId} className="p-8 rounded-[2rem] border border-slate-200 bg-white shadow-sm">
                       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
@@ -316,7 +358,7 @@ export default function SubmissionsPage() {
                             </span>
                           </div>
                           <h4 className="text-base font-bold text-slate-900 leading-relaxed">{question?.question_text || "Loading question text..."}</h4>
-                          
+
                           {question?.type === 'objective' && (
                             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Correct Answer</p>
@@ -332,7 +374,7 @@ export default function SubmissionsPage() {
                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Student Response</p>
                               <p className="text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">{response.text || "No written response provided."}</p>
                             </div>
-                            
+
                             {response.file_url && (
                               <div className="p-5 rounded-2xl bg-navy/5 border border-navy/10 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -344,9 +386,9 @@ export default function SubmissionsPage() {
                                     <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-widest font-medium">Original Document</p>
                                   </div>
                                 </div>
-                                <a 
-                                  href={response.file_url} 
-                                  target="_blank" 
+                                <a
+                                  href={response.file_url}
+                                  target="_blank"
                                   className="flex items-center gap-2 bg-navy text-white px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-md"
                                 >
                                   <ExternalLink size={14} /> View File
@@ -359,13 +401,13 @@ export default function SubmissionsPage() {
                         <div className="shrink-0 w-full md:w-48 bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100 flex flex-col items-center justify-center gap-3">
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Allot Marks</label>
                           <div className="relative w-full">
-                            <input 
-                              type="number" 
+                            <input
+                              type="number"
                               step="0.5"
                               max={question?.marks}
-                              disabled={selectedSubmission.status === 'graded'}
-                              className={`w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 text-center text-lg font-black text-navy outline-none focus:border-navy transition-all ${selectedSubmission.status === 'graded' ? 'opacity-70 cursor-not-allowed bg-slate-50' : ''}`}
-                              value={questionScores[qId] || ""}
+                              disabled={selectedSubmission.status === 'graded' || question?.type === 'objective'}
+                              className={`w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 text-center text-lg font-black text-navy outline-none focus:border-navy transition-all ${selectedSubmission.status === 'graded' || question?.type === 'objective' ? 'opacity-70 cursor-not-allowed bg-slate-50' : ''}`}
+                              value={questionScores[qId] !== undefined ? questionScores[qId] : ""}
                               onChange={(e) => setQuestionScores({
                                 ...questionScores,
                                 [qId]: e.target.value
@@ -375,18 +417,13 @@ export default function SubmissionsPage() {
                               Max: {question?.marks || 0}
                             </div>
                           </div>
-                          {question?.type === 'objective' && selectedSubmission.status !== 'graded' && (
-                            <button 
-                              onClick={() => setQuestionScores({
-                                ...questionScores,
-                                [qId]: isCorrectMCQ ? question.marks : 0
-                              })}
-                              className="text-[9px] font-bold text-navy uppercase underline hover:text-black transition-colors"
-                            >
-                              Auto-Fill Marks
-                            </button>
-                          )}
                         </div>
+                        {question?.type === 'objective' && selectedSubmission.status !== 'graded' && (
+                          <div className="flex items-center gap-1.5 text-emerald-600">
+                            <CheckCircle2 size={12} />
+                            <span className="text-[9px] font-bold uppercase tracking-widest">Auto-Calculated</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -408,16 +445,16 @@ export default function SubmissionsPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 w-full md:w-auto">
-                <button 
+                <button
                   onClick={() => setShowViewModal(false)}
                   className="flex-1 md:flex-none px-8 py-3.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-2xl transition-all border border-slate-100"
                 >
                   {selectedSubmission.status === 'graded' ? 'Close View' : 'Discard'}
                 </button>
                 {selectedSubmission.status !== 'graded' && (
-                  <button 
+                  <button
                     onClick={handleGrade}
                     className="flex-1 md:flex-none px-12 py-3.5 bg-navy text-white rounded-2xl text-xs font-bold shadow-xl hover:bg-black transition-all"
                   >
@@ -429,6 +466,16 @@ export default function SubmissionsPage() {
           </motion.div>
         </div>
       )}
+
+      <CustomModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

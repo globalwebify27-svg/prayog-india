@@ -28,6 +28,7 @@ import {
   CheckCircle2,
   FileText
 } from "lucide-react";
+import CustomModal from "@/components/CustomModal";
 
 const STEPS = [
   { id: 1, title: "Identity", sub: "Basic info & brand" },
@@ -57,6 +58,27 @@ export default function AdminCoursesPage() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   const validateStep = (data) => {
     let newErrors = {};
@@ -148,7 +170,7 @@ export default function AdminCoursesPage() {
         }
       }
     } catch (error) {
-      alert("Upload failed");
+      showAlert("Upload Failed", "A technical error occurred during the visual asset upload.", "error");
     } finally {
       setIsUploading(false);
     }
@@ -170,10 +192,10 @@ export default function AdminCoursesPage() {
           setCourseToEdit(prev => ({ ...prev, brochure: data.url }));
         }
       } else {
-        alert("Brochure upload failed");
+        showAlert("Brochure Failed", data.message || "Unable to process the brochure document.", "error");
       }
     } catch (error) {
-      alert("Upload failed");
+      showAlert("Upload Error", "System failure during brochure transmission.", "error");
     } finally {
       setIsUploading(false);
     }
@@ -201,6 +223,7 @@ export default function AdminCoursesPage() {
       setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "" });
       fetchCourses();
       setErrors({});
+      showAlert("Course Launched", "The new academic program has been successfully initialized.", "success");
     } else {
       setError(result.message);
     }
@@ -228,6 +251,7 @@ export default function AdminCoursesPage() {
       setCourseToEdit(null);
       fetchCourses();
       setErrors({});
+      showAlert("Course Updated", "Program modifications have been synchronized successfully.", "success");
     } else {
       setError(result.message);
     }
@@ -374,8 +398,22 @@ export default function AdminCoursesPage() {
                       </button>
                       <button 
                         onClick={() => {
-                          setCourseToDelete(course);
-                          setShowDeleteModal(true);
+                          showAlert(
+                            "Confirm Deletion",
+                            `Are you sure you want to delete "${course.title}"? This action cannot be undone and will affect all learning paths.`,
+                            "warning",
+                            async () => {
+                              const res = await fetch(`/api/admin/courses?id=${course.id}`, { method: "DELETE" });
+                              const result = await res.json();
+                              if (result.success) {
+                                fetchCourses();
+                                showAlert("Deleted", "The course has been permanently removed.", "success");
+                              } else {
+                                showAlert("Error", result.message, "error");
+                              }
+                            },
+                            "Delete Now"
+                          );
                         }}
                         className="flex items-center justify-center gap-2 py-2 text-[10px] font-bold uppercase tracking-widest text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all border border-transparent hover:border-rose-100"
                       >
@@ -983,48 +1021,15 @@ export default function AdminCoursesPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && courseToDelete && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-          <motion.div 
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden"
-          >
-            <div className="p-8 text-center">
-              <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Trash2 size={40} className="text-rose-500" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Delete Program?</h3>
-              <p className="text-sm text-slate-500 leading-relaxed">
-                Are you sure you want to delete <span className="font-bold text-slate-800">"{courseToDelete.title}"</span>? This action cannot be undone.
-              </p>
-              {error && (
-                <div className="mt-4 p-3 bg-rose-50 border border-rose-100 rounded-xl">
-                  <p className="text-xs font-bold text-rose-500 leading-tight">{error}</p>
-                </div>
-              )}
-            </div>
-            <div className="grid grid-cols-2 border-t border-slate-100 h-16">
-              <button 
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setError("");
-                }}
-                className="text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmDeleteCourse}
-                className="text-sm font-bold text-rose-500 hover:bg-rose-50 transition-all border-l border-slate-100"
-              >
-                Yes, Delete
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

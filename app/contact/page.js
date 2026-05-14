@@ -17,6 +17,8 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+import CustomModal from "@/components/CustomModal";
+
 const contactInfo = [
   {
     icon: <Phone size={20} />,
@@ -48,6 +50,27 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
+
   const validate = () => {
     let newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required.";
@@ -77,10 +100,10 @@ export default function ContactPage() {
       if (data.success) {
         setFormData({ name: "", email: "", subject: "General Inquiry", message: "" });
         setErrors({});
-        alert("Institutional Inquiry Sent.");
+        showAlert("Inquiry Sent", "Your institutional inquiry has been synchronized. Our team will connect with you shortly.", "success");
       }
     } catch (error) {
-      alert("System failure. Please retry.");
+      showAlert("System Failure", "We encountered a technical issue. Please retry or contact us directly.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -220,6 +243,16 @@ export default function ContactPage() {
       </section>
 
       <Footer />
+      
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </main>
   );
 }

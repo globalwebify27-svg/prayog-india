@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Trash2, Edit2, User, BookOpen, Star, Upload, Loader2 } from "lucide-react";
+import CustomModal from "@/components/CustomModal";
 
 export default function AdminFaculties() {
   const [faculties, setFaculties] = useState([]);
@@ -30,6 +31,27 @@ export default function AdminFaculties() {
   });
   const [availableTimings, setAvailableTimings] = useState([]);
   const [errors, setErrors] = useState({});
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   const validateStep = () => {
     let newErrors = {};
@@ -95,10 +117,10 @@ export default function AdminFaculties() {
       if (data.success) {
         setNewFaculty({ ...newFaculty, image: data.url });
       } else {
-        alert(data.error || "Upload failed");
+        showAlert("Upload Failed", data.error || "Unable to process the profile image.", "error");
       }
     } catch (e) {
-      alert("Upload failed");
+      showAlert("Upload Error", "A technical failure occurred during image transmission.", "error");
     } finally {
       setUploading(false);
     }
@@ -133,6 +155,11 @@ export default function AdminFaculties() {
         fetchFaculties();
         setActiveStep(1);
         setErrors({});
+        showAlert(
+          isEditing ? "Profile Updated" : "Faculty Onboarded",
+          isEditing ? "The faculty profile has been successfully modified." : "New mentor has been successfully registered in the institutional directory.",
+          "success"
+        );
       } else {
         setError(data.error || "Failed to process request");
       }
@@ -162,15 +189,22 @@ export default function AdminFaculties() {
   };
 
   const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this faculty member?")) {
-      const res = await fetch(`/api/faculties?id=${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (data.success) {
-        fetchFaculties();
-      } else {
-        alert(data.error || "Failed to delete faculty");
-      }
-    }
+    showAlert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this faculty member? This will remove their profile from all institutional records.",
+      "warning",
+      async () => {
+        const res = await fetch(`/api/faculties?id=${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.success) {
+          fetchFaculties();
+          showAlert("Deleted", "Faculty record has been permanently removed.", "success");
+        } else {
+          showAlert("Error", data.error || "Failed to delete faculty", "error");
+        }
+      },
+      "Delete Now"
+    );
   };
 
   return (
@@ -491,6 +525,16 @@ export default function AdminFaculties() {
           </div>
         </div>
       )}
+
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

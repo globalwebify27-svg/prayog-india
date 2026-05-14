@@ -19,6 +19,7 @@ import {
   History,
   Lock
 } from "lucide-react";
+import CustomModal from "@/components/CustomModal";
 
 export default function ExamsPage() {
   const [activeView, setActiveView] = useState("exams"); // "exams" or "results"
@@ -28,9 +29,30 @@ export default function ExamsPage() {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { question_id: { text: "", file_url: "" } }
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(null);
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   useEffect(() => {
     if (activeView === "exams") fetchAvailableExams();
@@ -40,18 +62,26 @@ export default function ExamsPage() {
   useEffect(() => {
     if (activeExam) {
       fetchQuestions();
-      setTimeLeft(activeExam.duration * 60);
+      const duration = parseInt(activeExam.duration) || 30;
+      setTimeLeft(duration * 60);
     }
   }, [activeExam]);
 
   useEffect(() => {
-    if (activeExam && timeLeft > 0) {
-      const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-      return () => clearInterval(timer);
-    } else if (timeLeft === 0 && activeExam) {
-      handleSubmitExam();
+    let timer;
+    if (activeExam && timeLeft !== null && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    } else if (timeLeft === 0 && activeExam && !isSubmitting) {
+      // Small delay to ensure state consistency before auto-submit
+      const timeout = setTimeout(() => {
+        handleSubmitExam(true);
+      }, 500);
+      return () => clearTimeout(timeout);
     }
-  }, [timeLeft, activeExam]);
+    return () => clearInterval(timer);
+  }, [timeLeft, activeExam, isSubmitting]);
 
   const fetchAvailableExams = async () => {
     try {
@@ -106,18 +136,28 @@ export default function ExamsPage() {
           [questionId]: { ...prev[questionId], file_url: data.url }
         }));
       } else {
-        alert(data.error || "Upload failed");
+        showAlert("Upload Failed", data.error || "Unable to upload the requested file.", "error");
       }
     } catch (e) {
-      alert("Upload failed");
+      showAlert("Upload Error", "A technical error occurred during file upload.", "error");
     } finally {
       setUploadingFile(null);
     }
   };
 
-  const handleSubmitExam = async () => {
+  const handleSubmitExam = async (force = false) => {
     if (isSubmitting) return;
-    if (!confirm("Are you sure you want to finish and submit the exam?")) return;
+    
+    if (!force) {
+      showAlert(
+        "Final Submission",
+        "Are you sure you want to finish and submit the exam? You won't be able to change your answers after this.",
+        "question",
+        () => handleSubmitExam(true),
+        "Submit Exam"
+      );
+      return;
+    }
     
     setIsSubmitting(true);
     try {
@@ -131,23 +171,25 @@ export default function ExamsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        alert("Exam submitted successfully!");
-        setActiveExam(null);
-        setQuestions([]);
-        setAnswers({});
-        setCurrentQuestionIndex(0);
-        fetchAvailableExams();
+        showAlert("Success", "Your exam has been submitted successfully.", "success", () => {
+          setActiveExam(null);
+          setQuestions([]);
+          setAnswers({});
+          setCurrentQuestionIndex(0);
+          fetchAvailableExams();
+        });
       } else {
-        alert(data.message || "Submission failed");
+        showAlert("Submission Failed", data.message || "Unable to submit your exam.", "error");
       }
     } catch (e) {
-      alert("Submission failed");
+      showAlert("Submission Error", "A technical error occurred during submission.", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const formatTime = (seconds) => {
+    if (seconds === null) return "0:00";
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s < 10 ? '0' : ''}${s}`;
@@ -215,7 +257,13 @@ export default function ExamsPage() {
                         </div>
                         <button 
                           disabled={exam.has_submitted > 0}
-                          onClick={() => setActiveExam(exam)}
+                          onClick={() => showAlert(
+                            "Institutional Assessment Policy",
+                            "By proceeding, you acknowledge the following:\n\n• Academic Integrity: You will not use unauthorized resources.\n• Proctored Session: Your session may be monitored for compliance.\n• Non-Pausable Timer: Once started, the timer cannot be stopped.\n• Final Submission: Auto-submission occurs upon timer expiry.",
+                            "question",
+                            () => setActiveExam(exam),
+                            "Accept & Begin Exam"
+                          )}
                           className={`w-full md:w-auto px-6 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wide transition-all shadow-sm flex items-center justify-center gap-2 ${
                             exam.has_submitted > 0 
                             ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200" 
@@ -328,14 +376,23 @@ export default function ExamsPage() {
                               <button 
                                 key={i} 
                                 onClick={() => setAnswers({...answers, [currentQuestion.id]: { text: opt }})}
-                                className={`w-full text-left p-5 rounded-xl border transition-all group flex items-center justify-between shadow-sm ${
+                                className={`w-full text-left p-4 rounded-xl border transition-all group flex items-center justify-between shadow-sm ${
                                   answers[currentQuestion.id]?.text === opt 
                                     ? "border-navy bg-navy/5 text-navy shadow-md" 
                                     : "border-slate-100 bg-slate-50 hover:border-navy hover:bg-white"
                                 }`}
                               >
-                                <span className="text-sm font-semibold">{opt}</span>
-                                <div className={`w-5 h-5 rounded-full border-2 transition-all ${
+                                <div className="flex items-center gap-4">
+                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black transition-all ${
+                                    answers[currentQuestion.id]?.text === opt 
+                                      ? "bg-navy text-white shadow-lg shadow-navy/20" 
+                                      : "bg-white text-slate-400 border border-slate-200 shadow-sm"
+                                  }`}>
+                                    {String.fromCharCode(65 + i)}
+                                  </div>
+                                  <span className="text-sm font-semibold">{opt}</span>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full border-2 transition-all shrink-0 ${
                                   answers[currentQuestion.id]?.text === opt ? "border-navy bg-navy ring-4 ring-navy/10" : "border-slate-300 group-hover:border-navy"
                                 }`} />
                               </button>
@@ -511,6 +568,16 @@ export default function ExamsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

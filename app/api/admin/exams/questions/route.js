@@ -62,6 +62,47 @@ export async function POST(req) {
   }
 }
 
+export async function PUT(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    
+    if (!id) {
+      return NextResponse.json({ success: false, message: "Question ID is required" }, { status: 400 });
+    }
+
+    const { question_text, type, options, correct_answer, marks, order_num } = await req.json();
+
+    const [result] = await pool.query(
+      "UPDATE exam_questions SET question_text = ?, type = ?, options = ?, correct_answer = ?, marks = ?, order_num = ? WHERE id = ?",
+      [
+        question_text, 
+        type, 
+        options ? JSON.stringify(options) : "[]", 
+        correct_answer || "", 
+        parseInt(marks) || 0, 
+        parseInt(order_num) || 0,
+        parseInt(id)
+      ]
+    );
+
+    // Sync total_marks in exams table for the exam this question belongs to
+    const [qInfo] = await pool.query("SELECT exam_id FROM exam_questions WHERE id = ?", [parseInt(id)]);
+    if (qInfo.length > 0) {
+      const exam_id = qInfo[0].exam_id;
+      await pool.query(
+        "UPDATE exams SET total_marks = (SELECT SUM(marks) FROM exam_questions WHERE exam_id = ?) WHERE id = ?",
+        [exam_id, exam_id]
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("PUT Question Error:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(req) {
   try {
     const { searchParams } = new URL(req.url);

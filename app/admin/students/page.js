@@ -25,6 +25,7 @@ import {
   EyeOff,
   Trash2
 } from "lucide-react";
+import CustomModal from "@/components/CustomModal";
 
 export default function StudentsAdmin() {
   const [students, setStudents] = useState([]);
@@ -51,6 +52,27 @@ export default function StudentsAdmin() {
     isInstallment: true
   });
   const [errors, setErrors] = useState({});
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   const validateStudent = () => {
     let newErrors = {};
@@ -145,6 +167,7 @@ export default function StudentsAdmin() {
           isInstallment: true
         });
         setErrors({});
+        showAlert("Success", "New student enrollment has been initialized successfully.", "success");
       } else {
         setErrors({ submit: data.message });
       }
@@ -154,26 +177,30 @@ export default function StudentsAdmin() {
   };
 
   const handleDeleteStudent = async (studentId, studentName) => {
-    if (!confirm(`Are you absolutely sure you want to delete ${studentName}? This will permanently remove all their enrollments, payments, attendance, and certificates. This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/admin/students/${studentId}`, {
-        method: "DELETE"
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Student record and all associated data deleted successfully.");
-        fetchStudents();
-        setMenuOpen(null);
-      } else {
-        alert(data.message || "Failed to delete student");
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      alert("An error occurred while deleting the student record.");
-    }
+    showAlert(
+      "Confirm Deletion",
+      `Are you absolutely sure you want to delete ${studentName}? This will permanently remove all their enrollments, payments, attendance, and certificates. This action cannot be undone.`,
+      "warning",
+      async () => {
+        try {
+          const res = await fetch(`/api/admin/students/${studentId}`, {
+            method: "DELETE"
+          });
+          const data = await res.json();
+          if (data.success) {
+            showAlert("Deleted", "Student record and all associated data deleted successfully.", "success");
+            fetchStudents();
+            setMenuOpen(null);
+          } else {
+            showAlert("Error", data.message || "Failed to delete student", "error");
+          }
+        } catch (error) {
+          console.error("Delete error:", error);
+          showAlert("System Error", "An error occurred while deleting the student record.", "error");
+        }
+      },
+      "Delete Now"
+    );
   };
 
   const uniqueCourses = [...new Set(students.flatMap(s => s.enrollments?.map(e => e.course_name)).filter(Boolean))];
@@ -392,7 +419,7 @@ export default function StudentsAdmin() {
                           <Phone size={14} /> Call Student
                         </a>
                         <div className="h-px bg-slate-100 my-1" />
-                        <button onClick={() => alert('Account suspended')} className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors">
+                        <button onClick={() => showAlert("Suspension", "This account has been placed under administrative review.", "info")} className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors">
                           <ShieldAlert size={14} /> Suspend Account
                         </button>
                         <div className="h-px bg-slate-100 my-1" />
@@ -593,6 +620,16 @@ export default function StudentsAdmin() {
           </div>
         )}
       </AnimatePresence>
+
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

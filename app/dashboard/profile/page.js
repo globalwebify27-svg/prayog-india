@@ -24,6 +24,8 @@ import {
   FileText
 } from "lucide-react";
 
+import CustomModal from "@/components/CustomModal";
+
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("personal");
   const [user, setUser] = useState(null);
@@ -32,6 +34,27 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -117,9 +140,9 @@ export default function ProfilePage() {
       const result = await res.json();
       if (result.success) {
         setFormData(prev => ({ ...prev, [field]: result.url }));
-        alert(`${field.replace('_', ' ')} updated successfully!`);
+        showAlert("Success", `${field.replace('_', ' ').toUpperCase()} updated successfully!`, "success");
       } else {
-        alert("Upload failed: " + result.error);
+        showAlert("Upload Failed", result.error || "Unable to upload document.", "error");
       }
     } catch (error) {
       console.error("Upload error:", error);
@@ -138,14 +161,13 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (data.success) {
-        alert("Profile updated successfully!");
-        fetchProfile();
+        showAlert("Profile Updated", "Your institutional profile has been synchronized successfully.", "success", () => fetchProfile());
       } else {
-        alert(data.message || "Failed to update profile");
+        showAlert("Update Failed", data.message || "We were unable to update your profile.", "error");
       }
     } catch (error) {
       console.error("Save error:", error);
-      alert("Failed to save changes");
+      showAlert("Technical Error", "Failed to save changes due to a connectivity issue.", "error");
     } finally {
       setIsSaving(false);
     }
@@ -663,6 +685,16 @@ export default function ProfilePage() {
           )}
         </AnimatePresence>
       </div>
+
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

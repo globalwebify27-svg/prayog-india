@@ -27,7 +27,8 @@ import {
   FileText,
   ExternalLink,
   Calculator,
-  Lock
+  Lock,
+  Pencil
 } from "lucide-react";
 
 export default function ExamQuestionsPage({ params }) {
@@ -51,6 +52,8 @@ export default function ExamQuestionsPage({ params }) {
     marks: 5,
     order_num: 0
   });
+  const [isEditingQuestion, setIsEditingQuestion] = useState(false);
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
 
   useEffect(() => {
     fetchExam();
@@ -94,14 +97,28 @@ export default function ExamQuestionsPage({ params }) {
 
   const handleAddQuestion = async (e) => {
     e.preventDefault();
-    const res = await fetch(`/api/admin/exams/questions?exam_id=${id}`, {
-      method: "POST",
+    
+    // Validation for objective questions
+    if (newQuestion.type === 'objective' && !newQuestion.correct_answer) {
+      alert("Please select a correct answer by clicking the check icon next to an option.");
+      return;
+    }
+
+    const method = isEditingQuestion ? "PUT" : "POST";
+    const url = isEditingQuestion 
+      ? `/api/admin/exams/questions?id=${editingQuestionId}` 
+      : `/api/admin/exams/questions?exam_id=${id}`;
+
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newQuestion)
+      body: JSON.stringify(isEditingQuestion ? { ...newQuestion, id: editingQuestionId } : newQuestion)
     });
     const result = await res.json();
     if (result.success) {
       setShowAddModal(false);
+      setIsEditingQuestion(false);
+      setEditingQuestionId(null);
       setNewQuestion({
         question_text: "",
         type: "objective",
@@ -112,6 +129,20 @@ export default function ExamQuestionsPage({ params }) {
       });
       fetchQuestions();
     }
+  };
+
+  const handleEditQuestion = (q) => {
+    setNewQuestion({
+      question_text: q.question_text,
+      type: q.type,
+      options: q.type === 'objective' ? JSON.parse(q.options) : ["", "", "", ""],
+      correct_answer: q.correct_answer,
+      marks: q.marks,
+      order_num: q.order_num
+    });
+    setEditingQuestionId(q.id);
+    setIsEditingQuestion(true);
+    setShowAddModal(true);
   };
 
   const handleDelete = async (qid) => {
@@ -249,7 +280,19 @@ export default function ExamQuestionsPage({ params }) {
               <span>Bulk Upload</span>
             </button>
             <button 
-              onClick={() => setShowAddModal(true)}
+              onClick={() => {
+              setIsEditingQuestion(false);
+              setEditingQuestionId(null);
+              setNewQuestion({
+                question_text: "",
+                type: "objective",
+                options: ["", "", "", ""],
+                correct_answer: "",
+                marks: 5,
+                order_num: questions.length + 1
+              });
+              setShowAddModal(true);
+            }}
               className="flex items-center gap-2 bg-navy text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-black transition-all shadow-md"
             >
               <Plus size={18} />
@@ -313,12 +356,20 @@ export default function ExamQuestionsPage({ params }) {
                         )}
                       </div>
 
-                      <button 
-                        onClick={() => handleDelete(q.id)}
-                        className="p-2 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all pt-1">
+                        <button 
+                          onClick={() => handleEditQuestion(q)}
+                          className="p-2 rounded-lg text-slate-300 hover:text-navy hover:bg-slate-50 transition-all"
+                        >
+                          <Pencil size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(q.id)}
+                          className="p-2 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -605,8 +656,8 @@ export default function ExamQuestionsPage({ params }) {
           >
             <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Add New Question</h3>
-                <p className="text-slate-500 text-xs mt-1">Configure question type and marking scheme.</p>
+                <h3 className="text-xl font-bold text-slate-900">{isEditingQuestion ? 'Edit Question' : 'Add New Question'}</h3>
+                <p className="text-slate-500 text-xs mt-1">{isEditingQuestion ? 'Modify question text, options, or marks.' : 'Configure question type and marking scheme.'}</p>
               </div>
               <div className="flex p-1 bg-slate-200 rounded-xl">
                 <button 

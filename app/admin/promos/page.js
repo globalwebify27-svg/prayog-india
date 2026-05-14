@@ -8,6 +8,7 @@ import {
   AlertCircle, CheckCircle2, FileText, ArrowRight
 } from "lucide-react";
 import Link from "next/link";
+import CustomModal from "@/components/CustomModal";
 
 export default function PromoManagement() {
   const [promos, setPromos] = useState([]);
@@ -27,8 +28,29 @@ export default function PromoManagement() {
     image: "",
     target_date: "",
     is_active: true,
-    registration_link: "/register"
+    registration_link: "/register",
+    start_date: ""
   });
+
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   const [courses, setCourses] = useState([]);
 
@@ -118,8 +140,12 @@ export default function PromoManagement() {
         setNewPromo({
           title: "", subtitle: "", description: "", date_text: "",
           price: "", tag: "Limited Time", image: "", target_date: "",
-          is_active: true, registration_link: "/register"
+          is_active: true, registration_link: "/register", start_date: ""
         });
+        showAlert("Campaign Launched", "Marketing campaign has been synchronized successfully.", "success");
+      } else {
+        const err = await res.json();
+        showAlert("Launch Error", err.error || "Unable to synchronize campaign data.", "error");
       }
     } catch (error) {
       console.error("Submit error:", error);
@@ -129,13 +155,25 @@ export default function PromoManagement() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this promo?")) return;
-    try {
-      const res = await fetch(`/api/admin/promos?id=${id}`, { method: "DELETE" });
-      if (res.ok) fetchPromos();
-    } catch (error) {
-      console.error("Delete error:", error);
-    }
+    showAlert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this seasonal promo? This will remove it from the public portal immediately.",
+      "warning",
+      async () => {
+        try {
+          const res = await fetch(`/api/admin/promos?id=${id}`, { method: "DELETE" });
+          if (res.ok) {
+            fetchPromos();
+            showAlert("Deleted", "Marketing campaign removed successfully.", "success");
+          } else {
+            showAlert("Error", "Failed to remove the campaign record.", "error");
+          }
+        } catch (error) {
+          showAlert("System Error", "A technical failure occurred during deletion.", "error");
+        }
+      },
+      "Delete Now"
+    );
   };
 
   return (
@@ -316,7 +354,7 @@ export default function PromoManagement() {
                                <label className="text-[10px] font-black text-navy uppercase tracking-widest">Actual Start Date</label>
                                <input 
                                   type="date" 
-                                  value={promoToEdit ? (promoToEdit.start_date ? new Date(promoToEdit.start_date).toISOString().split('T')[0] : '') : newPromo.start_date}
+                                  value={promoToEdit ? (promoToEdit.start_date ? new Date(new Date(promoToEdit.start_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] : '') : newPromo.start_date}
                                   onChange={(e) => promoToEdit ? setPromoToEdit({...promoToEdit, start_date: e.target.value}) : setNewPromo({...newPromo, start_date: e.target.value})}
                                   className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                />
@@ -362,7 +400,7 @@ export default function PromoManagement() {
                             <label className="text-[10px] font-black text-navy uppercase tracking-widest">Target Countdown Date</label>
                             <input 
                                type="datetime-local" 
-                               value={promoToEdit ? (promoToEdit.target_date ? new Date(promoToEdit.target_date).toISOString().slice(0, 16) : '') : newPromo.target_date}
+                               value={promoToEdit ? (promoToEdit.target_date ? new Date(new Date(promoToEdit.target_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '') : newPromo.target_date}
                                onChange={(e) => promoToEdit ? setPromoToEdit({...promoToEdit, target_date: e.target.value}) : setNewPromo({...newPromo, target_date: e.target.value})}
                                className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                             />
@@ -440,6 +478,16 @@ export default function PromoManagement() {
           </div>
         )}
       </AnimatePresence>
+
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

@@ -13,11 +13,32 @@ import Link from "next/link";
 import IdCardTemplate from "@/components/IdCardTemplate";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import CustomModal from "@/components/CustomModal";
 
 export default function StudentIdCardPage() {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   useEffect(() => {
     fetchDashboardData();
@@ -60,7 +81,7 @@ export default function StudentIdCardPage() {
       pdf.save(`ID_CARD_${data.user.name.replace(/\s+/g, "_")}.pdf`);
     } catch (error) {
       console.error("ID Generation failed:", error);
-      alert("Failed to download ID card.");
+      showAlert("Generation Failed", "We encountered an issue while generating your digital ID card. Please try again or contact support.", "error");
     } finally {
       setIsGenerating(false);
     }
@@ -144,6 +165,16 @@ export default function StudentIdCardPage() {
           This document is a property of Prayog India. Tampering with this identity card is a punishable offense.
         </p>
       </div>
+      
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }

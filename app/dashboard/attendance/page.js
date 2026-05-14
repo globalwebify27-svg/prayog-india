@@ -14,6 +14,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import Link from "next/link";
+import CustomModal from "@/components/CustomModal";
 
 export default function AttendancePage() {
   const [step, setStep] = useState(1);
@@ -27,6 +28,27 @@ export default function AttendancePage() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+    confirmText: "Confirm",
+    onConfirm: () => {}
+  });
+
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      description,
+      type,
+      confirmText,
+      onConfirm
+    });
+  };
 
   useEffect(() => {
     fetch("/api/student/dashboard")
@@ -78,7 +100,7 @@ export default function AttendancePage() {
             setLocationName(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
           }
         },
-        (err) => alert("Please enable location access to mark attendance.")
+        (err) => showAlert("Location Required", "Please enable location access in your browser settings to verify your presence at the hub.", "warning")
       );
     }
   };
@@ -92,7 +114,7 @@ export default function AttendancePage() {
         videoRef.current.srcObject = stream;
       }
     } catch (err) {
-      alert("Camera access denied.");
+      showAlert("Camera Access", "We need camera permission to perform biometric verification. Please check your browser settings.", "error");
     }
   };
 
@@ -137,10 +159,10 @@ export default function AttendancePage() {
         setStep(4);
         fetchHistory(); // Refresh history after successful submission
       } else {
-        alert(data.message || "Failed to log attendance");
+        showAlert("Submission Failed", data.message || "We were unable to log your attendance at this time.", "error");
       }
     } catch (error) {
-      alert("Something went wrong");
+      showAlert("Technical Error", "Something went wrong while processing your verification.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -281,6 +303,15 @@ export default function AttendancePage() {
         <span>End-to-end encrypted session tracking</span>
       </div>
 
+      <CustomModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+      />
     </div>
   );
 }
