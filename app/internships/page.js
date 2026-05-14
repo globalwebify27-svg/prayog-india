@@ -66,9 +66,9 @@ export default function InternshipsPage() {
             {/* Sidebar Context */}
             <div className="lg:col-span-4 space-y-8">
               <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm sticky top-32">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Elite Cohort Selection</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-4">Industrial Training Programs</h3>
                 <p className="text-slate-500 text-sm leading-relaxed mb-10 font-medium">
-                  We maintain a rigorous selection process, onboarding only the top applicants for intensive industrial research and hardware development.
+                  Enroll in our intensive industrial training and internship programs to gain hands-on experience in hardware development and software engineering.
                 </p>
                 
                 <div className="space-y-6">
@@ -94,7 +94,7 @@ export default function InternshipsPage() {
 
                 <div className="mt-10 pt-8 border-t border-slate-100">
                   <Link href="/register" className="w-full bg-navy text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-black transition-all flex items-center justify-center space-x-3">
-                    <span>Submit global CV</span>
+                    <span>Register as Student</span>
                     <ChevronRight size={18} />
                   </Link>
                 </div>
@@ -161,9 +161,9 @@ export default function InternshipsPage() {
                       </div>
 
                       <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-                        <span className="text-[10px] font-bold text-slate-300 uppercase">Application closing soon</span>
-                        <Link href="/register?type=internship" className="flex items-center space-x-2 text-navy font-bold text-xs uppercase group/btn">
-                          <span>Express interest</span>
+                        <span className="text-[10px] font-bold text-slate-300 uppercase">Limited Seats Available</span>
+                        <Link href={`/courses/${job.id}`} className="flex items-center space-x-2 text-navy font-bold text-xs uppercase group/btn">
+                          <span>Enroll Now</span>
                           <ArrowUpRight size={18} className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                         </Link>
                       </div>
