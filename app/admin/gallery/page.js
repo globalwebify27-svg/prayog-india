@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, Image as ImageIcon, MapPin, Tag } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon, MapPin, Tag, X, Loader2 } from "lucide-react";
 
 export default function AdminGallery() {
   const [images, setImages] = useState([]);
@@ -27,18 +27,48 @@ export default function AdminGallery() {
     setLoading(false);
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+
   const handleAdd = async (e) => {
     e.preventDefault();
-    const res = await fetch("/api/gallery", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newImage)
-    });
-    const data = await res.json();
-    if (data.success) {
-      setShowAddModal(false);
-      setNewImage({ title: "", category: "Robotics", image_url: "", location: "" });
-      fetchImages();
+    setIsUploading(true);
+    
+    try {
+      let finalUrl = newImage.image_url;
+
+      // If there's a file to upload
+      const fileInput = document.getElementById('gallery-file-input');
+      if (fileInput.files[0]) {
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success) {
+          finalUrl = uploadData.url;
+        } else {
+          throw new Error(uploadData.error || "Upload failed");
+        }
+      }
+
+      const res = await fetch("/api/gallery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...newImage, image_url: finalUrl })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShowAddModal(false);
+        setNewImage({ title: "", category: "Media Coverage", image_url: "", location: "" });
+        fetchImages();
+      }
+    } catch (error) {
+      alert("Error: " + error.message);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -94,8 +124,11 @@ export default function AdminGallery() {
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-slate-50">
+            <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
               <h3 className="text-lg font-bold text-slate-900">Add Image to Gallery</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-navy transition-colors">
+                <X size={20} />
+              </button>
             </div>
             <form onSubmit={handleAdd} className="p-6 space-y-4">
                <div>
@@ -105,6 +138,7 @@ export default function AdminGallery() {
                <div>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Category</label>
                   <select className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none cursor-pointer" value={newImage.category} onChange={e => setNewImage({...newImage, category: e.target.value})}>
+                    <option>Media Coverage</option>
                     <option>Robotics</option>
                     <option>AI Workshops</option>
                     <option>Drone Labs</option>
@@ -113,16 +147,31 @@ export default function AdminGallery() {
                   </select>
                </div>
                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Image URL</label>
-                  <input required className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none" placeholder="https://..." value={newImage.image_url} onChange={e => setNewImage({...newImage, image_url: e.target.value})} />
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Upload Image</label>
+                  <div className="relative group">
+                    <input 
+                      id="gallery-file-input"
+                      type="file" 
+                      accept="image/*"
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs outline-none file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-black file:bg-navy file:text-white hover:file:bg-black cursor-pointer"
+                    />
+                  </div>
                </div>
                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Location</label>
-                  <input className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none" value={newImage.location} onChange={e => setNewImage({...newImage, location: e.target.value})} />
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">News Source / Location</label>
+                  <input className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none" placeholder="e.g. National News, Delhi" value={newImage.location} onChange={e => setNewImage({...newImage, location: e.target.value})} />
                </div>
                <div className="flex justify-end gap-3 pt-4">
                   <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2 text-xs font-bold text-slate-500">Cancel</button>
-                  <button type="submit" className="px-5 py-2 bg-navy text-white rounded-lg text-xs font-bold">Upload to Gallery</button>
+                  <button 
+                    type="submit" 
+                    disabled={isUploading}
+                    className="px-5 py-2 bg-navy text-white rounded-lg text-xs font-bold disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                    <span>{isUploading ? "Uploading..." : "Add to Archive"}</span>
+                  </button>
                </div>
             </form>
           </div>

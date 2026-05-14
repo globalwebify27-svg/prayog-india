@@ -16,7 +16,8 @@ import {
   Eye,
   X,
   PlusCircle,
-  FileText
+  FileText,
+  Upload
 } from "lucide-react";
 import { motion, Reorder, AnimatePresence } from "framer-motion";
 
@@ -29,6 +30,29 @@ export default function StoryBuilder({ initialData, onSave, isSaving }) {
   const [category, setCategory] = useState(initialData?.category || "Industrial");
   const [author, setAuthor] = useState(initialData?.author || "Prayog India Labs");
   const [content, setContent] = useState(initialData?.content || []);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageUpload = async (file, callback) => {
+    if (!file) return;
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        callback(data.url);
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const addSection = (type) => {
     const newSection = {
@@ -213,14 +237,26 @@ export default function StoryBuilder({ initialData, onSave, isSaving }) {
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image URL</label>
-                            <input 
-                              type="text" 
-                              value={section.value}
-                              onChange={(e) => updateSection(idx, 'value', e.target.value)}
-                              placeholder="https://..."
-                              className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold"
-                            />
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image Upload</label>
+                            <div className="flex gap-2">
+                              <input 
+                                type="text" 
+                                value={section.value}
+                                readOnly
+                                placeholder="Uploaded image path..."
+                                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-bold text-slate-400"
+                              />
+                              <label className="px-4 py-3 bg-navy text-white rounded-xl text-[10px] font-bold cursor-pointer hover:bg-slate-800 transition-all flex items-center gap-2">
+                                <Upload size={14} />
+                                <span>{isUploading ? '...' : 'Upload'}</span>
+                                <input 
+                                  type="file" 
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleImageUpload(e.target.files[0], (url) => updateSection(idx, 'value', url))}
+                                />
+                              </label>
+                            </div>
                           </div>
                           <div className="space-y-1">
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Caption</label>
@@ -279,14 +315,42 @@ export default function StoryBuilder({ initialData, onSave, isSaving }) {
 
                     {section.type === 'gallery' && (
                       <div className="space-y-4">
-                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image URLs (one per line)</label>
-                         <textarea 
-                          rows="4"
-                          value={Array.isArray(section.value) ? section.value.join('\n') : ''}
-                          onChange={(e) => updateSection(idx, 'value', e.target.value.split('\n'))}
-                          placeholder="https://url1.com\nhttps://url2.com"
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold font-mono"
-                        />
+                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gallery Assets</label>
+                         <div className="grid grid-cols-4 gap-4">
+                           {Array.isArray(section.value) && section.value.map((url, gIdx) => (
+                             <div key={gIdx} className="relative aspect-square rounded-xl overflow-hidden group/img">
+                               <img src={url} className="w-full h-full object-cover" />
+                               <button 
+                                 onClick={() => {
+                                   const newVal = [...section.value];
+                                   newVal.splice(gIdx, 1);
+                                   updateSection(idx, 'value', newVal);
+                                 }}
+                                 className="absolute top-1 right-1 p-1 bg-rose-500 text-white rounded-md opacity-0 group-hover/img:opacity-100 transition-opacity"
+                               >
+                                 <X size={10} />
+                               </button>
+                             </div>
+                           ))}
+                           <label className="aspect-square rounded-xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-2 hover:border-navy hover:bg-slate-50 transition-all cursor-pointer group/add">
+                              <Plus size={20} className="text-slate-300 group-hover/add:text-navy" />
+                              <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Add Photo</span>
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                multiple
+                                className="hidden"
+                                onChange={(e) => {
+                                  Array.from(e.target.files).forEach(file => {
+                                    handleImageUpload(file, (url) => {
+                                      const current = Array.isArray(section.value) ? section.value : [];
+                                      updateSection(idx, 'value', [...current, url]);
+                                    });
+                                  });
+                                }}
+                              />
+                           </label>
+                         </div>
                       </div>
                     )}
                   </div>
@@ -339,27 +403,46 @@ export default function StoryBuilder({ initialData, onSave, isSaving }) {
                       <span className="text-[8px] font-bold uppercase tracking-widest">No Selection</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-navy/60 flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity">
-                    <input 
-                      type="text" 
-                      value={thumbnail}
-                      onChange={(e) => setThumbnail(e.target.value)}
-                      placeholder="Paste Thumbnail URL"
-                      className="w-[80%] px-3 py-2 bg-white rounded-lg text-[10px] font-bold outline-none"
-                    />
+                  <div className="absolute inset-0 bg-navy/60 flex flex-col items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity gap-3">
+                    <label className="px-6 py-2 bg-white rounded-lg text-[10px] font-bold uppercase tracking-widest text-navy cursor-pointer hover:bg-primary transition-all">
+                      {isUploading ? 'Uploading...' : 'Upload Image'}
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleImageUpload(e.target.files[0], (url) => setThumbnail(url))}
+                      />
+                    </label>
+                    <button 
+                      onClick={() => setThumbnail("")}
+                      className="text-white/60 text-[8px] font-bold uppercase tracking-widest hover:text-rose-400"
+                    >
+                      Clear Selection
+                    </button>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4 pt-8 border-t border-slate-50">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Main Banner Image</label>
-                <input 
-                  type="text" 
-                  value={banner}
-                  onChange={(e) => setBanner(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold"
-                />
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={banner}
+                    readOnly
+                    placeholder="No banner uploaded"
+                    className="flex-1 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-bold text-slate-400"
+                  />
+                  <label className="px-4 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-[10px] font-bold cursor-pointer hover:bg-slate-50 transition-all flex items-center gap-2">
+                    <Upload size={14} />
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e.target.files[0], (url) => setBanner(url))}
+                    />
+                  </label>
+                </div>
               </div>
 
               <div className="space-y-4 pt-8 border-t border-slate-50">

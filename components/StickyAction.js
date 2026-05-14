@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, X } from "lucide-react";
 import Link from "next/link";
 
 export default function StickyAction() {
@@ -15,6 +15,7 @@ export default function StickyAction() {
   });
 
   const [promo, setPromo] = useState(null);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
     const fetchPromo = async () => {
@@ -69,7 +70,7 @@ export default function StickyAction() {
 
   return (
     <AnimatePresence>
-      {(isVisible && promo) && (
+      {(isVisible && promo && !isDismissed) && (
         <motion.div
           initial={{ y: 100 }}
           animate={{ y: 0 }}
@@ -108,6 +109,14 @@ export default function StickyAction() {
                 Register Now
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
+              
+              <button 
+                onClick={() => setIsDismissed(true)}
+                className="p-1 md:p-2 text-secondary/40 hover:text-secondary transition-colors"
+                title="Dismiss"
+              >
+                <X size={20} />
+              </button>
             </div>
           </div>
         </motion.div>

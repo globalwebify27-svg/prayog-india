@@ -14,9 +14,14 @@ export default function ShortTermActivities() {
       try {
         const res = await fetch("/api/promos", { cache: 'no-store' });
         const data = await res.json();
-        setActivities(data);
+        if (Array.isArray(data)) {
+          setActivities(data);
+        } else {
+          setActivities([]);
+        }
       } catch (error) {
         console.error("Fetch error:", error);
+        setActivities([]);
       } finally {
         setLoading(false);
       }

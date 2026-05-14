@@ -6,22 +6,19 @@ import {
   Play, 
   ChevronRight, 
   Calendar, 
-  MapPin, 
+  Tag, 
   Share2, 
-  Heart, 
-  TrendingUp, 
-  Bookmark,
-  Briefcase
+  MoreHorizontal,
+  Plus,
+  ArrowRight
 } from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-export default function WorkshopStoriesPage() {
+export default function SuccessNarrativesPage() {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState("");
-  const [isSubscribing, setIsSubscribing] = useState(false);
 
   useEffect(() => {
     fetchStories();
@@ -31,7 +28,20 @@ export default function WorkshopStoriesPage() {
     try {
       const res = await fetch("/api/stories");
       const data = await res.json();
-      setStories(data);
+      if (Array.isArray(data)) {
+        const processed = data.map(story => {
+          let extraImages = [];
+          try {
+            const content = typeof story.content === 'string' ? JSON.parse(story.content) : story.content;
+            content?.forEach(block => {
+              if (block.type === 'image') extraImages.push(block.value);
+              if (block.type === 'gallery') extraImages.push(...block.value);
+            });
+          } catch (e) {}
+          return { ...story, extraImages: [...new Set(extraImages)].filter(img => img !== story.thumbnail) };
+        });
+        setStories(processed);
+      }
     } catch (error) {
       console.error("Failed to fetch stories:", error);
     } finally {
@@ -39,205 +49,126 @@ export default function WorkshopStoriesPage() {
     }
   };
 
-  const handleSubscribe = async () => {
-    if (!email) return;
-    setIsSubscribing(true);
-    try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Subscribed Successfully!");
-        setEmail("");
-      }
-    } catch (error) {
-      alert("Subscription failed.");
-    } finally {
-      setIsSubscribing(false);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-slate-50 font-body">
       <Header />
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-navy relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-semibold text-white mb-6 leading-tight tracking-tight">
-              Workshop <span className="text-primary">Narratives</span>
+      {/* Modern Compact Hero */}
+      <section className="pt-40 pb-16 bg-white border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+            <h4 className="text-navy font-bold uppercase tracking-[0.4em] text-[10px] mb-4">Institutional Impact Feed</h4>
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
+              Success <span className="text-navy">Narratives</span>
             </h1>
-            <p className="text-blue-100/60 text-lg max-w-2xl mx-auto leading-relaxed">
-              Witness the industrial impact of our technical outreach through documented success stories from laboratories to assembly lines.
+            <p className="text-slate-500 text-sm md:text-base max-w-2xl mx-auto leading-relaxed font-medium italic">
+              "Witness the transformation through documented case studies of robotics and industrial excellence."
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Stories Feed */}
+      {/* Grid Layout (3 Stories per Row) */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-12 gap-12">
-            
-            {/* Main Feed */}
-            <div className="lg:col-span-8 space-y-16">
-              {loading ? (
-                [1, 2].map(i => (
-                  <div key={i} className="bg-white rounded-3xl h-96 animate-pulse border border-slate-200" />
-                ))
-              ) : stories.length === 0 ? (
-                <div className="bg-white rounded-3xl p-20 text-center border border-slate-200 shadow-sm">
-                  <Briefcase size={48} className="mx-auto text-slate-200 mb-4" />
-                  <p className="text-slate-400 font-medium">No success stories published yet. Check back soon!</p>
-                </div>
-              ) : stories.map((story, i) => (
-                <motion.article 
-                  key={story.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="group"
-                >
-                  <Link href={`/stories/${story.id}`}>
-                    <div className="relative h-[400px] rounded-3xl overflow-hidden mb-8 shadow-lg border border-slate-200 cursor-pointer">
-                      {story.thumbnail ? (
-                        <img 
-                          src={story.thumbnail} 
-                          alt={story.title} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
-                          <Bookmark size={64} />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                      
-                      {story.video_url && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-20 h-20 rounded-full bg-primary text-navy flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-110 transition-all">
-                            <Play size={28} className="fill-current ml-1" />
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="absolute bottom-8 left-8 right-8 flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white font-bold text-xs border border-white/20">
-                            PI
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-white leading-tight">{story.client_name || "Internal Project"}</p>
-                            <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-0.5">Success Case</p>
-                          </div>
-                        </div>
-                        <div className="hidden md:flex items-center space-x-6 text-white/50 text-[10px] font-bold uppercase tracking-wider">
-                          <span className="flex items-center gap-1.5"><MapPin size={12} /> {story.location}</span>
-                          <span className="flex items-center gap-1.5"><Calendar size={12} /> {new Date(story.date).toLocaleDateString()}</span>
-                        </div>
-                      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            {loading ? (
+              [1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-white rounded-[2.5rem] h-[500px] animate-pulse border border-slate-200" />
+              ))
+            ) : stories.length === 0 ? (
+              <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-100 rounded-[3rem]">
+                <Tag size={48} className="mx-auto text-slate-100 mb-6" />
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">New narratives are being documented...</p>
+              </div>
+            ) : stories.map((story, i) => (
+              <motion.article 
+                key={story.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: (i % 3) * 0.1 }}
+                className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-2xl hover:shadow-navy/5 transition-all duration-500 flex flex-col"
+              >
+                {/* Header (Social Style) */}
+                <div className="p-6 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center font-bold text-xs border-2 border-slate-50 shadow-sm">
+                      PI
                     </div>
-                  </Link>
-
-                  <div className="max-w-3xl">
-                    <span className="inline-block px-3 py-1 bg-white text-navy border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-tight mb-4">
-                      {story.category}
-                    </span>
-                    <Link href={`/stories/${story.id}`}>
-                      <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 group-hover:text-navy transition-colors leading-tight tracking-tight cursor-pointer">
-                        {story.title}
-                      </h2>
-                    </Link>
-                    <p className="text-slate-500 text-base leading-relaxed mb-8 font-medium line-clamp-3">
-                      {story.description}
-                    </p>
-                    <div className="flex items-center space-x-8 pt-6 border-t border-slate-100">
-                      <div className="flex items-center space-x-2 text-slate-400">
-                        <Heart size={16} className="group-hover:text-rose-500 transition-colors" />
-                        <span className="text-[11px] font-bold">1.2k</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-slate-400">
-                        <TrendingUp size={16} />
-                        <span className="text-[11px] font-bold uppercase tracking-tight">Verified Success</span>
-                      </div>
-                      <Link href={`/stories/${story.id}`} className="ml-auto text-navy font-bold text-xs uppercase tracking-wider flex items-center gap-2 group/btn">
-                        <span>Read Investigation</span>
-                        <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
-                      </Link>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 leading-tight">{story.author || "PI Labs"}</h4>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+                        <Calendar size={10} className="text-primary" />
+                        {new Date(story.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                      </p>
                     </div>
                   </div>
-                </motion.article>
-              ))}
-            </div>
+                  <button className="text-slate-200 hover:text-navy transition-colors">
+                    <MoreHorizontal size={18} />
+                  </button>
+                </div>
 
-            {/* Sidebar */}
-            <aside className="lg:col-span-4 space-y-8">
-              <div className="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm sticky top-32">
-                <h3 className="text-lg font-bold text-slate-900 mb-8 border-b border-slate-100 pb-4">Insight Series</h3>
-                <div className="space-y-6">
-                  {stories.slice(0, 3).map((story, i) => (
-                    <Link key={story.id} href={`/stories/${story.id}`} className="flex gap-4 group cursor-pointer">
-                      <div className="w-16 h-16 rounded-xl bg-slate-50 shrink-0 overflow-hidden border border-slate-100 shadow-sm">
-                        {story.image_url ? (
-                          <img src={story.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-200">
-                            <Bookmark size={20} />
-                          </div>
-                        )}
+                {/* Content */}
+                <div className="px-6 pb-6">
+                  <h2 className="text-lg font-black text-slate-900 mb-3 group-hover:text-navy transition-colors line-clamp-2 leading-tight">
+                    {story.title}
+                  </h2>
+                  <p className="text-slate-500 text-xs leading-relaxed font-medium line-clamp-2 italic">
+                    {story.excerpt}
+                  </p>
+                </div>
+
+                {/* Media Grid (Facebook Style) */}
+                <div 
+                  className="relative aspect-square bg-slate-50 cursor-pointer overflow-hidden border-y border-slate-50"
+                  onClick={() => window.location.href=`/stories/${story.slug || story.id}`}
+                >
+                  <div className={`grid h-full w-full gap-0.5 ${story.extraImages.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                    <div className={`relative overflow-hidden ${story.extraImages.length > 0 ? 'row-span-2' : ''}`}>
+                      <img src={story.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+                    </div>
+                    {story.extraImages.length > 0 && (
+                      <div className="grid grid-rows-2 gap-0.5">
+                        <div className="relative overflow-hidden">
+                          <img src={story.extraImages[0]} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="relative overflow-hidden">
+                          <img src={story.extraImages[1] || story.thumbnail} alt="" className="w-full h-full object-cover" />
+                          {story.extraImages.length > 2 && (
+                            <div className="absolute inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center text-white font-black text-xl">
+                              +{story.extraImages.length - 1}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-900 leading-snug mb-1 group-hover:text-navy transition-colors line-clamp-2">{story.title}</h4>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{story.category}</p>
+                    )}
+                  </div>
+                  {story.video_url && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+                        <Play size={20} fill="white" className="ml-1" />
                       </div>
-                    </Link>
-                  ))}
-                  {stories.length === 0 && (
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center py-4">Updates coming soon</p>
+                    </div>
                   )}
                 </div>
-                
-                <div className="mt-10 pt-8 border-t border-slate-100">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-5">Topic Exploration</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {["Robotics", "Industrial AI", "Edge Computing", "Lab Notes", "Case Study"].map(tag => (
-                      <span key={tag} className="px-3 py-1.5 bg-slate-50 text-slate-500 rounded-lg text-[10px] font-bold uppercase border border-slate-100 hover:bg-navy hover:text-white hover:border-navy transition-all cursor-pointer">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
 
-                <div className="mt-10 bg-navy rounded-3xl p-8 text-white relative overflow-hidden shadow-lg border border-white/5">
-                  <Bookmark className="absolute top-4 right-4 text-primary opacity-10" size={40} />
-                  <h4 className="text-base font-bold mb-2 uppercase tracking-tight">Success Digest</h4>
-                  <p className="text-white/40 text-[10px] font-bold uppercase tracking-wider mb-6">Stay updated with research.</p>
-                  <div className="space-y-3">
-                    <input 
-                      type="email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Institutional Email" 
-                      className="w-full px-4 py-3 bg-white/5 rounded-xl border border-white/10 text-xs font-medium outline-none focus:bg-white/10" 
-                    />
-                    <button 
-                      onClick={handleSubscribe}
-                      disabled={isSubscribing}
-                      className="w-full bg-primary text-navy py-3 rounded-xl font-bold text-xs uppercase shadow-md disabled:opacity-50 hover:bg-white transition-all"
-                    >
-                      {isSubscribing ? "Syncing..." : "Subscribe"}
-                    </button>
-                  </div>
+                {/* Footer */}
+                <div className="p-6 flex items-center justify-between mt-auto bg-slate-50/30">
+                  <button className="flex items-center gap-2 text-slate-400 hover:text-navy transition-colors group/share">
+                    <Share2 size={16} />
+                    <span className="text-[9px] font-bold uppercase tracking-widest">Share</span>
+                  </button>
+                  <Link 
+                    href={`/stories/${story.slug || story.id}`} 
+                    className="flex items-center gap-2 text-navy font-bold text-[10px] uppercase tracking-widest hover:text-primary transition-all group/btn"
+                  >
+                    <span>Read More</span>
+                    <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                  </Link>
                 </div>
-              </div>
-            </aside>
-
+              </motion.article>
+            ))}
           </div>
         </div>
       </section>

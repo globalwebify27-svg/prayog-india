@@ -18,6 +18,7 @@ import Testimonials from "@/components/Home/Testimonials";
 import FAQ from "@/components/Home/FAQ";
 import CTA from "@/components/Home/CTA";
 import ShortTermActivities from "@/components/Home/ShortTermActivities";
+import MediaCoverage from "@/components/Home/MediaCoverage";
 
 export default function Home() {
   return (
@@ -29,6 +30,7 @@ export default function Home() {
       <Categories />
       <Stats />
       <Partners />
+      <MediaCoverage />
       <AboutSection />
       <FeaturedCourses />
       <WorkshopMarquee />

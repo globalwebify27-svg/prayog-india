@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { 
+  Briefcase,
   Book, 
   ChevronRight, 
   Search, 
@@ -112,7 +113,8 @@ export default function AdminCoursesPage() {
     installments_count: 1,
     rating: "4.5",
     level: "Beginner",
-    brochure: ""
+    brochure: "",
+    is_internship: false
   });
 
   useEffect(() => {
@@ -220,7 +222,7 @@ export default function AdminCoursesPage() {
     if (result.success) {
       setShowAddModal(false);
       setModalStep(1);
-      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "" });
+      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "", is_internship: false });
       fetchCourses();
       setErrors({});
       showAlert("Course Launched", "The new academic program has been successfully initialized.", "success");
@@ -339,6 +341,11 @@ export default function AdminCoursesPage() {
                   <span className="px-2 py-0.5 bg-navy text-white rounded text-[9px] font-bold uppercase shadow-sm">
                     {course.category}
                   </span>
+                  {course.is_internship === 1 && (
+                    <span className="px-2 py-0.5 bg-primary text-navy rounded text-[9px] font-bold uppercase shadow-sm flex items-center gap-1">
+                      <Briefcase size={8} /> Internship
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="p-6 flex-grow">
@@ -506,6 +513,20 @@ export default function AdminCoursesPage() {
                                 <option value="Expert">Expert</option>
                               </select>
                             </div>
+                          </div>
+                          
+                          <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between group hover:bg-primary/10 transition-all">
+                            <div>
+                              <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Program Classification</p>
+                              <p className="text-[9px] text-slate-500 font-medium italic">Mark this as a professional internship opportunity.</p>
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => setNewCourse({...newCourse, is_internship: !newCourse.is_internship})}
+                              className={`w-12 h-6 rounded-full transition-all relative ${newCourse.is_internship ? 'bg-navy' : 'bg-slate-200'}`}
+                            >
+                              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${newCourse.is_internship ? 'left-7' : 'left-1'}`} />
+                            </button>
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Banner Image</label>
@@ -802,6 +823,20 @@ export default function AdminCoursesPage() {
                                 <option value="Expert">Expert</option>
                               </select>
                             </div>
+                          </div>
+
+                          <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between group hover:bg-primary/10 transition-all">
+                            <div>
+                              <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Program Classification</p>
+                              <p className="text-[9px] text-slate-500 font-medium italic">Mark this as a professional internship opportunity.</p>
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => setCourseToEdit({...courseToEdit, is_internship: !courseToEdit.is_internship})}
+                              className={`w-12 h-6 rounded-full transition-all relative ${courseToEdit.is_internship ? 'bg-navy' : 'bg-slate-200'}`}
+                            >
+                              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${courseToEdit.is_internship ? 'left-7' : 'left-1'}`} />
+                            </button>
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Banner Image</label>

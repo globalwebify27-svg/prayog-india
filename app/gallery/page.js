@@ -15,7 +15,7 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const galleryCategories = ["All", "Robotics", "AI Workshops", "Drone Labs", "IoT Projects", "Institution"];
+const galleryCategories = ["All", "Media Coverage", "Robotics", "AI Workshops", "Drone Labs", "IoT Projects", "Institution"];
 
 export default function GalleryPage() {
   const [galleryImages, setGalleryImages] = useState([]);

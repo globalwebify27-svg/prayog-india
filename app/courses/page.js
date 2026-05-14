@@ -19,7 +19,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 
-const categories = ["All", "Township", "Robotics", "Artificial Intelligence", "Aviation", "Electronics", "Design"];
+const categories = ["All", "Internships", "Township", "Robotics", "Artificial Intelligence", "Aviation", "Electronics", "Design"];
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
@@ -44,7 +44,8 @@ export default function CoursesPage() {
   }, []);
 
   const filteredCourses = courses.filter(course => {
-    const matchesTab = activeTab === "All" || course.category === activeTab;
+    const matchesTab = activeTab === "All" || 
+                      (activeTab === "Internships" ? course.is_internship === 1 : course.category === activeTab);
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesTab && matchesSearch;
@@ -162,6 +163,11 @@ export default function CoursesPage() {
                     <span className="px-2.5 py-0.5 bg-white/90 backdrop-blur-sm text-navy rounded font-bold text-[9px] uppercase shadow-sm">
                       {course.category}
                     </span>
+                    {course.is_internship === 1 && (
+                      <span className="ml-2 px-2.5 py-0.5 bg-primary text-navy rounded font-bold text-[9px] uppercase shadow-sm">
+                        Internship
+                      </span>
+                    )}
                   </div>
                 </div>
 
