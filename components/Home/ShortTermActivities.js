@@ -1,23 +1,30 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Zap, Calendar, ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
 
-const activities = [
-  {
-    id: 1,
-    title: "Robotics Summer Camp 2026",
-    subtitle: "For School Students (Class 5th - 10th)",
-    description: "A 15-day hands-on journey into the world of building and programming robots. Limited seats available!",
-    date: "Starts May 15th, 2026",
-    price: "₹2,999",
-    tag: "Limited Time",
-    image: "/assets/summer_camp.png"
-  }
-];
-
 export default function ShortTermActivities() {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPromos = async () => {
+      try {
+        const res = await fetch("/api/promos", { cache: 'no-store' });
+        const data = await res.json();
+        setActivities(data);
+      } catch (error) {
+        console.error("Fetch error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPromos();
+  }, []);
+
+  if (loading) return null;
   if (activities.length === 0) return null;
 
   return (
@@ -60,7 +67,7 @@ export default function ShortTermActivities() {
               <div className="md:w-1/2 p-10 md:p-16 flex flex-col justify-center">
                 <div className="flex items-center space-x-2 text-navy/40 font-black text-[10px] uppercase tracking-widest mb-6">
                   <Calendar size={14} className="text-primary" />
-                  <span>{activity.date}</span>
+                  <span>{activity.date_text}</span>
                 </div>
                 
                 <h3 className="text-3xl md:text-4xl font-heading font-black text-slate-900 mb-4">{activity.title}</h3>
@@ -68,7 +75,7 @@ export default function ShortTermActivities() {
                 <p className="text-slate-500 text-sm leading-relaxed mb-10">{activity.description}</p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-6">
-                  <Link href="/summer-camp" className="w-full sm:w-auto bg-navy text-white px-10 py-5 rounded-2xl font-heading font-bold text-sm uppercase tracking-widest shadow-xl shadow-navy/20 hover:scale-105 transition-all flex items-center justify-center gap-3">
+                  <Link href={activity.registration_link} className="w-full sm:w-auto bg-navy text-white px-10 py-5 rounded-2xl font-heading font-bold text-sm uppercase tracking-widest shadow-xl shadow-navy/20 hover:scale-105 transition-all flex items-center justify-center gap-3">
                     <span>Enroll Now</span>
                     <Zap size={18} className="text-primary" />
                   </Link>

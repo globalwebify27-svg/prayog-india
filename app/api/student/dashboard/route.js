@@ -20,7 +20,8 @@ export async function GET() {
       SELECT id, name, email, role, phone, dob, address, blood_group, 
              emergency_contact, id_card_issued, image, profile_completed,
              father_name, mother_name, gender, qualification,
-             school_college, last_qualification_year, id_type, id_number, id_image
+             school_college, last_qualification_year, id_type, id_number, 
+             id_image, school_id_card, school_id_number
       FROM users WHERE id = ?
     `, [userId]);
     

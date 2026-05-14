@@ -46,9 +46,26 @@ export default function ContactPage() {
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    let newErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required.";
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format.";
+    }
+    if (!formData.message.trim()) newErrors.message = "Message is required.";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+    
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/contact", {
@@ -58,8 +75,9 @@ export default function ContactPage() {
       });
       const data = await res.json();
       if (data.success) {
-        alert("Institutional Inquiry Sent.");
         setFormData({ name: "", email: "", subject: "General Inquiry", message: "" });
+        setErrors({});
+        alert("Institutional Inquiry Sent.");
       }
     } catch (error) {
       alert("System failure. Please retry.");
@@ -70,6 +88,9 @@ export default function ContactPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: null });
+    }
   };
 
   return (
@@ -147,11 +168,13 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Full name</label>
-                      <input name="name" value={formData.name} onChange={handleChange} type="text" required placeholder="Arjun Malhotra" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" />
+                      <input name="name" value={formData.name} onChange={handleChange} type="text" placeholder="Arjun Malhotra" className={`w-full px-4 py-3 bg-slate-50 border rounded-lg outline-none transition-all text-sm font-medium ${errors.name ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`} />
+                      {errors.name && <p className="text-[10px] text-rose-500 font-bold ml-1">{errors.name}</p>}
                     </div>
                     <div className="space-y-2">
                       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Official email</label>
-                      <input name="email" value={formData.email} onChange={handleChange} type="email" required placeholder="arjun@example.com" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" />
+                      <input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="arjun@example.com" className={`w-full px-4 py-3 bg-slate-50 border rounded-lg outline-none transition-all text-sm font-medium ${errors.email ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`} />
+                      {errors.email && <p className="text-[10px] text-rose-500 font-bold ml-1">{errors.email}</p>}
                     </div>
                   </div>
                   
@@ -167,7 +190,8 @@ export default function ContactPage() {
 
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Inquiry details</label>
-                    <textarea name="message" value={formData.message} onChange={handleChange} rows={5} required placeholder="State your technical or academic query..." className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium resize-none"></textarea>
+                    <textarea name="message" value={formData.message} onChange={handleChange} rows={5} placeholder="State your technical or academic query..." className={`w-full px-4 py-3 bg-slate-50 border rounded-lg outline-none transition-all text-sm font-medium resize-none ${errors.message ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`}></textarea>
+                    {errors.message && <p className="text-[10px] text-rose-500 font-bold ml-1">{errors.message}</p>}
                   </div>
 
                   <button type="submit" disabled={isSubmitting} className="w-full bg-navy text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-black transition-all flex items-center justify-center space-x-2 disabled:opacity-50">

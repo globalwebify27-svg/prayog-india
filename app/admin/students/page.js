@@ -50,6 +50,32 @@ export default function StudentsAdmin() {
     batch: "Morning (9AM - 11AM)",
     isInstallment: true
   });
+  const [errors, setErrors] = useState({});
+
+  const validateStudent = () => {
+    let newErrors = {};
+    if (!newStudent.name.trim()) newErrors.name = "Name is required.";
+    if (!newStudent.email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newStudent.email)) {
+      newErrors.email = "Invalid email format.";
+    }
+    const phoneClean = newStudent.phone.replace(/[^0-9]/g, '');
+    if (!newStudent.phone.trim()) {
+      newErrors.phone = "Phone is required.";
+    } else if (phoneClean.length < 10) {
+      newErrors.phone = "Phone must be at least 10 digits.";
+    }
+    if (!newStudent.password) {
+      newErrors.password = "Password is required.";
+    } else if (newStudent.password.length < 6) {
+      newErrors.password = "Min 6 characters.";
+    }
+    if (!newStudent.course) newErrors.course = "Course selection is required.";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   useEffect(() => {
     fetchStudents();
@@ -96,6 +122,8 @@ export default function StudentsAdmin() {
 
   const handleAddStudent = async (e) => {
     e.preventDefault();
+    if (!validateStudent()) return;
+    
     try {
       const res = await fetch("/api/register", {
         method: "POST",
@@ -116,11 +144,12 @@ export default function StudentsAdmin() {
           batch: "Morning (9AM - 11AM)",
           isInstallment: true
         });
+        setErrors({});
       } else {
-        alert(data.message);
+        setErrors({ submit: data.message });
       }
     } catch (error) {
-      alert("Failed to add student");
+      setErrors({ submit: "Failed to add student. Please try again." });
     }
   };
 
@@ -427,8 +456,11 @@ export default function StudentsAdmin() {
                       placeholder="e.g. John Doe"
                       value={newStudent.name}
                       onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all"
+                      className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-xs font-semibold outline-none focus:bg-white transition-all ${
+                        errors.name ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                      }`}
                     />
+                    {errors.name && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.name}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
@@ -438,8 +470,11 @@ export default function StudentsAdmin() {
                       placeholder="john@example.com"
                       value={newStudent.email}
                       onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all"
+                      className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-xs font-semibold outline-none focus:bg-white transition-all ${
+                        errors.email ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                      }`}
                     />
+                    {errors.email && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
                   </div>
                 </div>
 
@@ -452,8 +487,11 @@ export default function StudentsAdmin() {
                       placeholder="9876543210"
                       value={newStudent.phone}
                       onChange={(e) => setNewStudent({...newStudent, phone: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all"
+                      className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-xs font-semibold outline-none focus:bg-white transition-all ${
+                        errors.phone ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                      }`}
                     />
+                    {errors.phone && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.phone}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Student Password</label>
@@ -463,7 +501,9 @@ export default function StudentsAdmin() {
                         type={showPassword ? "text" : "password"} 
                         value={newStudent.password}
                         onChange={(e) => setNewStudent({...newStudent, password: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all pr-10"
+                        className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-xs font-semibold outline-none focus:bg-white transition-all pr-10 ${
+                          errors.password ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                        }`}
                       />
                       <button 
                         type="button"
@@ -473,6 +513,7 @@ export default function StudentsAdmin() {
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
+                    {errors.password && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.password}</p>}
                   </div>
                 </div>
 
@@ -487,11 +528,14 @@ export default function StudentsAdmin() {
                         required
                         value={newStudent.course}
                         onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-xl text-xs font-semibold outline-none transition-all ${
+                          errors.course ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                        }`}
                       >
                         <option value="">Select Course</option>
                         {courses.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
                       </select>
+                      {errors.course && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.course}</p>}
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[9px] font-bold text-slate-500">Batch</label>
@@ -531,6 +575,12 @@ export default function StudentsAdmin() {
                     </div>
                   </div>
                 </div>
+
+                {errors.submit && (
+                  <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-[10px] font-bold mb-4">
+                    {errors.submit}
+                  </div>
+                )}
 
                 <div className="pt-6">
                   <button type="submit" className="w-full bg-navy text-white py-3.5 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-navy/10 flex items-center justify-center gap-2">

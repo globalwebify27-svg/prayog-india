@@ -20,18 +20,30 @@ import Footer from "../../components/Footer";
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    let newErrors = {};
+    if (!email) newErrors.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Invalid email format.";
+    if (!password) newErrors.password = "Password is required.";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setIsLoading(true);
     setError("");
+    setErrors({});
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const email = formData.get("email");
-      const password = formData.get("password");
-
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,11 +124,11 @@ export default function LoginPage() {
                       <input 
                         type="email" 
                         name="email"
-                        required
                         placeholder="e.g. name@prayogindia.in"
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-navy focus:bg-white transition-all text-sm"
+                        className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${errors.email ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`}
                       />
                     </div>
+                    {errors.email && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
                   </div>
 
                   <div className="space-y-1.5">
@@ -129,9 +141,8 @@ export default function LoginPage() {
                       <input 
                         type={showPassword ? "text" : "password"} 
                         name="password"
-                        required
                         placeholder="••••••••"
-                        className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-navy focus:bg-white transition-all text-sm"
+                        className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${errors.password ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`}
                       />
                       <button 
                         type="button"
@@ -141,6 +152,7 @@ export default function LoginPage() {
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
+                    {errors.password && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.password}</p>}
                   </div>
 
                   <button 

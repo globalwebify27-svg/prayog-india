@@ -13,9 +13,31 @@ export default function EnquiryForm() {
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    let newErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required.";
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format.";
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone is required.";
+    } else if (!/^\d{10}$/.test(formData.phone.replace(/[^0-9]/g, ""))) {
+      newErrors.phone = "Invalid phone number (10 digits).";
+    }
+    if (!formData.message.trim()) newErrors.message = "Message is required.";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+    
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/enquiry", {
@@ -25,8 +47,9 @@ export default function EnquiryForm() {
       });
       const data = await res.json();
       if (data.success) {
-        alert("Enquiry Submitted Successfully!");
         setFormData({ name: "", email: "", phone: "", course: "Industrial Robotics", message: "" });
+        setErrors({});
+        alert("Enquiry Submitted Successfully!");
       }
     } catch (error) {
       alert("Submission failed.");
@@ -37,6 +60,9 @@ export default function EnquiryForm() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: null });
+    }
   };
 
   return (
@@ -50,18 +76,21 @@ export default function EnquiryForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest ml-1">Full Name</label>
-                  <input name="name" value={formData.name} onChange={handleChange} type="text" required placeholder="Rahul Sharma" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:border-navy focus:bg-white transition-all text-sm" />
+                  <input name="name" value={formData.name} onChange={handleChange} type="text" placeholder="Rahul Sharma" className={`w-full bg-slate-50 border rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:bg-white transition-all text-sm ${errors.name ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`} />
+                  {errors.name && <p className="text-[10px] text-rose-500 font-bold ml-1">{errors.name}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest ml-1">Email Address</label>
-                  <input name="email" value={formData.email} onChange={handleChange} type="email" required placeholder="rahul@example.com" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:border-navy focus:bg-white transition-all text-sm" />
+                  <input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="rahul@example.com" className={`w-full bg-slate-50 border rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:bg-white transition-all text-sm ${errors.email ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`} />
+                  {errors.email && <p className="text-[10px] text-rose-500 font-bold ml-1">{errors.email}</p>}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest ml-1">Phone Number</label>
-                  <input name="phone" value={formData.phone} onChange={handleChange} type="tel" required placeholder="+91 98765 43210" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:border-navy focus:bg-white transition-all text-sm" />
+                  <input name="phone" value={formData.phone} onChange={handleChange} type="tel" placeholder="+91 98765 43210" className={`w-full bg-slate-50 border rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:bg-white transition-all text-sm ${errors.phone ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`} />
+                  {errors.phone && <p className="text-[10px] text-rose-500 font-bold ml-1">{errors.phone}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest ml-1">Interested Course</label>
@@ -76,7 +105,8 @@ export default function EnquiryForm() {
 
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest ml-1">Your Message</label>
-                <textarea name="message" value={formData.message} onChange={handleChange} rows="3" required placeholder="How can we help you?" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:border-navy focus:bg-white transition-all resize-none text-sm"></textarea>
+                <textarea name="message" value={formData.message} onChange={handleChange} rows="3" placeholder="How can we help you?" className={`w-full bg-slate-50 border rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:bg-white transition-all resize-none text-sm ${errors.message ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`}></textarea>
+                {errors.message && <p className="text-[10px] text-rose-500 font-bold ml-1">{errors.message}</p>}
               </div>
 
               <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto bg-navy text-white px-8 py-3.5 md:px-10 md:py-4 rounded-xl font-heading font-bold hover:bg-navy/90 hover:shadow-xl transition-all flex items-center justify-center space-x-3 group text-sm md:text-base disabled:opacity-50">

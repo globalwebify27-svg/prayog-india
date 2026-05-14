@@ -15,7 +15,9 @@ import {
   Unlock,
   ChevronUp,
   ChevronDown,
-  Layers
+  Layers,
+  Upload,
+  Loader2
 } from "lucide-react";
 
 export default function CourseMaterialsPage({ params }) {
@@ -32,6 +34,7 @@ export default function CourseMaterialsPage({ params }) {
     module_number: 1,
     is_locked: false
   });
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchCourse();
@@ -57,13 +60,37 @@ export default function CourseMaterialsPage({ params }) {
     if (result.success) setMaterials(result.data);
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNewMaterial({ ...newMaterial, content: data.url });
+      }
+    } catch (error) {
+      alert("Upload failed");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleAddMaterial = async (e) => {
     e.preventDefault();
-    const url = `/api/admin/courses/materials?id=${id}`;
-    const method = editingMaterial ? "PUT" : "POST"; // I'll need to implement PUT in API
+    const url = editingMaterial ? `/api/admin/courses/materials?id=${editingMaterial.id}` : `/api/admin/courses/materials?id=${id}`;
+    const method = editingMaterial ? "PUT" : "POST";
     
     const res = await fetch(url, {
-      method: "POST", // Sticking to POST for now but I'll add edit logic
+      method: method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newMaterial)
     });
@@ -76,6 +103,19 @@ export default function CourseMaterialsPage({ params }) {
     }
   };
 
+  const handleEdit = (m) => {
+    setEditingMaterial(m);
+    setNewMaterial({
+      title: m.title,
+      type: m.type,
+      content: m.content || "",
+      module_number: m.module_number,
+      is_locked: m.is_locked === 1
+    });
+    setShowAddModal(true);
+    setActiveMenu(null);
+  };
+
   const handleDelete = async (mid) => {
     if (!confirm("Are you sure you want to delete this material?")) return;
     const res = await fetch(`/api/admin/courses/materials?id=${mid}`, { method: "DELETE" });
@@ -83,9 +123,15 @@ export default function CourseMaterialsPage({ params }) {
     if (result.success) fetchMaterials();
   };
 
-  const toggleLock = async (material) => {
-    // Just a quick hack for now using POST to update if I don't have PUT
-    alert("Lock status toggled (API update pending)");
+  const toggleLock = async (m) => {
+    const res = await fetch(`/api/admin/courses/materials?id=${m.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...m, is_locked: !m.is_locked })
+    });
+    const result = await res.json();
+    if (result.success) fetchMaterials();
+    setActiveMenu(null);
   };
 
   return (
@@ -183,9 +229,12 @@ export default function CourseMaterialsPage({ params }) {
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-10 py-1 overflow-hidden"
                       >
-                        <button className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                          <FileText size={14} /> Edit Details
-                        </button>
+                      <button 
+                        onClick={() => handleEdit(m)}
+                        className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+                      >
+                        <FileText size={14} /> Edit Details
+                      </button>
                         <button onClick={() => toggleLock(m)} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
                           {m.is_locked ? <Unlock size={14} /> : <Lock size={14} />} 
                           {m.is_locked ? "Make Public" : "Lock Material"}
@@ -213,7 +262,7 @@ export default function CourseMaterialsPage({ params }) {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
               <div className="p-6 border-b border-slate-100">
-                <h3 className="text-lg font-bold text-slate-900">Add New Material</h3>
+                <h3 className="text-lg font-bold text-slate-900">{editingMaterial ? "Edit Material" : "Add New Material"}</h3>
               </div>
               <form onSubmit={handleAddMaterial} className="p-6 space-y-4">
                 <div>
@@ -250,13 +299,38 @@ export default function CourseMaterialsPage({ params }) {
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Content URL / Description</label>
-                  <textarea 
-                    rows={3}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none"
-                    value={newMaterial.content}
-                    onChange={e => setNewMaterial({...newMaterial, content: e.target.value})}
-                  />
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Resource Content</label>
+                  <div className="space-y-3">
+                    <textarea 
+                      rows={3}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none"
+                      placeholder="Enter description, YouTube URL, or upload a file below..."
+                      value={newMaterial.content}
+                      onChange={e => setNewMaterial({...newMaterial, content: e.target.value})}
+                    />
+                    
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="file" 
+                        id="material-file" 
+                        className="hidden" 
+                        onChange={handleFileUpload}
+                      />
+                      <label 
+                        htmlFor="material-file" 
+                        className="flex-grow flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-navy hover:bg-slate-50 transition-all group"
+                      >
+                        {isUploading ? (
+                          <Loader2 size={16} className="animate-spin text-navy" />
+                        ) : (
+                          <>
+                            <Upload size={16} className="text-slate-300 group-hover:text-navy" />
+                            <span className="text-[10px] font-bold text-slate-400 uppercase group-hover:text-navy">Upload Document / Image</span>
+                          </>
+                        )}
+                      </label>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 pt-2">
                   <input 

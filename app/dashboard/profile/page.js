@@ -49,13 +49,15 @@ export default function ProfilePage() {
     last_qualification_year: "",
     id_type: "",
     id_number: "",
-    id_image: ""
+    id_image: "",
+    school_id_card: "",
+    school_id_number: ""
   });
 
   const tabs = [
     { id: "personal", label: "General details", icon: <User size={16} /> },
     { id: "academic", label: "Academic records", icon: <GraduationCap size={16} /> },
-    { id: "kyc", label: "KYC & Verification", icon: <Fingerprint size={16} /> },
+    { id: "kyc", label: "Student Verification", icon: <Fingerprint size={16} /> },
     { id: "security", label: "Login & Security", icon: <Shield size={16} /> }
   ];
 
@@ -84,7 +86,9 @@ export default function ProfilePage() {
           last_qualification_year: u.last_qualification_year || "",
           id_type: u.id_type || "",
           id_number: u.id_number || "",
-          id_image: u.id_image || ""
+          id_image: u.id_image || "",
+          school_id_card: u.school_id_card || "",
+          school_id_number: u.school_id_number || ""
         });
       } else {
         setError(data.message || "Failed to load profile");
@@ -465,85 +469,169 @@ export default function ProfilePage() {
               <div className="p-6 bg-amber-50 border border-amber-100 rounded-2xl flex gap-5 items-start">
                 <div className="p-3 bg-white rounded-xl text-amber-600 shadow-sm"><Shield size={24} /></div>
                 <div>
-                  <h4 className="text-sm font-bold text-amber-900 mb-1">Identity Verification Required</h4>
+                  <h4 className="text-sm font-bold text-amber-900 mb-1">Student Verification</h4>
                   <p className="text-xs text-amber-700 leading-relaxed">
-                    Institutional policy requires a valid government-issued ID for final certification. Please upload a clear copy of your Aadhar Card, PAN, or Passport.
+                    Institutional policy requires a valid government-issued ID and school credentials for final certification.
                   </p>
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-700 ml-1">Identity Document Type</label>
-                    <select 
-                      value={formData.id_type} 
-                      onChange={(e) => setFormData({...formData, id_type: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium appearance-none"
-                    >
-                      <option value="">Select ID Type</option>
-                      <option value="Aadhar Card">Aadhar Card</option>
-                      <option value="PAN Card">PAN Card</option>
-                      <option value="Voter ID">Voter ID</option>
-                      <option value="Passport">Passport</option>
-                    </select>
+              <div className="space-y-6">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-navy" />
+                  Government Identity
+                </h4>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-700 ml-1">Identity Document Type</label>
+                      <select 
+                        value={formData.id_type} 
+                        onChange={(e) => setFormData({...formData, id_type: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium appearance-none"
+                      >
+                        <option value="">Select ID Type</option>
+                        <option value="Aadhar Card">Aadhar Card</option>
+                        <option value="PAN Card">PAN Card</option>
+                        <option value="Voter ID">Voter ID</option>
+                        <option value="Passport">Passport</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-700 ml-1">Document / ID Number</label>
+                      <input 
+                        type="text" 
+                        value={formData.id_number} 
+                        onChange={(e) => setFormData({...formData, id_number: e.target.value})}
+                        placeholder="Enter Identification Number" 
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-700 ml-1">Document / ID Number</label>
-                    <input 
-                      type="text" 
-                      value={formData.id_number} 
-                      onChange={(e) => setFormData({...formData, id_number: e.target.value})}
-                      placeholder="Enter Identification Number" 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
-                    />
+                  
+                  <div className="space-y-4">
+                    <label className="text-xs font-bold text-slate-700 ml-1">Upload ID Proof (Front)</label>
+                    <div className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all min-h-[160px] ${formData.id_image ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 hover:border-navy bg-slate-50/50'}`}>
+                      {formData.id_image ? (
+                        <div className="flex flex-col items-center gap-4 w-full">
+                          <div className="relative group w-full max-w-[200px] aspect-video rounded-xl overflow-hidden shadow-md border border-emerald-100 bg-white">
+                            <img src={formData.id_image} alt="ID Preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[1px]">
+                              <a href={formData.id_image} target="_blank" rel="noopener noreferrer" className="p-2 bg-white text-navy rounded-lg shadow-xl hover:scale-110 transition-all">
+                                <FileText size={16} />
+                              </a>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2 text-emerald-600">
+                              <CheckCircle size={14} />
+                              <p className="text-[10px] font-bold uppercase tracking-widest">Document Uploaded</p>
+                            </div>
+                            <button 
+                              onClick={() => setFormData({...formData, id_image: ""})}
+                              className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors uppercase underline"
+                            >
+                              Replace File
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="text-slate-300 mb-3" size={32} />
+                          <p className="text-xs font-semibold text-slate-500 mb-4 text-center">Click to upload JPG, PNG or PDF</p>
+                          <input 
+                            type="file" 
+                            onChange={(e) => handleFileUpload(e, 'id_image')}
+                            className="hidden" 
+                            id="id_upload" 
+                          />
+                          <label 
+                            htmlFor="id_upload"
+                            className="px-5 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:text-navy hover:border-navy transition-all cursor-pointer shadow-sm uppercase tracking-wider"
+                          >
+                            Select Document
+                          </label>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-                
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-slate-700 ml-1">Upload ID Proof (Front)</label>
-                  <div className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all min-h-[160px] ${formData.id_image ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 hover:border-navy bg-slate-50/50'}`}>
-                    {formData.id_image ? (
-                      <div className="flex flex-col items-center gap-4 w-full">
-                        <div className="relative group w-full max-w-[200px] aspect-video rounded-xl overflow-hidden shadow-md border border-emerald-100 bg-white">
-                          <img src={formData.id_image} alt="ID Preview" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[1px]">
-                            <a href={formData.id_image} target="_blank" rel="noopener noreferrer" className="p-2 bg-white text-navy rounded-lg shadow-xl hover:scale-110 transition-all">
-                              <FileText size={16} />
-                            </a>
+              </div>
+
+              <div className="space-y-6 pt-6 border-t border-slate-100">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-navy" />
+                  Institutional Identity
+                </h4>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-700 ml-1">School / College Name</label>
+                      <input 
+                        type="text" 
+                        value={formData.school_college} 
+                        onChange={(e) => setFormData({...formData, school_college: e.target.value})}
+                        placeholder="Current Institution Name" 
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-700 ml-1">ID Card / Roll Number</label>
+                      <input 
+                        type="text" 
+                        value={formData.school_id_number} 
+                        onChange={(e) => setFormData({...formData, school_id_number: e.target.value})}
+                        placeholder="Enter Institutional ID or Roll No." 
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <label className="text-xs font-bold text-slate-700 ml-1">Upload School ID Card</label>
+                    <div className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all min-h-[160px] ${formData.school_id_card ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 hover:border-navy bg-slate-50/50'}`}>
+                      {formData.school_id_card ? (
+                        <div className="flex flex-col items-center gap-4 w-full">
+                          <div className="relative group w-full max-w-[200px] aspect-video rounded-xl overflow-hidden shadow-md border border-emerald-100 bg-white">
+                            <img src={formData.school_id_card} alt="School ID Preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[1px]">
+                              <a href={formData.school_id_card} target="_blank" rel="noopener noreferrer" className="p-2 bg-white text-navy rounded-lg shadow-xl hover:scale-110 transition-all">
+                                <FileText size={16} />
+                              </a>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2 text-emerald-600">
+                              <CheckCircle size={14} />
+                              <p className="text-[10px] font-bold uppercase tracking-widest">School ID Uploaded</p>
+                            </div>
+                            <button 
+                              onClick={() => setFormData({...formData, school_id_card: ""})}
+                              className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors uppercase underline"
+                            >
+                              Replace File
+                            </button>
                           </div>
                         </div>
-                        <div className="flex flex-col items-center gap-1">
-                          <div className="flex items-center gap-2 text-emerald-600">
-                            <CheckCircle size={14} />
-                            <p className="text-[10px] font-bold uppercase tracking-widest">Document Uploaded</p>
-                          </div>
-                          <button 
-                            onClick={() => setFormData({...formData, id_image: ""})}
-                            className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors uppercase underline"
+                      ) : (
+                        <>
+                          <Upload className="text-slate-300 mb-3" size={32} />
+                          <p className="text-xs font-semibold text-slate-500 mb-4 text-center">Click to upload School/College ID</p>
+                          <input 
+                            type="file" 
+                            onChange={(e) => handleFileUpload(e, 'school_id_card')}
+                            className="hidden" 
+                            id="school_id_upload" 
+                          />
+                          <label 
+                            htmlFor="school_id_upload"
+                            className="px-5 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:text-navy hover:border-navy transition-all cursor-pointer shadow-sm uppercase tracking-wider"
                           >
-                            Replace File
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <Upload className="text-slate-300 mb-3" size={32} />
-                        <p className="text-xs font-semibold text-slate-500 mb-4 text-center">Click to upload JPG, PNG or PDF</p>
-                        <input 
-                          type="file" 
-                          onChange={(e) => handleFileUpload(e, 'id_image')}
-                          className="hidden" 
-                          id="id_upload" 
-                        />
-                        <label 
-                          htmlFor="id_upload"
-                          className="px-5 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:text-navy hover:border-navy transition-all cursor-pointer shadow-sm uppercase tracking-wider"
-                        >
-                          Select Document
-                        </label>
-                      </>
-                    )}
+                            Select School ID
+                          </label>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

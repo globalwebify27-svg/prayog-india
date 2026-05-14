@@ -61,6 +61,32 @@ export async function POST(req) {
   }
 }
 
+export async function PUT(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const materialId = searchParams.get("id");
+    if (!materialId) return NextResponse.json({ success: false, message: "Missing material ID" }, { status: 400 });
+
+    const { title, type, content, module_number, is_locked } = await req.json();
+
+    // Find course_id first to verify access
+    const [material] = await pool.query("SELECT course_id FROM course_materials WHERE id = ?", [materialId]);
+    if (material.length === 0) return NextResponse.json({ success: false, message: "Material not found" }, { status: 404 });
+
+    const access = await verifyAccess(material[0].course_id);
+    if (!access.allowed) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
+
+    await pool.query(
+      "UPDATE course_materials SET title = ?, type = ?, content = ?, module_number = ?, is_locked = ? WHERE id = ?",
+      [title, type, content, module_number, is_locked ? 1 : 0, materialId]
+    );
+
+    return NextResponse.json({ success: true, message: "Material updated successfully" });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(req) {
   try {
     const { searchParams } = new URL(req.url);

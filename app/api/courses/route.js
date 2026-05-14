@@ -18,11 +18,11 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { title, category, level, description, price, type, image, duration } = body;
+    const { title, category, level, description, price, type, image, duration, brochure } = body;
 
     const [result] = await pool.query(
-      "INSERT INTO courses (title, category, level, description, price, type, image, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [title, category, level, description, price, type, image, duration]
+      "INSERT INTO courses (title, category, level, description, price, type, image, duration, brochure) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [title, category, level, description, price, type, image, duration, brochure || null]
     );
 
     return NextResponse.json({ id: result.insertId, message: "Course created successfully" });

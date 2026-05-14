@@ -29,6 +29,28 @@ export default function AdminFaculties() {
     selectedTimings: []
   });
   const [availableTimings, setAvailableTimings] = useState([]);
+  const [errors, setErrors] = useState({});
+
+  const validateStep = () => {
+    let newErrors = {};
+    if (activeStep === 1) {
+      if (!newFaculty.name.trim()) newErrors.name = "Name is required.";
+      if (!newFaculty.email.trim()) {
+        newErrors.email = "Email is required.";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newFaculty.email)) {
+        newErrors.email = "Invalid email format.";
+      }
+      if (!newFaculty.password) newErrors.password = "Password is required.";
+      if (!newFaculty.role.trim()) newErrors.role = "Designation is required.";
+    } else if (activeStep === 2) {
+      if (!newFaculty.specialty.trim()) newErrors.specialty = "Specialty is required.";
+      if (!newFaculty.education.trim()) newErrors.education = "Education details are required.";
+      if (!newFaculty.expertise.trim()) newErrors.expertise = "At least one expertise area is required.";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   useEffect(() => {
     fetchFaculties();
@@ -84,11 +106,14 @@ export default function AdminFaculties() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    if (!validateStep()) return;
+
     if (activeStep < 3) {
       setActiveStep(activeStep + 1);
       return;
     }
     setError("");
+    setErrors({});
     const method = isEditing ? "PUT" : "POST";
     const expertiseArray = typeof newFaculty.expertise === 'string' ? newFaculty.expertise.split(",").map(i => i.trim()) : newFaculty.expertise;
     const payload = isEditing ? { ...newFaculty, id: editingId, expertise: expertiseArray } : { ...newFaculty, expertise: expertiseArray };
@@ -107,6 +132,7 @@ export default function AdminFaculties() {
         setNewFaculty({ name: "", email: "", password: "Teacher@123", role: "Senior Faculty", specialty: "", image: "", bio: "", education: "", expertise: "", selectedCourses: [], selectedTimings: [] });
         fetchFaculties();
         setActiveStep(1);
+        setErrors({});
       } else {
         setError(data.error || "Failed to process request");
       }
@@ -255,21 +281,46 @@ export default function AdminFaculties() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Full Name</label>
-                          <input required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all" value={newFaculty.name} onChange={e => setNewFaculty({...newFaculty, name: e.target.value})} />
+                          <input 
+                            required 
+                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.name ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
+                            value={newFaculty.name} 
+                            onChange={e => setNewFaculty({...newFaculty, name: e.target.value})} 
+                          />
+                          {errors.name && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.name}</p>}
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Institutional Email</label>
-                          <input required type="email" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all" value={newFaculty.email} onChange={e => setNewFaculty({...newFaculty, email: e.target.value})} />
+                          <input 
+                            required 
+                            type="email" 
+                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.email ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
+                            value={newFaculty.email} 
+                            onChange={e => setNewFaculty({...newFaculty, email: e.target.value})} 
+                          />
+                          {errors.email && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Access Password</label>
-                          <input required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all" value={newFaculty.password} onChange={e => setNewFaculty({...newFaculty, password: e.target.value})} />
+                          <input 
+                            required 
+                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.password ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
+                            value={newFaculty.password} 
+                            onChange={e => setNewFaculty({...newFaculty, password: e.target.value})} 
+                          />
+                          {errors.password && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.password}</p>}
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Designation</label>
-                          <input required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all" value={newFaculty.role} onChange={e => setNewFaculty({...newFaculty, role: e.target.value})} />
+                          <input 
+                            required 
+                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.role ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
+                            value={newFaculty.role} 
+                            onChange={e => setNewFaculty({...newFaculty, role: e.target.value})} 
+                          />
+                          {errors.role && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.role}</p>}
                         </div>
                     </div>
                   </motion.div>
@@ -285,11 +336,21 @@ export default function AdminFaculties() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Specialty</label>
-                          <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all" value={newFaculty.specialty} onChange={e => setNewFaculty({...newFaculty, specialty: e.target.value})} />
+                          <input 
+                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.specialty ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
+                            value={newFaculty.specialty} 
+                            onChange={e => setNewFaculty({...newFaculty, specialty: e.target.value})} 
+                          />
+                          {errors.specialty && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.specialty}</p>}
                         </div>
                         <div>
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Education</label>
-                          <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all" value={newFaculty.education} onChange={e => setNewFaculty({...newFaculty, education: e.target.value})} />
+                          <input 
+                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.education ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
+                            value={newFaculty.education} 
+                            onChange={e => setNewFaculty({...newFaculty, education: e.target.value})} 
+                          />
+                          {errors.education && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.education}</p>}
                         </div>
                     </div>
                     <div>
@@ -309,7 +370,13 @@ export default function AdminFaculties() {
                     </div>
                     <div>
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Expertise (comma separated)</label>
-                        <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all" placeholder="Robotics, AI, IoT" value={newFaculty.expertise} onChange={e => setNewFaculty({...newFaculty, expertise: e.target.value})} />
+                        <input 
+                          className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.expertise ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
+                          placeholder="Robotics, AI, IoT" 
+                          value={newFaculty.expertise} 
+                          onChange={e => setNewFaculty({...newFaculty, expertise: e.target.value})} 
+                        />
+                        {errors.expertise && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.expertise}</p>}
                     </div>
                   </motion.div>
                 )}

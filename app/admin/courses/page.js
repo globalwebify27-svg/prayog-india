@@ -24,7 +24,9 @@ import {
   Layers,
   Star,
   Settings2,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2,
+  FileText
 } from "lucide-react";
 
 const STEPS = [
@@ -54,6 +56,25 @@ export default function AdminCoursesPage() {
   const [modalStep, setModalStep] = useState(1);
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validateStep = (data) => {
+    let newErrors = {};
+    if (modalStep === 1) {
+      if (!data.title.trim()) newErrors.title = "Title is required.";
+      if (!data.category) newErrors.category = "Category is required.";
+    } else if (modalStep === 2) {
+      if (!data.teacher_id) newErrors.teacher_id = "Faculty assignment is required.";
+      if (!data.duration.trim()) newErrors.duration = "Duration is required.";
+    } else if (modalStep === 3) {
+      if (!data.price) newErrors.price = "Price is required.";
+      if (data.allow_partial_payment && (!data.installments_count || data.installments_count < 2)) {
+        newErrors.installments_count = "Min 2 installments required.";
+      }
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   
   const [newCourse, setNewCourse] = useState({
     title: "",
@@ -68,7 +89,8 @@ export default function AdminCoursesPage() {
     allow_partial_payment: false,
     installments_count: 1,
     rating: "4.5",
-    level: "Beginner"
+    level: "Beginner",
+    brochure: ""
   });
 
   useEffect(() => {
@@ -132,13 +154,41 @@ export default function AdminCoursesPage() {
     }
   };
 
+  const handleBrochureUpload = async (e, mode = 'add') => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        if (mode === 'add') {
+          setNewCourse(prev => ({ ...prev, brochure: data.url }));
+        } else {
+          setCourseToEdit(prev => ({ ...prev, brochure: data.url }));
+        }
+      } else {
+        alert("Brochure upload failed");
+      }
+    } catch (error) {
+      alert("Upload failed");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleAddCourse = async (e) => {
     e.preventDefault();
+    if (!validateStep(newCourse)) return;
+
     if (modalStep < 3) {
       setModalStep(modalStep + 1);
       return;
     }
     setError("");
+    setErrors({});
     const res = await fetch("/api/admin/courses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -148,8 +198,9 @@ export default function AdminCoursesPage() {
     if (result.success) {
       setShowAddModal(false);
       setModalStep(1);
-      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner" });
+      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "" });
       fetchCourses();
+      setErrors({});
     } else {
       setError(result.message);
     }
@@ -157,11 +208,14 @@ export default function AdminCoursesPage() {
 
   const handleUpdateCourse = async (e) => {
     e.preventDefault();
+    if (!validateStep(courseToEdit)) return;
+
     if (modalStep < 3) {
       setModalStep(modalStep + 1);
       return;
     }
     setError("");
+    setErrors({});
     const res = await fetch("/api/admin/courses", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -173,6 +227,7 @@ export default function AdminCoursesPage() {
       setModalStep(1);
       setCourseToEdit(null);
       fetchCourses();
+      setErrors({});
     } else {
       setError(result.message);
     }
@@ -382,11 +437,12 @@ export default function AdminCoursesPage() {
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Program Title</label>
                             <input 
                               required
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none transition-all"
+                              className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm outline-none transition-all ${errors.title ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                               placeholder="e.g. Diploma in Industrial Robotics"
                               value={newCourse.title}
                               onChange={e => setNewCourse({...newCourse, title: e.target.value})}
                             />
+                            {errors.title && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.title}</p>}
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -446,13 +502,14 @@ export default function AdminCoursesPage() {
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Primary Faculty</label>
                             <select 
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none cursor-pointer"
+                              className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm outline-none cursor-pointer transition-all ${errors.teacher_id ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                               value={newCourse.teacher_id}
                               onChange={e => setNewCourse({...newCourse, teacher_id: e.target.value})}
                             >
                               <option value="">Select Faculty</option>
                               {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
+                            {errors.teacher_id && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.teacher_id}</p>}
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Course Type</label>
@@ -470,10 +527,11 @@ export default function AdminCoursesPage() {
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Duration</label>
                             <input 
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none"
+                              className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm outline-none transition-all ${errors.duration ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                               value={newCourse.duration}
                               onChange={e => setNewCourse({...newCourse, duration: e.target.value})}
                             />
+                            {errors.duration && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.duration}</p>}
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Rating (0-5)</label>
@@ -483,6 +541,32 @@ export default function AdminCoursesPage() {
                               value={newCourse.rating || ""}
                               onChange={e => setNewCourse({...newCourse, rating: e.target.value})}
                             />
+                          </div>
+                        </div>
+                        {/* Brochure Upload */}
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Course Brochure (PDF)</label>
+                          <div className="flex items-center gap-4">
+                            <label className="flex-grow flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 border-dashed rounded-lg cursor-pointer hover:bg-slate-100 transition-all">
+                              <Upload size={16} className="text-navy/40" />
+                              <span className="text-xs font-bold text-navy/60">
+                                {newCourse.brochure ? "Change Brochure" : "Upload Brochure"}
+                              </span>
+                              <input 
+                                type="file" 
+                                className="hidden" 
+                                accept=".pdf,.doc,.docx"
+                                onChange={(e) => handleBrochureUpload(e, 'add')} 
+                              />
+                            </label>
+                            {newCourse.brochure && (
+                              <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">
+                                <CheckCircle2 size={14} />
+                                <span className="text-[10px] font-bold truncate max-w-[120px]">
+                                  {newCourse.brochure.split('/').pop()}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div>
@@ -525,11 +609,12 @@ export default function AdminCoursesPage() {
                               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₹</span>
                               <input 
                                 type="number"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-4 py-2.5 text-sm focus:border-navy outline-none"
+                                className={`w-full bg-slate-50 border rounded-lg pl-8 pr-4 py-2.5 text-sm outline-none transition-all ${errors.price ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                                 value={newCourse.price}
                                 onChange={e => setNewCourse({...newCourse, price: e.target.value})}
                               />
                             </div>
+                            {errors.price && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.price}</p>}
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Installments</label>
@@ -552,10 +637,11 @@ export default function AdminCoursesPage() {
                               <input 
                                 type="number" 
                                 min="2" max="12"
-                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-navy"
+                                className={`w-full bg-white border rounded-lg px-3 py-1.5 text-xs outline-none transition-all ${errors.installments_count ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                                 value={newCourse.installments_count}
                                 onChange={e => setNewCourse({...newCourse, installments_count: e.target.value === "" ? "" : parseInt(e.target.value)})}
                               />
+                              {errors.installments_count && <p className="text-[8px] text-rose-500 font-bold ml-1 mt-1">{errors.installments_count}</p>}
                             </div>
                             <div className="text-right">
                               <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Per Cycle</p>
@@ -648,10 +734,11 @@ export default function AdminCoursesPage() {
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Program Title</label>
                             <input 
                               required
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none transition-all"
+                              className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm outline-none transition-all ${errors.title ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                               value={courseToEdit.title}
                               onChange={e => setCourseToEdit({...courseToEdit, title: e.target.value})}
                             />
+                            {errors.title && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.title}</p>}
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -711,13 +798,14 @@ export default function AdminCoursesPage() {
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Primary Faculty</label>
                             <select 
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none cursor-pointer"
+                              className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm outline-none cursor-pointer transition-all ${errors.teacher_id ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                               value={courseToEdit.teacher_id || ""}
                               onChange={e => setCourseToEdit({...courseToEdit, teacher_id: e.target.value})}
                             >
                               <option value="">Select Faculty</option>
                               {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
+                            {errors.teacher_id && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.teacher_id}</p>}
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Course Type</label>
@@ -735,10 +823,11 @@ export default function AdminCoursesPage() {
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Duration</label>
                             <input 
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none"
+                              className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm outline-none transition-all ${errors.duration ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                               value={courseToEdit.duration}
                               onChange={e => setCourseToEdit({...courseToEdit, duration: e.target.value})}
                             />
+                            {errors.duration && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.duration}</p>}
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Rating (0-5)</label>
@@ -750,6 +839,34 @@ export default function AdminCoursesPage() {
                             />
                           </div>
                         </div>
+
+                        {/* Brochure Upload */}
+                        <div className="mb-6">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Course Brochure (PDF)</label>
+                          <div className="flex items-center gap-4">
+                            <label className="flex-grow flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 border-dashed rounded-lg cursor-pointer hover:bg-slate-100 transition-all">
+                              <Upload size={16} className="text-navy/40" />
+                              <span className="text-xs font-bold text-navy/60">
+                                {courseToEdit.brochure ? "Change Brochure" : "Upload Brochure"}
+                              </span>
+                              <input 
+                                type="file" 
+                                className="hidden" 
+                                accept=".pdf,.doc,.docx"
+                                onChange={(e) => handleBrochureUpload(e, 'edit')} 
+                              />
+                            </label>
+                            {courseToEdit.brochure && (
+                              <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">
+                                <CheckCircle2 size={14} />
+                                <span className="text-[10px] font-bold truncate max-w-[120px]">
+                                  {courseToEdit.brochure.split('/').pop()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
                         <div>
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Active Timing Slots</label>
                           <div className="flex flex-wrap gap-2">
@@ -790,11 +907,12 @@ export default function AdminCoursesPage() {
                               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₹</span>
                               <input 
                                 type="number"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-4 py-2.5 text-sm focus:border-navy outline-none"
+                                className={`w-full bg-slate-50 border rounded-lg pl-8 pr-4 py-2.5 text-sm outline-none transition-all ${errors.price ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
                                 value={courseToEdit.price}
                                 onChange={e => setCourseToEdit({...courseToEdit, price: e.target.value})}
                               />
                             </div>
+                            {errors.price && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.price}</p>}
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Installments</label>

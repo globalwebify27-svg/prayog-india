@@ -18,7 +18,8 @@ export async function POST(req) {
     const { 
       name, phone, dob, address, blood_group, emergency_contact, image,
       father_name, mother_name, gender, qualification, school_college,
-      last_qualification_year, id_type, id_number, id_image
+      last_qualification_year, id_type, id_number, id_image, school_id_card,
+      school_id_number
     } = await req.json();
 
     // Check if profile is complete (Strict institutional requirements)
@@ -30,7 +31,9 @@ export async function POST(req) {
       address && 
       dob && 
       id_number && 
-      image // Profile photo is mandatory for ID cards
+      image && 
+      school_id_card &&
+      school_id_number // Added school ID number requirement
     ) ? 1 : 0;
 
     // Update profile
@@ -40,14 +43,16 @@ export async function POST(req) {
         emergency_contact = ?, image = ?, father_name = ?, mother_name = ?, 
         gender = ?, qualification = ?, school_college = ?, 
         last_qualification_year = ?, id_type = ?, id_number = ?, 
-        id_image = ?, profile_completed = ? 
+        id_image = ?, school_id_card = ?, school_id_number = ?, 
+        profile_completed = ? 
        WHERE id = ?`,
       [
         name, phone, dob || null, address, blood_group, 
         emergency_contact, image || null, father_name, mother_name, 
         gender, qualification, school_college, 
         last_qualification_year, id_type, id_number, 
-        id_image || null, isComplete, userId
+        id_image || null, school_id_card || null, school_id_number || null, 
+        isComplete, userId
       ]
     );
 

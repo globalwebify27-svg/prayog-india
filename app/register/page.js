@@ -68,6 +68,46 @@ function RegisterForm() {
     isInstallment: true
   });
 
+  const [errors, setErrors] = useState({});
+
+  const validateStep = () => {
+    let newErrors = {};
+    if (step === 1) {
+      if (!formData.courseId) newErrors.courseId = "Please select a specific program to continue.";
+    } else if (step === 2) {
+      if (!formData.name.trim()) newErrors.name = "Legal name is required for institutional records.";
+      
+      if (!formData.email.trim()) {
+        newErrors.email = "Institutional email is required.";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Please enter a valid institutional email address.";
+      }
+
+      const phoneClean = formData.phone.replace(/[^0-9]/g, '');
+      if (!formData.phone.trim()) {
+        newErrors.phone = "Mobile number is required.";
+      } else if (phoneClean.length < 10) {
+        newErrors.phone = "Mobile number must be at least 10 digits.";
+      }
+
+      if (!formData.emergencyContact.trim()) {
+        newErrors.emergencyContact = "Emergency contact number is required.";
+      }
+
+      if (!formData.password) {
+        newErrors.password = "Security password is required.";
+      } else if (formData.password.length < 6) {
+        newErrors.password = "Password must be at least 6 characters long.";
+      }
+
+      if (formData.confirmPassword !== formData.password) {
+        newErrors.confirmPassword = "Passwords do not match.";
+      }
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
     setIsValidatingCoupon(true);
@@ -154,25 +194,17 @@ function RegisterForm() {
   };
 
   const nextStep = () => {
-    if (step === 1 && !formData.courseId) {
-      alert("Please select a program to continue.");
-      return;
+    if (validateStep()) {
+      setStep(prev => Math.min(prev + 1, 3));
     }
-    if (step === 2) {
-      if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.emergencyContact) {
-        alert("Please fill all identity fields including emergency contact.");
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        alert("Passwords do not match!");
-        return;
-      }
-    }
-    setStep(prev => Math.min(prev + 1, 3));
   };
-  const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
+  const prevStep = () => {
+    setErrors({});
+    setStep(prev => Math.max(prev - 1, 1));
+  };
 
   const handleRegister = async () => {
+    if (!validateStep()) return;
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/register", {
@@ -348,13 +380,20 @@ function RegisterForm() {
                       disabled={isLocked}
                       value={formData.courseId} 
                       onChange={handleInputChange} 
-                      className={`w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy text-sm font-semibold ${isLocked ? 'opacity-70 cursor-not-allowed shadow-inner' : ''}`}
+                      className={`w-full px-4 py-3 bg-slate-50 border rounded-lg outline-none focus:border-navy text-sm font-semibold transition-all ${
+                        errors.courseId ? "border-rose-300 bg-rose-50/30" : "border-slate-200"
+                      } ${isLocked ? 'opacity-70 cursor-not-allowed shadow-inner' : ''}`}
                     >
                       <option value="">-- Choose Course --</option>
                       {filteredCourses.map(c => (
                         <option key={c.id} value={c.id}>{c.title}</option>
                       ))}
                     </select>
+                    {errors.courseId && (
+                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                        <AlertCircle size={10} /> {errors.courseId}
+                      </p>
+                    )}
                     {filteredCourses.length === 0 && (
                       <p className="text-[10px] text-amber-600 font-bold ml-1 italic">No {formData.mode} courses available for this specialization.</p>
                     )}
@@ -421,43 +460,101 @@ function RegisterForm() {
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Legal name</label>
                     <div className="relative group">
-                      <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
-                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Rahul Sharma" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" />
+                      <User size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.name ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
+                      <input 
+                        type="text" 
+                        name="name" 
+                        value={formData.name} 
+                        onChange={handleInputChange} 
+                        placeholder="Rahul Sharma" 
+                        className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
+                          errors.name ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                        }`} 
+                      />
                     </div>
+                    {errors.name && (
+                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                        <AlertCircle size={10} /> {errors.name}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Institutional Email</label>
                     <div className="relative group">
-                      <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
-                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="name@email.com" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" />
+                      <Mail size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.email ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
+                      <input 
+                        type="email" 
+                        name="email" 
+                        value={formData.email} 
+                        onChange={handleInputChange} 
+                        placeholder="name@email.com" 
+                        className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
+                          errors.email ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                        }`} 
+                      />
                     </div>
+                    {errors.email && (
+                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                        <AlertCircle size={10} /> {errors.email}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Mobile number</label>
                     <div className="relative group">
-                      <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
-                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 70330XXXXX" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" />
+                      <Phone size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.phone ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
+                      <input 
+                        type="tel" 
+                        name="phone" 
+                        value={formData.phone} 
+                        onChange={handleInputChange} 
+                        placeholder="+91 70330XXXXX" 
+                        className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
+                          errors.phone ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                        }`} 
+                      />
                     </div>
+                    {errors.phone && (
+                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                        <AlertCircle size={10} /> {errors.phone}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Emergency Contact</label>
                     <div className="relative group">
-                      <Smartphone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
-                      <input type="tel" name="emergencyContact" value={formData.emergencyContact} onChange={handleInputChange} placeholder="Guardian's Number" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" />
+                      <Smartphone size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.emergencyContact ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
+                      <input 
+                        type="tel" 
+                        name="emergencyContact" 
+                        value={formData.emergencyContact} 
+                        onChange={handleInputChange} 
+                        placeholder="Guardian's Number" 
+                        className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
+                          errors.emergencyContact ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                        }`} 
+                      />
                     </div>
+                    {errors.emergencyContact && (
+                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                        <AlertCircle size={10} /> {errors.emergencyContact}
+                      </p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Secure password</label>
                     <div className="relative group">
-                      <LockIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
+                      <LockIcon size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.password ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
                       <input 
                         type={showPassword ? "text" : "password"} 
                         name="password" 
                         value={formData.password} 
                         onChange={handleInputChange} 
                         placeholder="••••••••" 
-                        className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
+                        className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
+                          errors.password ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                        }`} 
                       />
                       <button 
                         type="button"
@@ -467,12 +564,17 @@ function RegisterForm() {
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
+                    {errors.password && (
+                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                        <AlertCircle size={10} /> {errors.password}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Confirm password</label>
                     <div className="relative group">
-                      <LockIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
+                      <LockIcon size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.confirmPassword ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
                       <input 
                         type={showConfirmPassword ? "text" : "password"} 
                         name="confirmPassword" 
@@ -480,8 +582,8 @@ function RegisterForm() {
                         onChange={handleInputChange} 
                         placeholder="••••••••" 
                         className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-lg outline-none transition-all text-sm font-medium ${
-                          formData.confirmPassword && formData.password !== formData.confirmPassword 
-                            ? "border-rose-300 focus:border-rose-500" 
+                          errors.confirmPassword
+                            ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" 
                             : "border-slate-200 focus:border-navy focus:bg-white"
                         }`} 
                       />
@@ -493,9 +595,9 @@ function RegisterForm() {
                         {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
-                    {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                    {errors.confirmPassword && (
                       <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
-                        <AlertCircle size={10} /> Passwords do not match
+                        <AlertCircle size={10} /> {errors.confirmPassword}
                       </p>
                     )}
                   </div>

@@ -52,8 +52,18 @@ export default function StudentDashboard() {
       const result = await res.json();
       if (result.success) {
         setData(result.data);
-        // Show profile prompt if not completed
-        if (result.data.user && !result.data.user.profile_completed) {
+        
+        // Dynamic Profile Completion Check (Background)
+        const u = result.data.user;
+        const essentialFields = [
+          u.father_name, u.mother_name, u.gender, 
+          u.qualification, u.address, u.dob, 
+          u.id_number, u.image, u.school_id_card, u.school_id_number
+        ];
+        const isActuallyComplete = essentialFields.every(f => f && String(f).trim() !== "");
+        
+        // Show profile prompt only if missing essential data
+        if (u && !isActuallyComplete) {
           setShowProfilePrompt(true);
         }
       }
@@ -103,6 +113,19 @@ export default function StudentDashboard() {
 
   const activeLiveBatch = enrollments.find(e => isLiveNow(e));
   const activeMeetingLink = activeLiveBatch?.meeting_link;
+
+  // Dynamic Profile Fields for Strength and Checklist
+  const profileFields = [
+    { label: "Family Details", val: user.father_name && user.mother_name },
+    { label: "Identity Image", val: user.image },
+    { label: "Academic Records", val: user.qualification && user.school_college },
+    { label: "Basic Info (DOB/Gender)", val: user.dob && user.gender },
+    { label: "Verification ID", val: user.id_number },
+    { label: "School ID/Roll Number", val: user.school_id_number },
+    { label: "School ID Card", val: user.school_id_card }
+  ];
+  const completedCount = profileFields.filter(f => f.val).length;
+  const profilePercent = Math.round((completedCount / profileFields.length) * 100);
 
   return (
     <div className="space-y-8 font-body">
@@ -336,13 +359,12 @@ export default function StudentDashboard() {
               {/* Abstract Background Element */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl" />
               
-              {/* Hide close button to force completion */}
-              {/* <button 
+              <button 
                 onClick={() => setShowProfilePrompt(false)}
                 className="absolute top-6 right-6 text-slate-400 hover:text-navy transition-colors p-1"
               >
                 <X size={20} />
-              </button> */}
+              </button>
 
               <div className="relative z-10 text-center">
                 <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center text-navy mx-auto mb-6 shadow-inner">
@@ -352,57 +374,33 @@ export default function StudentDashboard() {
                 <h2 className="text-2xl font-bold text-slate-900 mb-2">Institutional Onboarding</h2>
                 
                 {/* Completion Percentage */}
-                {(() => {
-                  const fields = [
-                    user.father_name, user.mother_name, user.image, 
-                    user.qualification, user.school_college, user.address, 
-                    user.dob, user.id_number, user.gender
-                  ];
-                  const completed = fields.filter(f => f).length;
-                  const percent = Math.round((completed / fields.length) * 100);
-                  return (
-                    <div className="mb-8">
-                      <div className="flex justify-between items-center mb-2 px-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profile Strength</p>
-                        <p className="text-xs font-bold text-navy">{percent}%</p>
-                      </div>
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${percent}%` }}
-                          className="h-full bg-gradient-to-r from-navy to-blue-600"
-                        />
-                      </div>
-                    </div>
-                  );
-                })()}
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-2 px-1">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profile Strength</p>
+                    <p className="text-xs font-bold text-navy">{profilePercent}%</p>
+                  </div>
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${profilePercent}%` }}
+                      className="h-full bg-gradient-to-r from-navy to-blue-600"
+                    />
+                  </div>
+                </div>
 
                 <p className="text-slate-500 text-sm leading-relaxed mb-8">
                   Please complete your official student profile to ensure your certification records and ID cards are generated correctly.
                 </p>
 
                 <div className="space-y-3 mb-8 text-left">
-                  {/* Reordered Dynamic Checklist */}
-                  <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${user.father_name && user.mother_name ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-                    {user.father_name && user.mother_name ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <Clock size={16} className="text-slate-400 shrink-0" />}
-                    <p className={`text-xs font-bold uppercase tracking-tight ${user.father_name && user.mother_name ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {user.father_name && user.mother_name ? 'Family Details Verified' : 'Father & Mother Name Pending'}
-                    </p>
-                  </div>
-
-                  <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${user.image ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-                    {user.image ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <Clock size={16} className="text-slate-400 shrink-0" />}
-                    <p className={`text-xs font-bold uppercase tracking-tight ${user.image ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {user.image ? 'Identity Image Uploaded' : 'Identity Image Pending'}
-                    </p>
-                  </div>
-
-                  <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${user.qualification && user.school_college ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-                    {user.qualification && user.school_college ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <Clock size={16} className="text-slate-400 shrink-0" />}
-                    <p className={`text-xs font-bold uppercase tracking-tight ${user.qualification && user.school_college ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {user.qualification && user.school_college ? 'Academic Records Verified' : 'Academic Records Pending'}
-                    </p>
-                  </div>
+                  {profileFields.map((f, i) => (
+                    <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${f.val ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
+                      {f.val ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <Clock size={16} className="text-slate-400 shrink-0" />}
+                      <p className={`text-[10px] font-bold uppercase tracking-tight ${f.val ? 'text-emerald-700' : 'text-slate-400'}`}>
+                        {f.label} {f.val ? 'Verified' : 'Pending'}
+                      </p>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="flex flex-col gap-3">

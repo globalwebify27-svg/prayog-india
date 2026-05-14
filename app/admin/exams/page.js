@@ -36,6 +36,23 @@ export default function AdminExamsPage() {
     start_time: "",
     end_time: ""
   });
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    let newErrors = {};
+    if (!newExam.title.trim()) newErrors.title = "Title is required.";
+    if (!newExam.course_id) newErrors.course_id = "Course selection is required.";
+    if (!newExam.start_time) newErrors.start_time = "Start time is required.";
+    if (!newExam.end_time) newErrors.end_time = "End time is required.";
+    if (newExam.start_time && newExam.end_time && new Date(newExam.start_time) >= new Date(newExam.end_time)) {
+      newErrors.end_time = "End time must be after start time.";
+    }
+    if (!newExam.duration || newExam.duration <= 0) newErrors.duration = "Invalid duration.";
+    if (!newExam.total_marks || newExam.total_marks <= 0) newErrors.total_marks = "Invalid marks.";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   useEffect(() => {
     fetchExams();
@@ -56,8 +73,11 @@ export default function AdminExamsPage() {
 
   const handleCreateExam = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+    
     const method = isEditing ? "PUT" : "POST";
     const payload = isEditing ? { ...newExam, id: editingId } : newExam;
+    setErrors({});
 
     const res = await fetch("/api/admin/exams", {
       method,
@@ -71,6 +91,7 @@ export default function AdminExamsPage() {
       setEditingId(null);
       setNewExam({ title: "", description: "", course_id: "", duration: 60, total_marks: 100, type: "objective", start_time: "", end_time: "" });
       fetchExams();
+      setErrors({});
     }
   };
 
@@ -223,10 +244,11 @@ export default function AdminExamsPage() {
                 <input 
                   required
                   placeholder="e.g. Mid-Term Machine Learning Quiz"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all"
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm outline-none transition-all ${errors.title ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`}
                   value={newExam.title}
                   onChange={e => setNewExam({...newExam, title: e.target.value})}
                 />
+                {errors.title && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.title}</p>}
               </div>
 
               <div className="space-y-1.5">
@@ -234,13 +256,14 @@ export default function AdminExamsPage() {
                 <select 
                   required
                   disabled={isEditing}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none cursor-pointer focus:border-navy disabled:opacity-60"
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm outline-none cursor-pointer transition-all ${errors.course_id ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy disabled:opacity-60'}`}
                   value={newExam.course_id}
                   onChange={e => setNewExam({...newExam, course_id: e.target.value})}
                 >
                   <option value="">Select Course</option>
                   {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                 </select>
+                {errors.course_id && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.course_id}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-6">
@@ -249,20 +272,22 @@ export default function AdminExamsPage() {
                   <input 
                     type="datetime-local"
                     required
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy"
+                    className={`w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm outline-none transition-all ${errors.start_time ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`}
                     value={newExam.start_time}
                     onChange={e => setNewExam({...newExam, start_time: e.target.value})}
                   />
+                  {errors.start_time && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.start_time}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">End Date & Time</label>
                   <input 
                     type="datetime-local"
                     required
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy"
+                    className={`w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm outline-none transition-all ${errors.end_time ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`}
                     value={newExam.end_time}
                     onChange={e => setNewExam({...newExam, end_time: e.target.value})}
                   />
+                  {errors.end_time && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.end_time}</p>}
                 </div>
               </div>
 

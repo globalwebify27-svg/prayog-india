@@ -12,7 +12,8 @@ import {
   Star,
   Layers,
   Clock,
-  ArrowUpRight
+  ArrowUpRight,
+  FileText
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -164,33 +165,49 @@ export default function CoursesPage() {
                   </div>
                 </div>
 
-                <div className={`flex flex-col flex-grow ${viewMode === 'grid' ? 'p-6' : 'px-6'}`}>
-                  <div className="flex items-center space-x-2 text-[10px] font-bold text-amber-500 uppercase mb-2">
+                <div className={`flex flex-col flex-grow ${viewMode === 'grid' ? 'px-6 py-5' : 'px-6'}`}>
+                  <div className="flex items-center space-x-2 text-[10px] font-bold text-amber-500 uppercase mb-1.5">
                     <Star size={12} className="fill-amber-500" />
                     <span>{course.rating} • {course.level}</span>
                   </div>
-                  <h3 className={`${viewMode === 'grid' ? 'text-lg' : 'text-base'} font-bold text-slate-900 mb-2 leading-snug group-hover:text-navy transition-colors`}>
+                  <h3 className={`${viewMode === 'grid' ? 'text-xl' : 'text-base'} font-extrabold text-navy mb-2 leading-tight group-hover:text-primary transition-colors line-clamp-1`}>
                     {course.title}
                   </h3>
-                  {viewMode === 'grid' && (
-                    <p className="text-slate-500 text-xs leading-relaxed mb-6 flex-grow line-clamp-2">
+                  {viewMode === 'grid' && course.description && (
+                    <p className="text-slate-500 text-[11px] leading-relaxed mb-6 line-clamp-2">
                       {course.description}
                     </p>
                   )}
                   
-                  <div className={`flex items-center justify-between ${viewMode === 'grid' ? 'pt-5 border-t border-slate-100' : ''}`}>
-                    <div className="flex items-center space-x-6">
+                  <div className={`mt-auto flex items-center justify-between ${viewMode === 'grid' ? 'pt-5 border-t border-slate-100' : ''}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                       <div>
                         <span className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5 tracking-tight">Investment</span>
                         <span className="block text-lg font-bold text-navy">₹{Number(course.price).toLocaleString('en-IN')}</span>
                       </div>
-                      <Link href={`/courses/${course.id}`} className="flex items-center space-x-1.5 text-[10px] font-bold text-navy hover:text-primary transition-colors uppercase">
-                        <BookOpen size={14} />
-                        <span>Learning Path</span>
-                      </Link>
+                      
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Link href={`/courses/${course.id}`} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-navy/5 text-navy rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-navy hover:text-white transition-all">
+                          <BookOpen size={12} />
+                          <span>Learning Path</span>
+                        </Link>
+                        
+                        {course.brochure && (
+                          <a 
+                            href={course.brochure} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-primary/20 text-primary rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-primary hover:text-navy transition-all"
+                          >
+                            <FileText size={12} />
+                            <span>Brochure</span>
+                          </a>
+                        )}
+                      </div>
                     </div>
-                    <Link href={`/register?course=${course.id}`} className="w-10 h-10 rounded-lg bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm">
-                      <ArrowUpRight size={18} />
+                    
+                    <Link href={`/register?course=${course.id}`} className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm group-hover:shadow-md shrink-0">
+                      <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </Link>
                   </div>
                 </div>

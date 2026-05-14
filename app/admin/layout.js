@@ -23,7 +23,8 @@ import {
   ChevronDown,
   Clock,
   IdCard,
-  Tag
+  Tag,
+  Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
@@ -65,18 +66,26 @@ const menuItems = [
   },
   { 
     icon: CreditCard, 
-    label: "Payments", 
+    label: "Finance & Accounting", 
     href: "/admin/payments", 
     roles: ["admin"],
     subItems: [
       { label: "Payment Ledger", href: "/admin/payments", icon: CreditCard },
-      { label: "Promo Codes", href: "/admin/promos", icon: Tag },
     ]
   },
-  { icon: Layout, label: "Workshops", href: "/admin/workshops", roles: ["admin"] },
-  { icon: Image, label: "Media Gallery", href: "/admin/gallery", roles: ["admin"] },
+  { 
+    icon: Layout, 
+    label: "CMS Hub", 
+    href: "/admin/promos", 
+    roles: ["admin"],
+    subItems: [
+      { label: "Seasonal Programs", href: "/admin/promos", icon: Zap },
+      { label: "Workshop Master", href: "/admin/workshops", icon: Layout },
+      { label: "Media Gallery", href: "/admin/gallery", icon: Image },
+      { label: "Success Narratives", href: "/admin/stories", icon: BookOpen },
+    ]
+  },
   { icon: Award, label: "Certificates", href: "/admin/certificates", roles: ["admin"] },
-  { icon: BookOpen, label: "Success Narratives", href: "/admin/stories", roles: ["admin"] },
 ];
 
 function SidebarItem({ item, pathname }) {
@@ -190,7 +199,7 @@ export default function AdminLayout({ children }) {
             initial={{ x: -300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -300, opacity: 0 }}
-            className="fixed lg:static z-50 w-64 h-screen bg-navy text-white flex flex-col shadow-lg shrink-0"
+            className="fixed lg:static z-50 w-72 h-screen bg-navy text-white flex flex-col shadow-lg shrink-0"
           >
             <div className="p-6 flex items-center justify-between border-b border-white/5">
               <Link href="/">

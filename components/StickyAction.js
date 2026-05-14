@@ -14,8 +14,26 @@ export default function StickyAction() {
     seconds: "00"
   });
 
+  const [promo, setPromo] = useState(null);
+
   useEffect(() => {
-    const targetDate = new Date("June 15, 2026 00:00:00").getTime();
+    const fetchPromo = async () => {
+      try {
+        const res = await fetch("/api/promos", { cache: 'no-store' });
+        const data = await res.json();
+        if (data && data.length > 0) {
+          setPromo(data[0]);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    };
+    fetchPromo();
+  }, []);
+
+  useEffect(() => {
+    if (!promo || !promo.target_date) return;
+    const targetDate = new Date(promo.target_date).getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -47,11 +65,11 @@ export default function StickyAction() {
       clearInterval(interval);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [promo]);
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {(isVisible && promo) && (
         <motion.div
           initial={{ y: 100 }}
           animate={{ y: 0 }}
@@ -64,7 +82,7 @@ export default function StickyAction() {
                 <Clock className="text-secondary" size={20} />
               </div>
               <p className="text-secondary font-bold text-sm md:text-base text-center md:text-left">
-                Limited seats left for <span className="underline decoration-2">Robotics Workshop 2026</span>. Book yours now!
+                Limited seats left for <span className="underline decoration-2">{promo?.title || "Special Program"}</span>. Book yours now!
               </p>
             </div>
 
@@ -86,7 +104,7 @@ export default function StickyAction() {
                 ))}
               </div>
 
-              <Link href="/register" className="bg-secondary text-white px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-black transition-colors group shadow-lg">
+              <Link href={promo?.registration_link || "/register"} className="bg-secondary text-white px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-black transition-colors group shadow-lg">
                 Register Now
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
