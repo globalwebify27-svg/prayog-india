@@ -3,7 +3,7 @@ import { jwtVerify } from "jose";
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
 
@@ -42,7 +42,7 @@ export async function middleware(request) {
 
     } catch (error) {
       // Invalid token? Redirect to login
-      console.error("Middleware Auth Error:", error.message);
+      console.error("Proxy Auth Error:", error.message);
       const loginUrl = new URL("/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
