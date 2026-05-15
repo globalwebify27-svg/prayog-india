@@ -9,7 +9,8 @@ const IdCardTemplate = ({
   validity = "2024-2025",
   qrCodeData = "https://prayogindiarobotics.com/verify",
   bloodGroup = "O+",
-  emergencyContact = "+91 98765 43210"
+  emergencyContact = "+91 98765 43210",
+  logoUrl = "/assets/logo.png"
 }) => {
   return (
     <div id="id-card-element" className="w-[320px] h-[500px] bg-white rounded-[24px] shadow-2xl overflow-hidden font-body relative border-2 border-slate-100">
@@ -19,7 +20,7 @@ const IdCardTemplate = ({
         <div className="absolute top-20 -left-10 w-32 h-32 bg-primary/10 rounded-full blur-xl"></div>
 
         <div className="relative pt-6 px-6 flex flex-col items-center text-center">
-          <img src="/assets/logo.png" alt="Logo" className="h-10 brightness-200 mb-2" />
+          <img src={logoUrl} alt="Logo" className="h-10 brightness-200 mb-2 object-contain" />
           <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Student Identity Card</h2>
           <p className="text-[8px] text-white/60 uppercase font-medium mt-1">Official Academic Credential</p>
         </div>

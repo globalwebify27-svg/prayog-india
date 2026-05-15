@@ -19,8 +19,10 @@ import {
 import IdCardTemplate from "@/components/IdCardTemplate";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { useSettings } from "@/components/SettingsContext";
 
 export default function IdCardManagement() {
+  const settings = useSettings();
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -401,6 +403,7 @@ export default function IdCardManagement() {
                       qrCodeData={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com'}/verify/${selectedStudent.id}`}
                       bloodGroup={selectedStudent.blood_group}
                       emergencyContact={selectedStudent.emergency_contact}
+                      logoUrl={settings?.logo_url}
                     />
                   </div>
                   

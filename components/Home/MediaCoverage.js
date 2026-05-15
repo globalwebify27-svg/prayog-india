@@ -186,24 +186,6 @@ export default function MediaCoverage() {
           )}
         </div>
 
-        {/* Media Partners / Logos Sub-section */}
-        <div className="mt-12 pt-12 border-t border-slate-100">
-          <div className="flex flex-wrap items-center justify-center gap-12 md:gap-24 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700">
-            {/* Mock logos or placeholders */}
-            <div className="flex items-center space-x-3">
-              <Tv size={24} className="text-navy" />
-              <span className="font-bold text-xl text-navy tracking-tighter italic">NATIONAL NEWS</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Newspaper size={24} className="text-navy" />
-              <span className="font-black text-xl text-navy uppercase tracking-widest">Global Times</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Award size={24} className="text-navy" />
-              <span className="font-bold text-xl text-navy tracking-tight">TECH INSIGHTS</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Lightbox / Slider Modal */}

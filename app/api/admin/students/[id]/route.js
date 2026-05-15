@@ -86,6 +86,12 @@ export async function DELETE(req, { params }) {
     // Delete certificates
     await pool.query("DELETE FROM certificates WHERE user_id = ?", [id]);
 
+    // Delete exam submissions
+    await pool.query("DELETE FROM exam_submissions WHERE user_id = ?", [id]);
+
+    // Delete material completions
+    await pool.query("DELETE FROM material_completions WHERE student_id = ?", [id]);
+
     // Delete enrollments
     await pool.query("DELETE FROM enrollments WHERE user_id = ?", [id]);
 

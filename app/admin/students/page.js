@@ -37,6 +37,7 @@ export default function StudentsAdmin() {
   const [courseFilter, setCourseFilter] = useState("all");
   const [batchFilter, setBatchFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
+  const [methodFilter, setMethodFilter] = useState("all");
   const [menuOpen, setMenuOpen] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -49,7 +50,8 @@ export default function StudentsAdmin() {
     course: "",
     mode: "offline",
     batch: "Morning (9AM - 11AM)",
-    isInstallment: true
+    isInstallment: true,
+    payment_method: "online"
   });
   const [errors, setErrors] = useState({});
 
@@ -164,7 +166,8 @@ export default function StudentsAdmin() {
           course: courses[0]?.title || "",
           mode: "offline",
           batch: "Morning (9AM - 11AM)",
-          isInstallment: true
+          isInstallment: true,
+          payment_method: "online"
         });
         setErrors({});
         showAlert("Success", "New student enrollment has been initialized successfully.", "success");
@@ -219,7 +222,8 @@ export default function StudentsAdmin() {
           return (modeFilter === "all" || e.mode === modeFilter) &&
                  (courseFilter === "all" || e.course_name === courseFilter) &&
                  (batchFilter === "all" || e.batch_name === batchFilter) &&
-                 (paymentFilter === "all" || e.payment_status === paymentFilter);
+                 (paymentFilter === "all" || e.payment_status === paymentFilter) &&
+                 (methodFilter === "all" || e.payment_method === methodFilter);
         });
       }
     }
@@ -296,6 +300,15 @@ export default function StudentsAdmin() {
                 <option value="paid">Paid</option>
                 <option value="partial">Partial</option>
                 <option value="pending">Pending</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Payment Method</label>
+              <select value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:border-navy outline-none transition-all">
+                <option value="all">All Methods</option>
+                <option value="online">Online</option>
+                <option value="cash">Cash</option>
+                <option value="bank_transfer">Bank Transfer</option>
               </select>
             </div>
           </motion.div>
@@ -600,6 +613,20 @@ export default function StudentsAdmin() {
                         <option value="false">Lump-sum Payment</option>
                       </select>
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-slate-500">Initial Payment Mode</label>
+                    <select 
+                      value={newStudent.payment_method}
+                      onChange={(e) => setNewStudent({...newStudent, payment_method: e.target.value})}
+                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
+                    >
+                      <option value="online">Online (Gateway)</option>
+                      <option value="cash">Cash Payment</option>
+                      <option value="bank_transfer">Bank Transfer</option>
+                    </select>
+                    <p className="text-[9px] text-slate-400 font-medium italic mt-1">Select 'Cash' for walk-in enrollments to maintain accurate cashflow records.</p>
                   </div>
                 </div>
 

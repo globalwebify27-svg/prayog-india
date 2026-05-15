@@ -13,13 +13,20 @@ const montserrat = Montserrat({
 export const metadata = {
   title: "Prayog India | Premier Robotics & STEM Education",
   description: "Empowering the next generation with hands-on robotics, AI, and STEM workshops.",
+  icons: {
+    icon: "/icon.png?v=2",
+  },
 };
+
+import { SettingsProvider } from "@/components/SettingsContext";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${montserrat.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white text-slate-900 font-body">
-        <main className="flex-grow">{children}</main>
+        <SettingsProvider>
+          <main className="flex-grow">{children}</main>
+        </SettingsProvider>
       </body>
     </html>
   );

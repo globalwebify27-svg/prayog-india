@@ -5,8 +5,10 @@ import Link from "next/link";
 import { 
   User, ChevronDown, Search, ShoppingCart, Menu, X
 } from "lucide-react";
+import { useSettings } from "./SettingsContext";
 
 export default function Header() {
+  const settings = useSettings();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -31,7 +33,7 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center">
               <img 
-                src="/assets/logo.png" 
+                src={settings?.logo_url || "/assets/logo.png"} 
                 alt="Prayog India" 
                 className={`transition-all duration-500 ${isScrolled ? "h-8 md:h-9" : "h-9 md:h-12"} object-contain`}
               />

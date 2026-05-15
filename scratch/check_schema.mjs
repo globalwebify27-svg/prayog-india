@@ -1,20 +1,13 @@
-import mysql from 'mysql2/promise';
+import pool from "../lib/db.js";
 
 async function checkSchema() {
-  const connection = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'prayog_india',
-  });
-
   try {
-    const [rows] = await connection.query("DESCRIBE courses");
-    console.log("Courses schema:", JSON.stringify(rows, null, 2));
+    const [rows] = await pool.query("DESCRIBE enrollments");
+    console.log("Enrollments Table Schema:", rows);
+    process.exit(0);
   } catch (error) {
-    console.error("Error describing courses table:", error);
-  } finally {
-    await connection.end();
+    console.error("Error:", error);
+    process.exit(1);
   }
 }
 

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { sendMail, getOnboardingEmailTemplate } from "@/lib/mailer";
 
 export async function POST(req) {
   try {
-    const { name, email, phone, emergency_contact, password, course_id, mode, batch, isInstallment, coupon_code } = await req.json();
+    const { name, email, phone, emergency_contact, password, course_id, mode, batch, isInstallment, coupon_code, payment_method } = await req.json();
 
     // Check if user already exists
     const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
@@ -58,8 +59,8 @@ export async function POST(req) {
 
     // 5. Create Enrollment
     const [enrollResult] = await pool.execute(
-      "INSERT INTO enrollments (user_id, course_id, batch_id, total_amount, payment_status) VALUES (?, ?, ?, ?, ?)",
-      [userId, course_id, batchId, amount, isInstallment ? 'partial' : 'pending']
+      "INSERT INTO enrollments (user_id, course_id, batch_id, total_amount, payment_status, payment_method) VALUES (?, ?, ?, ?, ?, ?)",
+      [userId, course_id, batchId, amount, isInstallment ? 'partial' : 'pending', payment_method || 'online']
     );
     const enrollmentId = enrollResult.insertId;
 
@@ -73,10 +74,19 @@ export async function POST(req) {
         dueDate.setMonth(dueDate.getMonth() + i);
         
         await pool.execute(
-          "INSERT INTO installments (enrollment_id, amount, due_date, status) VALUES (?, ?, ?, ?)",
-          [enrollmentId, installmentAmount, dueDate, i === 0 ? 'paid' : 'pending']
+          "INSERT INTO installments (enrollment_id, amount, due_date, status, payment_method) VALUES (?, ?, ?, ?, ?)",
+          [enrollmentId, installmentAmount, dueDate, i === 0 ? 'paid' : 'pending', i === 0 ? (payment_method || 'online') : 'online']
         );
       }
+    }
+    
+    // 7. Send Welcome Email
+    try {
+      const emailHtml = getOnboardingEmailTemplate(name, email, password || "Prayog@2026");
+      await sendMail(email, "Welcome to Prayog India - Your Student Account", emailHtml);
+    } catch (mailError) {
+      console.error("Failed to send onboarding mail:", mailError);
+      // Don't fail registration if mail fails, but log it
     }
 
     return NextResponse.json({ 
