@@ -84,12 +84,14 @@ function RegisterForm() {
     emergencyContact: "",
     password: "",
     confirmPassword: "",
-    specialization: "Robotics",
+    specialization: "Internships",
     courseId: "",
     mode: "Offline",
     batch: "Morning (9AM - 11AM)",
     isInstallment: true
   });
+
+  const [dynamicCategories, setDynamicCategories] = useState(["Internships", "1:1 Training"]);
 
   const [errors, setErrors] = useState({});
 
@@ -115,6 +117,8 @@ function RegisterForm() {
 
       if (!formData.emergencyContact.trim()) {
         newErrors.emergencyContact = "Emergency contact number is required.";
+      } else if (formData.emergencyContact.length < 10) {
+        newErrors.emergencyContact = "Emergency contact must be a valid 10-digit mobile number.";
       }
 
       if (!formData.password) {
@@ -154,37 +158,44 @@ function RegisterForm() {
     }
   };
 
-  const specializationMap = {
-    "Robotics": "Robotics",
-    "Artificial Intelligence": "AI & ML",
-    "Aviation": "Drone Tech",
-    "Electronics": "IoT"
-  };
-
-  const categoryMap = {
-    "Robotics": "Robotics",
-    "AI & ML": "Artificial Intelligence",
-    "Drone Tech": "Aviation",
-    "IoT": "Electronics"
-  };
-
   useEffect(() => {
     fetch("/api/courses")
       .then(res => res.json())
       .then(data => {
         setCourses(data);
+        
+        // Extract unique specializations
+        const specs = new Set();
+        data.forEach(course => {
+          if (course.specializations) {
+            course.specializations.forEach(s => specs.add(s.name));
+          }
+        });
+        const allSpecs = ["Internships", "1:1 Training", ...Array.from(specs)];
+        setDynamicCategories(allSpecs);
+
         if (preSelectedCourseId) {
           const selected = data.find(c => c.id == preSelectedCourseId);
           if (selected) {
+            let spec = "Internships";
+            if (selected.is_internship === 1) spec = "Internships";
+            else if (selected.is_one_to_one === 1) spec = "1:1 Training";
+            else if (selected.specializations?.length > 0) spec = selected.specializations[0].name;
+
             setFormData(prev => ({
               ...prev,
               courseId: preSelectedCourseId,
-              specialization: specializationMap[selected.category] || prev.specialization,
+              specialization: spec,
               mode: selected.type || prev.mode
             }));
             if (shouldLock) {
               setIsLocked(true);
             }
+          }
+        } else {
+          // Default to first specialization
+          if (allSpecs.length > 0) {
+            setFormData(prev => ({ ...prev, specialization: allSpecs[0] }));
           }
         }
       })
@@ -193,7 +204,11 @@ function RegisterForm() {
 
   const availableModesForSpecialization = [
     ...new Set(courses
-      .filter(c => c.category === categoryMap[formData.specialization])
+      .filter(c => {
+        if (formData.specialization === "Internships") return c.is_internship === 1;
+        if (formData.specialization === "1:1 Training") return c.is_one_to_one === 1;
+        return c.specializations && c.specializations.some(s => s.name === formData.specialization);
+      })
       .map(c => c.type))
   ];
 
@@ -204,10 +219,13 @@ function RegisterForm() {
     }
   }, [formData.specialization, availableModesForSpecialization, formData.mode, isLocked]);
 
-  const filteredCourses = courses.filter(c => 
-    c.category === categoryMap[formData.specialization] && 
-    c.type.toLowerCase() === formData.mode.toLowerCase()
-  );
+  const filteredCourses = courses.filter(c => {
+    const matchesSpec = formData.specialization === "Internships" ? c.is_internship === 1 :
+                       formData.specialization === "1:1 Training" ? c.is_one_to_one === 1 :
+                       (c.specializations && c.specializations.some(s => s.name === formData.specialization));
+    const matchesMode = c.type.toLowerCase() === formData.mode.toLowerCase();
+    return matchesSpec && matchesMode;
+  });
 
   const selectedCourse = courses.find(c => c.id == formData.courseId);
 
@@ -380,13 +398,13 @@ function RegisterForm() {
                 <div className="space-y-4">
                   <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Available Specializations</label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {["Robotics", "AI & ML", "Drone Tech", "IoT"].map(c => (
+                    {dynamicCategories.map(c => (
                       <button 
                         key={c} 
                         type="button"
                         disabled={isLocked}
                         onClick={() => setFormData({...formData, specialization: c, courseId: ""})} 
-                        className={`p-3 rounded-xl border transition-all text-xs font-bold uppercase ${formData.specialization === c ? "bg-navy text-white border-navy shadow-md" : "bg-white text-slate-400 border-slate-200 hover:border-navy"} ${isLocked ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`p-3 rounded-xl border transition-all text-[10px] font-bold uppercase ${formData.specialization === c ? "bg-navy text-white border-navy shadow-md" : "bg-white text-slate-400 border-slate-200 hover:border-navy"} ${isLocked ? 'opacity-70 cursor-not-allowed' : ''}`}
                       >
                         {c}
                       </button>
@@ -530,8 +548,13 @@ function RegisterForm() {
                         type="tel" 
                         name="phone" 
                         value={formData.phone} 
-                        onChange={handleInputChange} 
-                        placeholder="+91 70330XXXXX" 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          if (val.length <= 10) {
+                            setFormData({...formData, phone: val});
+                          }
+                        }}
+                        placeholder="70330XXXXX (10-digits)" 
                         className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
                           errors.phone ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
                         }`} 
@@ -551,8 +574,13 @@ function RegisterForm() {
                         type="tel" 
                         name="emergencyContact" 
                         value={formData.emergencyContact} 
-                        onChange={handleInputChange} 
-                        placeholder="Guardian's Number" 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          if (val.length <= 10) {
+                            setFormData({...formData, emergencyContact: val});
+                          }
+                        }}
+                        placeholder="Guardian's 10-digit Number" 
                         className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
                           errors.emergencyContact ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
                         }`} 
