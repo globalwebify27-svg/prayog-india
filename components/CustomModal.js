@@ -12,7 +12,8 @@ export default function CustomModal({
   confirmText = "Confirm", 
   cancelText = "Cancel",
   type = "info", // "info", "success", "warning", "error", "question"
-  showConfirm = true
+  showConfirm = true,
+  showCancel = true
 }) {
   const icons = {
     info: <Info className="text-blue-500" size={24} />,
@@ -73,12 +74,14 @@ export default function CustomModal({
                 </button>
               )}
               
-              <button
-                onClick={onClose}
-                className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 hover:text-navy transition-colors"
-              >
-                {cancelText}
-              </button>
+              {showCancel && (
+                <button
+                  onClick={onClose}
+                  className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 hover:text-navy transition-colors"
+                >
+                  {cancelText}
+                </button>
+              )}
             </div>
           </motion.div>
         </div>

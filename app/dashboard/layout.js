@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const menuItems = [
+const studentMenuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: BookOpen, label: "My Courses", href: "/dashboard/courses" },
   { 
@@ -37,6 +37,20 @@ const menuItems = [
   { icon: CreditCard, label: "Payments", href: "/dashboard/payments" },
   { icon: LayoutDashboard, label: "Identity Card", href: "/dashboard/idcard" },
   { icon: Award, label: "Certificates", href: "/dashboard/certificates" },
+];
+
+const teacherMenuItems = [
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: BookOpen, label: "Assigned Courses", href: "/dashboard/courses" },
+  { 
+    icon: CheckSquare, 
+    label: "Attendance", 
+    href: "/dashboard/attendance",
+    subItems: [
+      { label: "Take Attendance", href: "/dashboard/attendance", icon: CheckSquare },
+      { label: "Attendance History", href: "/dashboard/attendance/log", icon: FileText },
+    ]
+  },
 ];
 
 function SidebarItem({ item, pathname }) {
@@ -158,7 +172,7 @@ export default function StudentLayout({ children }) {
             </div>
 
             <nav className="flex-grow px-3 py-6 space-y-1">
-              {menuItems.map((item) => (
+              {(user?.role === 'teacher' ? teacherMenuItems : studentMenuItems).map((item) => (
                 <SidebarItem key={item.label} item={item} pathname={pathname} />
               ))}
             </nav>
@@ -203,7 +217,7 @@ export default function StudentLayout({ children }) {
               </button>
             )}
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest hidden md:block">
-              Student Portal
+              {user?.role === 'teacher' ? 'Faculty Portal' : 'Student Portal'}
             </div>
           </div>
 

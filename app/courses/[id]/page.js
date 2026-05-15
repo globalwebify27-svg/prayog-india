@@ -87,18 +87,30 @@ export default function CourseDetailPage() {
               <span>Back to Programs</span>
             </Link>
 
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
               <div className="h-[2px] w-8 bg-primary" />
               <span className="text-primary font-bold text-[10px] uppercase tracking-[0.3em]">
-                {course.level} Level Specialization
+                {course.level} Level
               </span>
+              {course.specializations && course.specializations.length > 0 && (
+                <>
+                  <div className="w-1 h-1 rounded-full bg-white/20" />
+                  <div className="flex flex-wrap gap-2">
+                    {course.specializations.map((spec, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-white/10 text-white/60 text-[9px] font-bold uppercase tracking-wider rounded border border-white/5">
+                        {spec.name}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight tracking-tight">
               {course.title}
             </h1>
 
-            <p className="text-white/50 text-sm md:text-base mb-8 max-w-xl leading-relaxed font-medium">
+            <p className="text-white/50 text-sm md:text-base mb-8 max-w-xl leading-relaxed font-medium line-clamp-2">
               {course.tagline || course.description}
             </p>
 
@@ -134,24 +146,22 @@ export default function CourseDetailPage() {
                 <p className="text-navy/70 text-base leading-relaxed mb-8">
                   {course.description}
                 </p>
-                {course.outcomes && (
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {(Array.isArray(course.outcomes) ? course.outcomes : JSON.parse(course.outcomes || "[]")).map((item, i) => (
-                      <div key={i} className="flex items-center gap-3 p-4 bg-white rounded-xl border border-navy/5">
-                        <CheckCircle2 size={16} className="text-primary" />
-                        <span className="text-xs font-bold text-navy uppercase tracking-wide">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Learning Path Accordion */}
               <div className="mb-16">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-2xl font-bold text-navy tracking-tight">Learning <span className="text-primary">Path</span></h2>
-                  <div className="px-3 py-1 bg-navy/5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-navy">
-                    {(materials.length > 0 ? materials.length : (course.modules ? (typeof course.modules === 'string' ? JSON.parse(course.modules) : course.modules).length : 0))} Modules
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 border-b border-navy/5 pb-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="h-1 w-12 bg-primary rounded-full" />
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">Curriculum</span>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-navy tracking-tight">Learning <span className="text-primary italic">Path</span></h2>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="px-4 py-2 bg-navy text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-navy/20">
+                      {(materials.length > 0 ? materials.length : (course.modules ? (typeof course.modules === 'string' ? JSON.parse(course.modules) : course.modules).length : 0))} Modules
+                    </div>
                   </div>
                 </div>
 
@@ -163,13 +173,17 @@ export default function CourseDetailPage() {
                           onClick={() => setActiveStep(activeStep === `mat-${i}` ? null : `mat-${i}`)}
                           className="w-full p-5 flex items-center justify-between text-left"
                         >
-                          <div className="flex items-center gap-4">
-                            <span className="text-[10px] font-bold text-primary bg-navy px-2 py-1 rounded min-w-[36px] text-center">
-                              {String(m.module_number || i + 1).padStart(2, '0')}
-                            </span>
+                          <div className="flex items-center gap-6">
+                            <div className="flex flex-col items-center">
+                              <span className="text-[9px] font-bold text-primary uppercase tracking-tighter leading-none mb-1">Module</span>
+                              <span className="text-2xl font-bold text-navy leading-none">
+                                {String(m.module_number || i + 1).padStart(2, '0')}
+                              </span>
+                            </div>
+                            <div className="h-10 w-[1px] bg-navy/5 hidden md:block" />
                             <div>
-                              <h4 className="font-bold text-navy text-sm">{m.title}</h4>
-                              {m.type && <p className="text-[10px] text-navy/40 font-bold uppercase tracking-widest mt-0.5">{m.type}</p>}
+                              <h4 className="font-bold text-navy text-base md:text-lg tracking-tight leading-tight group-hover:text-primary transition-colors">{m.title}</h4>
+                              {m.type && <p className="text-[9px] text-navy/30 font-bold uppercase tracking-[0.2em] mt-1">{m.type}</p>}
                             </div>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
@@ -213,8 +227,44 @@ export default function CourseDetailPage() {
                                       );
                                     }
                                     return (
-                                      <div className="text-sm text-navy/70 leading-relaxed whitespace-pre-wrap bg-navy/[0.03] p-4 rounded-lg border border-navy/5">
-                                        {m.content}
+                                      <div className="bg-navy/[0.03] p-6 rounded-2xl border border-navy/5 space-y-6">
+                                        {m.content.split('^').map((section, sIdx) => {
+                                          const trimmedSection = section.trim();
+                                          if (!trimmedSection) return null;
+
+                                          // Detect list structure (using '4' as bullet or standard patterns)
+                                          const hasList = trimmedSection.includes('4 ') || trimmedSection.includes(':');
+                                          
+                                          if (hasList) {
+                                            const [header, ...listParts] = trimmedSection.split(':');
+                                            const items = listParts.join(':').split('4').map(item => item.trim()).filter(Boolean);
+
+                                            return (
+                                              <div key={sIdx} className="space-y-4">
+                                                {header && (
+                                                  <h5 className="text-xs font-bold text-navy uppercase tracking-widest flex items-center gap-2">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                                    {header.trim()}
+                                                  </h5>
+                                                )}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                                                  {items.map((item, iIdx) => (
+                                                    <div key={iIdx} className="flex items-start gap-2 group">
+                                                      <ChevronRight size={12} className="text-primary mt-0.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                                                      <span className="text-sm text-navy/70 font-medium leading-tight">{item}</span>
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            );
+                                          }
+
+                                          return (
+                                            <p key={sIdx} className="text-sm text-navy/80 leading-relaxed font-medium">
+                                              {trimmedSection}
+                                            </p>
+                                          );
+                                        })}
                                       </div>
                                     );
                                   })()
@@ -254,6 +304,79 @@ export default function CourseDetailPage() {
                   )}
                 </div>
               </div>
+
+              <div className="mb-16">
+                <div className="grid md:grid-cols-2 gap-12">
+                  {/* Methodology */}
+                  {course.methodology && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Zap size={18} className="text-primary" />
+                        <h4 className="text-sm font-bold text-navy uppercase tracking-widest">Workshop Methodology</h4>
+                      </div>
+                      <p className="text-sm text-navy/60 leading-relaxed italic">
+                        {course.methodology}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Who Can Join */}
+                  {course.who_can_join && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Cpu size={18} className="text-primary" />
+                        <h4 className="text-sm font-bold text-navy uppercase tracking-widest">Who Can Join?</h4>
+                      </div>
+                      <p className="text-sm text-navy/60 leading-relaxed">
+                        {course.who_can_join}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Outcomes */}
+                {course.outcomes && (
+                  <div className="mt-12 space-y-6">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 size={18} className="text-primary" />
+                      <h4 className="text-sm font-bold text-navy uppercase tracking-widest">Learning Outcomes</h4>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {((course.outcomes || "").includes('^') ? course.outcomes.split('^') : (course.outcomes || "").split('\n')).filter(Boolean).map((item, i) => (
+                        <div key={i} className="flex items-center gap-3 p-4 bg-white rounded-xl border border-navy/5 shadow-sm hover:shadow-md transition-all">
+                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <CheckCircle2 size={12} className="text-primary" />
+                          </div>
+                          <span className="text-[10px] font-bold text-navy uppercase tracking-wide leading-tight">{item.trim()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Certification */}
+                {course.certification && (
+                  <div className="mt-12 p-8 bg-navy rounded-3xl text-white relative overflow-hidden border border-white/5">
+                    <div className="absolute top-0 right-0 p-8 opacity-10">
+                      <Award size={120} />
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Award size={20} className="text-primary" />
+                        <h4 className="text-sm font-bold uppercase tracking-[0.2em]">Institutional Certification</h4>
+                      </div>
+                      <p className="text-white/60 text-sm leading-relaxed max-w-xl mb-6">
+                        {course.certification}
+                      </p>
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest">
+                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                        Industry Recognized Credentials
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
 
             {/* Right: Action Sidebar */}
@@ -269,9 +392,9 @@ export default function CourseDetailPage() {
                     <div className="pt-4 border-t border-white/5 space-y-3">
                       <div className="flex justify-between text-xs">
                         <span className="text-white/60 font-medium italic">Duration</span>
-                        <span className="text-primary font-bold">{course.duration || "Self-Paced"}</span>
+                        <span className="text-primary font-bold">{course.duration && course.duration !== "0" ? course.duration : "Self-Paced"}</span>
                       </div>
-                      {course.allow_partial_payment && (
+                      {!!course.allow_partial_payment && (
                         <div className="flex justify-between text-xs">
                           <span className="text-white/60 font-medium italic">Installments</span>
                           <span className="text-primary font-bold">Available</span>

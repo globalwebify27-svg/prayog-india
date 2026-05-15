@@ -24,6 +24,20 @@ export async function POST(request) {
   }
 }
 
+export async function PUT(request) {
+  try {
+    const body = await request.json();
+    const { id, name, logo_url } = body;
+    await pool.query(
+      "UPDATE placement_partners SET name = ?, logo_url = ? WHERE id = ?",
+      [name, logo_url, id]
+    );
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);

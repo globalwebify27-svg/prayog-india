@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { sendMail, getFacultyOnboardingEmailTemplate } from "@/lib/mailer";
 
 export async function GET() {
   try {
@@ -56,6 +57,14 @@ export async function POST(request) {
     if (selectedTimings && selectedTimings.length > 0) {
       const timingValues = selectedTimings.map(tId => [facultyId, tId]);
       await pool.query("INSERT INTO faculty_timings (faculty_id, timing_id) VALUES ?", [timingValues]);
+    }
+
+    // Send Onboarding Email
+    try {
+      const emailHtml = getFacultyOnboardingEmailTemplate(name, email, password || "Teacher@123", role);
+      await sendMail(email, "Welcome to Prayog India - Faculty Portal Access", emailHtml);
+    } catch (mailError) {
+      console.error("Failed to send faculty onboarding mail:", mailError);
     }
 
     return NextResponse.json({ success: true, id: facultyId });

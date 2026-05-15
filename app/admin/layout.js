@@ -49,6 +49,7 @@ const menuItems = [
     roles: ["admin", "teacher"],
     subItems: [
       { label: "Academic Programs", href: "/admin/courses", icon: Layout },
+      { label: "Specialization Master", href: "/admin/specializations", icon: Tag },
       { label: "Timing Master", href: "/admin/timings", icon: Clock },
       { label: "Live Virtual Sessions", href: "/admin/batches", icon: Video },
       { label: "Exams & Assessments", href: "/admin/exams", icon: FileText },
@@ -80,6 +81,7 @@ const menuItems = [
     href: "/admin/promos", 
     roles: ["admin"],
     subItems: [
+      { label: "1:1 Training", href: "/admin/training", icon: Zap },
       { label: "Seasonal Programs", href: "/admin/promos", icon: Zap },
       { label: "Internship Banner", href: "/admin/banners/internship", icon: Layout },
       { label: "Media Gallery", href: "/admin/gallery", icon: Image },
@@ -221,10 +223,16 @@ export default function AdminLayout({ children }) {
 
             <div className="p-4 border-t border-white/5 space-y-4 bg-navy mt-auto">
               <div className="space-y-1">
+                {user?.role === 'teacher' && (
+                  <Link href="/admin/profile" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-all">
+                    <Settings size={18} />
+                    <span className="text-sm">Profile Settings</span>
+                  </Link>
+                )}
                 {user?.role === 'admin' && (
                   <Link href="/admin/settings" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-all">
                     <Settings size={18} />
-                    <span className="text-sm">Settings</span>
+                    <span className="text-sm">System Settings</span>
                   </Link>
                 )}
                 <button 

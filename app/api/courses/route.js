@@ -6,9 +6,30 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   console.log("GET /api/courses hit");
   try {
-    const [rows] = await pool.query("SELECT * FROM courses ORDER BY created_at DESC");
-    console.log("Fetched courses rows count:", rows?.length);
-    return NextResponse.json(Array.isArray(rows) ? rows : []);
+    const [courses] = await pool.query("SELECT * FROM courses ORDER BY created_at DESC");
+    
+    // Fetch timings for each course
+    const [courseTimings] = await pool.query(`
+      SELECT ct.course_id, t.name, t.slot, t.id
+      FROM course_timings ct
+      JOIN timings t ON ct.timing_id = t.id
+    `);
+
+    // Fetch specializations for each course
+    const [courseSpecs] = await pool.query(`
+      SELECT cs.course_id, s.name, s.id
+      FROM course_specializations cs
+      JOIN specializations s ON cs.specialization_id = s.id
+    `);
+
+    const coursesWithDetails = courses.map(course => ({
+      ...course,
+      timings: courseTimings.filter(ct => ct.course_id === course.id),
+      specializations: courseSpecs.filter(cs => cs.course_id === course.id)
+    }));
+
+    console.log("Fetched courses rows count:", coursesWithDetails.length);
+    return NextResponse.json(coursesWithDetails);
   } catch (error) {
     console.error("Error fetching courses:", error);
     return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 });

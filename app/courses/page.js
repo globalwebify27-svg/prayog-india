@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import { 
   BookOpen, 
   ArrowRight, 
@@ -19,14 +20,22 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 
-const categories = ["All", "Internships", "Township", "Robotics", "Artificial Intelligence", "Aviation", "Electronics", "Design"];
-
 export default function CoursesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="w-12 h-12 border-4 border-navy border-t-transparent rounded-full animate-spin"></div></div>}>
+      <CoursesPageContent />
+    </Suspense>
+  );
+}
+
+function CoursesPageContent() {
+  const searchParams = useSearchParams();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("All");
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [dynamicCategories, setDynamicCategories] = useState(["All", "Internships", "1:1 Training"]);
 
   useEffect(() => {
     async function fetchCourses() {
@@ -34,6 +43,16 @@ export default function CoursesPage() {
         const res = await fetch("/api/courses");
         const data = await res.json();
         setCourses(data);
+        
+        // Extract unique specializations
+        const specs = new Set();
+        data.forEach(course => {
+          if (course.specializations) {
+            course.specializations.forEach(s => specs.add(s.name));
+          }
+        });
+        
+        setDynamicCategories(["All", "Internships", "1:1 Training", ...Array.from(specs)]);
       } catch (err) {
         console.error("Failed to fetch courses:", err);
       } finally {
@@ -43,9 +62,19 @@ export default function CoursesPage() {
     fetchCourses();
   }, []);
 
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && (dynamicCategories.includes(tab) || tab === "All")) {
+      setActiveTab(tab);
+    }
+  }, [searchParams, dynamicCategories]);
+
   const filteredCourses = courses.filter(course => {
     const matchesTab = activeTab === "All" || 
-                      (activeTab === "Internships" ? course.is_internship === 1 : course.category === activeTab);
+                      (activeTab === "Internships" ? course.is_internship === 1 : 
+                       activeTab === "1:1 Training" ? course.is_one_to_one === 1 :
+                       (course.specializations && course.specializations.some(s => s.name === activeTab)));
+    
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesTab && matchesSearch;
@@ -93,7 +122,7 @@ export default function CoursesPage() {
           {/* Controls */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
+              {dynamicCategories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveTab(cat)}
@@ -159,15 +188,22 @@ export default function CoursesPage() {
                   viewMode === 'grid' ? 'h-52 w-full' : 'h-24 w-36 rounded-lg'
                 }`}>
                   <img src={course.image} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-0.5 bg-white/90 backdrop-blur-sm text-navy rounded font-bold text-[9px] uppercase shadow-sm">
-                      {course.category}
-                    </span>
+                  <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                     {course.is_internship === 1 && (
-                      <span className="ml-2 px-2.5 py-0.5 bg-primary text-navy rounded font-bold text-[9px] uppercase shadow-sm">
+                      <span className="px-2.5 py-0.5 bg-primary text-navy rounded font-bold text-[9px] uppercase shadow-sm">
                         Internship
                       </span>
                     )}
+                    {course.is_one_to_one === 1 && (
+                      <span className="px-2.5 py-0.5 bg-emerald-600 text-white rounded font-bold text-[9px] uppercase shadow-sm">
+                        1:1 Training
+                      </span>
+                    )}
+                    {course.specializations && course.specializations.map(s => (
+                      <span key={s.id} className="px-2.5 py-0.5 bg-white/90 backdrop-blur-sm text-navy rounded font-bold text-[9px] uppercase shadow-sm">
+                        {s.name}
+                      </span>
+                    ))}
                   </div>
                 </div>
 

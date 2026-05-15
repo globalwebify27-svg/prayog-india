@@ -17,12 +17,15 @@ export async function GET() {
 
     // 1. Get User Info
     const [user] = await pool.query(`
-      SELECT id, name, email, role, phone, dob, address, blood_group, 
-             emergency_contact, id_card_issued, image, profile_completed,
-             father_name, mother_name, gender, qualification,
-             school_college, last_qualification_year, id_type, id_number, 
-             id_image, school_id_card, school_id_number
-      FROM users WHERE id = ?
+      SELECT u.id, u.name, u.email, u.role, u.phone, u.dob, u.address, u.blood_group, 
+             u.emergency_contact, u.id_card_issued, u.image, u.profile_completed,
+             u.father_name, u.mother_name, u.gender, u.qualification,
+             u.school_college, u.last_qualification_year, u.id_type, u.id_number, 
+             u.id_image, u.school_id_card, u.school_id_number,
+             f.bio, f.specialty, f.expertise, f.education as faculty_education
+      FROM users u
+      LEFT JOIN faculties f ON u.id = f.user_id
+      WHERE u.id = ?
     `, [userId]);
     
     // 2. Get Enrollments with Meeting Links

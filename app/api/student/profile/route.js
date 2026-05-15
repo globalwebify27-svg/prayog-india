@@ -15,12 +15,14 @@ export async function POST(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
+    const body = await req.json();
     const { 
       name, phone, dob, address, blood_group, emergency_contact, image,
       father_name, mother_name, gender, qualification, school_college,
       last_qualification_year, id_type, id_number, id_image, school_id_card,
-      school_id_number
-    } = await req.json();
+      school_id_number,
+      bio, specialty, expertise, faculty_education
+    } = body;
 
     // Check if profile is complete (Strict institutional requirements)
     const isComplete = (
@@ -36,7 +38,7 @@ export async function POST(req) {
       school_id_number // Added school ID number requirement
     ) ? 1 : 0;
 
-    // Update profile
+    // Update profile in users table
     await pool.query(
       `UPDATE users SET 
         name = ?, phone = ?, dob = ?, address = ?, blood_group = ?, 
@@ -55,6 +57,15 @@ export async function POST(req) {
         isComplete, userId
       ]
     );
+
+    // If role is teacher, also update faculties table
+    const [userRows] = await pool.query("SELECT role FROM users WHERE id = ?", [userId]);
+    if (userRows.length > 0 && userRows[0].role === 'teacher') {
+      await pool.query(
+        "UPDATE faculties SET bio = ?, specialty = ?, expertise = ?, education = ? WHERE user_id = ?",
+        [bio || null, specialty || null, JSON.stringify(expertise || []), faculty_education || null, userId]
+      );
+    }
 
     return NextResponse.json({
       success: true,

@@ -159,8 +159,8 @@ export default function CourseMaterialsPage({ params }) {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div className="p-5 border-b border-slate-100 bg-slate-50 flex items-center gap-2 rounded-t-2xl">
           <Layers size={18} className="text-navy" />
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Learning Path Configuration</h2>
         </div>
@@ -230,18 +230,30 @@ export default function CourseMaterialsPage({ params }) {
                         className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-10 py-1 overflow-hidden"
                       >
                       <button 
-                        onClick={() => handleEdit(m)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(m);
+                        }}
                         className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2"
                       >
                         <FileText size={14} /> Edit Details
                       </button>
-                        <button onClick={() => toggleLock(m)} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleLock(m);
+                          }} 
+                          className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+                        >
                           {m.is_locked ? <Unlock size={14} /> : <Lock size={14} />} 
                           {m.is_locked ? "Make Public" : "Lock Material"}
                         </button>
                         <div className="border-t border-slate-100 my-1"></div>
                         <button 
-                          onClick={() => handleDelete(m.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(m.id);
+                          }}
                           className="w-full text-left px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2"
                         >
                           <Trash2 size={14} /> Delete Material
@@ -259,7 +271,12 @@ export default function CourseMaterialsPage({ params }) {
       {/* Add Modal */}
       <AnimatePresence>
         {showAddModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+          >
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
               <div className="p-6 border-b border-slate-100">
                 <h3 className="text-lg font-bold text-slate-900">{editingMaterial ? "Edit Material" : "Add New Material"}</h3>

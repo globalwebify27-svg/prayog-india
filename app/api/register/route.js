@@ -5,7 +5,7 @@ import { sendMail, getOnboardingEmailTemplate } from "@/lib/mailer";
 
 export async function POST(req) {
   try {
-    const { name, email, phone, emergency_contact, password, course_id, mode, batch, isInstallment, coupon_code, payment_method } = await req.json();
+    const { name, email, phone, emergency_contact = null, password, course_id, mode, batch, isInstallment, coupon_code, payment_method } = await req.json();
 
     // Check if user already exists
     const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
@@ -65,14 +65,17 @@ export async function POST(req) {
     const enrollmentId = enrollResult.insertId;
 
     // 6. Create Installments if applicable
+    const installmentData = [];
     if (isInstallment && course.allow_partial_payment) {
       const count = course.installments_count || 1;
-      const installmentAmount = amount / count;
+      const installmentAmount = Math.round((amount / count) * 100) / 100;
       
       for (let i = 0; i < count; i++) {
         const dueDate = new Date();
         dueDate.setMonth(dueDate.getMonth() + i);
         
+        installmentData.push({ amount: installmentAmount, dueDate });
+
         await pool.execute(
           "INSERT INTO installments (enrollment_id, amount, due_date, status, payment_method) VALUES (?, ?, ?, ?, ?)",
           [enrollmentId, installmentAmount, dueDate, i === 0 ? 'paid' : 'pending', i === 0 ? (payment_method || 'online') : 'online']
@@ -82,7 +85,16 @@ export async function POST(req) {
     
     // 7. Send Welcome Email
     try {
-      const emailHtml = getOnboardingEmailTemplate(name, email, password || "Prayog@2026");
+      const emailHtml = getOnboardingEmailTemplate(
+        name, 
+        email, 
+        password || "Prayog@2026",
+        course.title,
+        batch,
+        payment_method || 'online',
+        amount,
+        installmentData
+      );
       await sendMail(email, "Welcome to Prayog India - Your Student Account", emailHtml);
     } catch (mailError) {
       console.error("Failed to send onboarding mail:", mailError);

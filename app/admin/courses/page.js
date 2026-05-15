@@ -34,7 +34,8 @@ import CustomModal from "@/components/CustomModal";
 const STEPS = [
   { id: 1, title: "Identity", sub: "Basic info & brand" },
   { id: 2, title: "Delivery", sub: "Faculty & logistics" },
-  { id: 3, title: "Finance", sub: "Pricing & payments" }
+  { id: 3, title: "Finance", sub: "Pricing & payments" },
+  { id: 4, title: "Curriculum", sub: "Outcomes & Details" }
 ];
 
 const SPECIALIZATIONS = [
@@ -58,6 +59,7 @@ export default function AdminCoursesPage() {
   const [modalStep, setModalStep] = useState(1);
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
+  const [specializations, setSpecializations] = useState([]);
   const [errors, setErrors] = useState({});
 
   // Modal State
@@ -67,16 +69,18 @@ export default function AdminCoursesPage() {
     description: "",
     type: "info",
     confirmText: "Confirm",
+    showCancel: true,
     onConfirm: () => {}
   });
 
-  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm", showCancel = true) => {
     setModalConfig({
       isOpen: true,
       title,
       description,
       type,
       confirmText,
+      showCancel,
       onConfirm
     });
   };
@@ -87,7 +91,7 @@ export default function AdminCoursesPage() {
       if (!data.title.trim()) newErrors.title = "Title is required.";
       if (!data.category) newErrors.category = "Category is required.";
     } else if (modalStep === 2) {
-      if (!data.teacher_id) newErrors.teacher_id = "Faculty assignment is required.";
+      // teacher_id is now optional
       if (!data.duration.trim()) newErrors.duration = "Duration is required.";
     } else if (modalStep === 3) {
       if (!data.price) newErrors.price = "Price is required.";
@@ -109,12 +113,18 @@ export default function AdminCoursesPage() {
     image: "",
     teacher_id: "",
     selectedTimings: [],
+    selectedSpecializations: [],
     allow_partial_payment: false,
     installments_count: 1,
     rating: "4.5",
     level: "Beginner",
     brochure: "",
-    is_internship: false
+    is_internship: false,
+    is_one_to_one: false,
+    outcomes: "",
+    certification: "",
+    who_can_join: "",
+    methodology: ""
   });
 
   useEffect(() => {
@@ -122,6 +132,7 @@ export default function AdminCoursesPage() {
     fetchCourses();
     fetchTeachers();
     fetchTimings();
+    fetchSpecializations();
   }, []);
 
   const fetchUser = async () => {
@@ -142,6 +153,12 @@ export default function AdminCoursesPage() {
     const res = await fetch("/api/admin/teachers");
     const result = await res.json();
     if (result.success) setTeachers(result.teachers);
+  };
+
+  const fetchSpecializations = async () => {
+    const res = await fetch("/api/admin/specializations");
+    const result = await res.json();
+    if (result.success) setSpecializations(result.specializations);
   };
 
   const fetchCourses = async () => {
@@ -172,7 +189,7 @@ export default function AdminCoursesPage() {
         }
       }
     } catch (error) {
-      showAlert("Upload Failed", "A technical error occurred during the visual asset upload.", "error");
+      showAlert("Upload Failed", "A technical error occurred during the visual asset upload.", "error", () => {}, "OK", false);
     } finally {
       setIsUploading(false);
     }
@@ -194,17 +211,17 @@ export default function AdminCoursesPage() {
           setCourseToEdit(prev => ({ ...prev, brochure: data.url }));
         }
       } else {
-        showAlert("Brochure Failed", data.message || "Unable to process the brochure document.", "error");
+        showAlert("Brochure Failed", data.message || "Unable to process the brochure document.", "error", () => {}, "OK", false);
       }
     } catch (error) {
-      showAlert("Upload Error", "System failure during brochure transmission.", "error");
+      showAlert("Upload Error", "System failure during brochure transmission.", "error", () => {}, "OK", false);
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleAddCourse = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!validateStep(newCourse)) return;
 
     if (modalStep < 3) {
@@ -222,17 +239,17 @@ export default function AdminCoursesPage() {
     if (result.success) {
       setShowAddModal(false);
       setModalStep(1);
-      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "", is_internship: false });
+      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "", is_internship: false, is_one_to_one: false, outcomes: "", certification: "", who_can_join: "", methodology: "" });
       fetchCourses();
       setErrors({});
-      showAlert("Course Launched", "The new academic program has been successfully initialized.", "success");
+      showAlert("Course Launched", "The new academic program has been successfully initialized.", "success", () => {}, "OK", false);
     } else {
       setError(result.message);
     }
   };
 
   const handleUpdateCourse = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!validateStep(courseToEdit)) return;
 
     if (modalStep < 3) {
@@ -253,7 +270,7 @@ export default function AdminCoursesPage() {
       setCourseToEdit(null);
       fetchCourses();
       setErrors({});
-      showAlert("Course Updated", "Program modifications have been synchronized successfully.", "success");
+      showAlert("Course Updated", "Program modifications have been synchronized successfully.", "success", () => {}, "OK", false);
     } else {
       setError(result.message);
     }
@@ -338,12 +355,19 @@ export default function AdminCoursesPage() {
                   <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase shadow-sm ${course.type === 'online' ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'}`}>
                     {course.type}
                   </span>
-                  <span className="px-2 py-0.5 bg-navy text-white rounded text-[9px] font-bold uppercase shadow-sm">
-                    {course.category}
-                  </span>
+                  {course.specializations && course.specializations.map(s => (
+                    <span key={s.id} className="px-2 py-0.5 bg-navy text-white rounded text-[9px] font-bold uppercase shadow-sm">
+                      {s.name}
+                    </span>
+                  ))}
                   {course.is_internship === 1 && (
                     <span className="px-2 py-0.5 bg-primary text-navy rounded text-[9px] font-bold uppercase shadow-sm flex items-center gap-1">
                       <Briefcase size={8} /> Internship
+                    </span>
+                  )}
+                  {course.is_one_to_one === 1 && (
+                    <span className="px-2 py-0.5 bg-emerald-600 text-white rounded text-[9px] font-bold uppercase shadow-sm flex items-center gap-1">
+                      <Star size={8} /> 1:1 Training
                     </span>
                   )}
                 </div>
@@ -394,7 +418,23 @@ export default function AdminCoursesPage() {
                         onClick={() => {
                           setCourseToEdit({
                             ...course,
-                            selectedTimings: course.timings.map(t => t.id)
+                            title: course.title || "",
+                            description: course.description || "",
+                            category: course.category || "Robotics",
+                            price: course.price || "",
+                            type: course.type || "online",
+                            duration: course.duration || "6 Months",
+                            image: course.image || "",
+                            teacher_id: course.teacher_id || "",
+                            brochure: course.brochure || "",
+                            selectedTimings: course.timings ? course.timings.map(t => t.id) : [],
+                            selectedSpecializations: course.specializations ? course.specializations.map(s => s.id) : [],
+                            is_internship: !!course.is_internship,
+                            is_one_to_one: !!course.is_one_to_one,
+                            outcomes: course.outcomes || "",
+                            certification: course.certification || "",
+                            who_can_join: course.who_can_join || "",
+                            methodology: course.methodology || ""
                           });
                           setModalStep(1);
                           setShowEditModal(true);
@@ -414,9 +454,9 @@ export default function AdminCoursesPage() {
                               const result = await res.json();
                               if (result.success) {
                                 fetchCourses();
-                                showAlert("Deleted", "The course has been permanently removed.", "success");
+                                showAlert("Deleted", "The course has been permanently removed.", "success", () => {}, "OK", false);
                               } else {
-                                showAlert("Error", result.message, "error");
+                                showAlert("Error", result.message, "error", () => {}, "OK", false);
                               }
                             },
                             "Delete Now"
@@ -467,7 +507,7 @@ export default function AdminCoursesPage() {
             </div>
 
             {/* Content */}
-            <div className="lg:w-2/3 p-8 flex flex-col">
+            <div className="lg:w-2/3 p-8 flex flex-col max-h-[90vh] overflow-y-auto">
               <form onSubmit={handleAddCourse} className="flex-grow flex flex-col">
                 <div className="flex-grow">
                   <AnimatePresence mode="wait">
@@ -491,14 +531,29 @@ export default function AdminCoursesPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Specialization</label>
-                              <select 
-                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm outline-none cursor-pointer focus:border-navy"
-                                value={newCourse.category}
-                                onChange={e => setNewCourse({...newCourse, category: e.target.value})}
-                              >
-                                {SPECIALIZATIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                              </select>
+                              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Specializations (Select Multiple)</label>
+                              <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg min-h-[42px]">
+                                {specializations.map(s => (
+                                  <button
+                                    key={s.id}
+                                    type="button"
+                                    onClick={() => {
+                                      const exists = newCourse.selectedSpecializations.includes(s.id);
+                                      if (exists) {
+                                        setNewCourse({...newCourse, selectedSpecializations: newCourse.selectedSpecializations.filter(id => id !== s.id)});
+                                      } else {
+                                        setNewCourse({...newCourse, selectedSpecializations: [...newCourse.selectedSpecializations, s.id]});
+                                      }
+                                    }}
+                                    className={`px-2 py-1 rounded text-[9px] font-bold uppercase transition-all ${
+                                      newCourse.selectedSpecializations.includes(s.id) ? 'bg-navy text-white' : 'bg-white text-slate-400 border border-slate-200 hover:border-navy hover:text-navy'
+                                    }`}
+                                  >
+                                    {s.name}
+                                  </button>
+                                ))}
+                                {specializations.length === 0 && <span className="text-[9px] text-slate-400 italic py-1">No specializations defined</span>}
+                              </div>
                             </div>
                             <div>
                               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Level</label>
@@ -515,18 +570,33 @@ export default function AdminCoursesPage() {
                             </div>
                           </div>
                           
-                          <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between group hover:bg-primary/10 transition-all">
-                            <div>
-                              <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Program Classification</p>
-                              <p className="text-[9px] text-slate-500 font-medium italic">Mark this as a professional internship opportunity.</p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between group hover:bg-primary/10 transition-all">
+                              <div>
+                                <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Internship</p>
+                                <p className="text-[9px] text-slate-500 font-medium italic leading-tight">Mark as internship opportunity.</p>
+                              </div>
+                              <button 
+                                type="button"
+                                onClick={() => setNewCourse({...newCourse, is_internship: !newCourse.is_internship})}
+                                className={`w-10 h-5 rounded-full transition-all relative ${newCourse.is_internship ? 'bg-navy' : 'bg-slate-200'}`}
+                              >
+                                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${newCourse.is_internship ? 'left-5.5' : 'left-0.5'}`} />
+                              </button>
                             </div>
-                            <button 
-                              type="button"
-                              onClick={() => setNewCourse({...newCourse, is_internship: !newCourse.is_internship})}
-                              className={`w-12 h-6 rounded-full transition-all relative ${newCourse.is_internship ? 'bg-navy' : 'bg-slate-200'}`}
-                            >
-                              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${newCourse.is_internship ? 'left-7' : 'left-1'}`} />
-                            </button>
+                            <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-between group hover:bg-emerald-100/50 transition-all">
+                              <div>
+                                <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-0.5">1:1 Training</p>
+                                <p className="text-[9px] text-slate-500 font-medium italic leading-tight">Personalized one-on-one session.</p>
+                              </div>
+                              <button 
+                                type="button"
+                                onClick={() => setNewCourse({...newCourse, is_one_to_one: !newCourse.is_one_to_one})}
+                                className={`w-10 h-5 rounded-full transition-all relative ${newCourse.is_one_to_one ? 'bg-emerald-600' : 'bg-slate-200'}`}
+                              >
+                                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${newCourse.is_one_to_one ? 'left-5.5' : 'left-0.5'}`} />
+                              </button>
+                            </div>
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Banner Image</label>
@@ -565,7 +635,7 @@ export default function AdminCoursesPage() {
                               value={newCourse.teacher_id}
                               onChange={e => setNewCourse({...newCourse, teacher_id: e.target.value})}
                             >
-                              <option value="">Select Faculty</option>
+                              <option value="">Select Faculty (Optional)</option>
                               {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
                             {errors.teacher_id && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.teacher_id}</p>}
@@ -720,24 +790,84 @@ export default function AdminCoursesPage() {
                         </div>
                       </motion.div>
                     )}
+
+                    {modalStep === 4 && (
+                      <motion.div key="step4" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-900 mb-1">Curriculum Details</h3>
+                          <p className="text-slate-500 text-xs">Define program outcomes and methodology.</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Learning Outcomes</label>
+                            <textarea 
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs focus:border-navy outline-none"
+                              rows={3}
+                              placeholder="Key takeaways (one per line or use ^)"
+                              value={newCourse.outcomes}
+                              onChange={e => setNewCourse({...newCourse, outcomes: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Who Can Join?</label>
+                            <textarea 
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs focus:border-navy outline-none"
+                              rows={3}
+                              placeholder="Eligibility criteria..."
+                              value={newCourse.who_can_join}
+                              onChange={e => setNewCourse({...newCourse, who_can_join: e.target.value})}
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Certification Details</label>
+                            <textarea 
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs focus:border-navy outline-none"
+                              rows={3}
+                              placeholder="Certificate info..."
+                              value={newCourse.certification}
+                              onChange={e => setNewCourse({...newCourse, certification: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Workshop Methodology</label>
+                            <textarea 
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs focus:border-navy outline-none"
+                              rows={3}
+                              placeholder="How the course is taught..."
+                              value={newCourse.methodology}
+                              onChange={e => setNewCourse({...newCourse, methodology: e.target.value})}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
                   </AnimatePresence>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center justify-between pt-8 border-t border-slate-100 mt-8">
                   <button 
-                    type="button" 
-                    onClick={() => modalStep === 1 ? setShowAddModal(false) : setModalStep(modalStep - 1)}
-                    className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-navy uppercase tracking-widest transition-colors"
+                    type="button"
+                    onClick={() => modalStep > 1 ? setModalStep(modalStep - 1) : setShowAddModal(false)}
+                    className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-navy transition-colors"
                   >
                     <ChevronLeft size={16} />
                     <span>{modalStep === 1 ? "Cancel" : "Back"}</span>
                   </button>
+
                   <button 
-                    type="submit"
-                    className="flex items-center gap-2 bg-navy text-white px-8 py-2.5 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg"
+                    type="button"
+                    onClick={() => {
+                      if (validateStep(newCourse)) {
+                        if (modalStep < 4) setModalStep(modalStep + 1);
+                        else handleAddCourse();
+                      }
+                    }}
+                    className="bg-navy text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-navy/20 flex items-center gap-2"
                   >
-                    <span>{modalStep === 3 ? "Launch Course" : "Next Step"}</span>
-                    <ChevronRight size={16} />
+                    <span>{modalStep === 4 ? "Launch Program" : "Next Step"}</span>
+                    <ArrowRight size={16} />
                   </button>
                 </div>
               </form>
@@ -778,7 +908,7 @@ export default function AdminCoursesPage() {
             </div>
 
             {/* Content */}
-            <div className="lg:w-2/3 p-8 flex flex-col">
+            <div className="lg:w-2/3 p-8 flex flex-col max-h-[90vh] overflow-y-auto">
               <form onSubmit={handleUpdateCourse} className="flex-grow flex flex-col">
                 <div className="flex-grow">
                   <AnimatePresence mode="wait">
@@ -801,14 +931,29 @@ export default function AdminCoursesPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Specialization</label>
-                              <select 
-                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm outline-none cursor-pointer focus:border-navy"
-                                value={courseToEdit.category}
-                                onChange={e => setCourseToEdit({...courseToEdit, category: e.target.value})}
-                              >
-                                {SPECIALIZATIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                              </select>
+                              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Specializations (Select Multiple)</label>
+                              <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg min-h-[42px]">
+                                {specializations.map(s => (
+                                  <button
+                                    key={s.id}
+                                    type="button"
+                                    onClick={() => {
+                                      const exists = courseToEdit.selectedSpecializations.includes(s.id);
+                                      if (exists) {
+                                        setCourseToEdit({...courseToEdit, selectedSpecializations: courseToEdit.selectedSpecializations.filter(id => id !== s.id)});
+                                      } else {
+                                        setCourseToEdit({...courseToEdit, selectedSpecializations: [...courseToEdit.selectedSpecializations, s.id]});
+                                      }
+                                    }}
+                                    className={`px-2 py-1 rounded text-[9px] font-bold uppercase transition-all ${
+                                      courseToEdit.selectedSpecializations.includes(s.id) ? 'bg-navy text-white' : 'bg-white text-slate-400 border border-slate-200 hover:border-navy hover:text-navy'
+                                    }`}
+                                  >
+                                    {s.name}
+                                  </button>
+                                ))}
+                                {specializations.length === 0 && <span className="text-[9px] text-slate-400 italic py-1">No specializations defined</span>}
+                              </div>
                             </div>
                             <div>
                               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Level</label>
@@ -825,18 +970,33 @@ export default function AdminCoursesPage() {
                             </div>
                           </div>
 
-                          <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between group hover:bg-primary/10 transition-all">
-                            <div>
-                              <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Program Classification</p>
-                              <p className="text-[9px] text-slate-500 font-medium italic">Mark this as a professional internship opportunity.</p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between group hover:bg-primary/10 transition-all">
+                              <div>
+                                <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Internship</p>
+                                <p className="text-[9px] text-slate-500 font-medium italic leading-tight">Mark as internship opportunity.</p>
+                              </div>
+                              <button 
+                                type="button"
+                                onClick={() => setCourseToEdit({...courseToEdit, is_internship: !courseToEdit.is_internship})}
+                                className={`w-10 h-5 rounded-full transition-all relative ${courseToEdit.is_internship ? 'bg-navy' : 'bg-slate-200'}`}
+                              >
+                                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${courseToEdit.is_internship ? 'left-5.5' : 'left-0.5'}`} />
+                              </button>
                             </div>
-                            <button 
-                              type="button"
-                              onClick={() => setCourseToEdit({...courseToEdit, is_internship: !courseToEdit.is_internship})}
-                              className={`w-12 h-6 rounded-full transition-all relative ${courseToEdit.is_internship ? 'bg-navy' : 'bg-slate-200'}`}
-                            >
-                              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${courseToEdit.is_internship ? 'left-7' : 'left-1'}`} />
-                            </button>
+                            <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-between group hover:bg-emerald-100/50 transition-all">
+                              <div>
+                                <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-0.5">1:1 Training</p>
+                                <p className="text-[9px] text-slate-500 font-medium italic leading-tight">Personalized one-on-one session.</p>
+                              </div>
+                              <button 
+                                type="button"
+                                onClick={() => setCourseToEdit({...courseToEdit, is_one_to_one: !courseToEdit.is_one_to_one})}
+                                className={`w-10 h-5 rounded-full transition-all relative ${courseToEdit.is_one_to_one ? 'bg-emerald-600' : 'bg-slate-200'}`}
+                              >
+                                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${courseToEdit.is_one_to_one ? 'left-5.5' : 'left-0.5'}`} />
+                              </button>
+                            </div>
                           </div>
                           <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Banner Image</label>
@@ -1030,6 +1190,59 @@ export default function AdminCoursesPage() {
                         </div>
                       </motion.div>
                     )}
+
+                    {modalStep === 4 && (
+                      <motion.div key="step4" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-900 mb-1">Curriculum Details</h3>
+                          <p className="text-slate-500 text-xs">Define program outcomes and methodology.</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Learning Outcomes</label>
+                            <textarea 
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs focus:border-navy outline-none"
+                              rows={3}
+                              placeholder="Key takeaways (one per line or use ^)"
+                              value={courseToEdit.outcomes}
+                              onChange={e => setCourseToEdit({...courseToEdit, outcomes: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Who Can Join?</label>
+                            <textarea 
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs focus:border-navy outline-none"
+                              rows={3}
+                              placeholder="Eligibility criteria..."
+                              value={courseToEdit.who_can_join}
+                              onChange={e => setCourseToEdit({...courseToEdit, who_can_join: e.target.value})}
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Certification Details</label>
+                            <textarea 
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs focus:border-navy outline-none"
+                              rows={3}
+                              placeholder="Certificate info..."
+                              value={courseToEdit.certification}
+                              onChange={e => setCourseToEdit({...courseToEdit, certification: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Workshop Methodology</label>
+                            <textarea 
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs focus:border-navy outline-none"
+                              rows={3}
+                              placeholder="How the course is taught..."
+                              value={courseToEdit.methodology}
+                              onChange={e => setCourseToEdit({...courseToEdit, methodology: e.target.value})}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
                   </AnimatePresence>
                 </div>
 
@@ -1044,9 +1257,15 @@ export default function AdminCoursesPage() {
                   </button>
                   <button 
                     type="submit"
+                    onClick={(e) => {
+                      if (modalStep < 4) {
+                        e.preventDefault();
+                        if (validateStep(courseToEdit)) setModalStep(modalStep + 1);
+                      }
+                    }}
                     className="flex items-center gap-2 bg-navy text-white px-8 py-2.5 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg"
                   >
-                    <span>{modalStep === 3 ? "Save Changes" : "Next Step"}</span>
+                    <span>{modalStep === 4 ? "Update Program" : "Next Step"}</span>
                     <ChevronRight size={16} />
                   </button>
                 </div>
@@ -1064,6 +1283,7 @@ export default function AdminCoursesPage() {
         description={modalConfig.description}
         type={modalConfig.type}
         confirmText={modalConfig.confirmText}
+        showCancel={modalConfig.showCancel}
       />
     </div>
   );

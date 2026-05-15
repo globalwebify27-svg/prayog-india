@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PlacementModal from "@/components/admin/PlacementModal";
+import PartnerModal from "@/components/admin/PartnerModal";
 
 export default function AdminPlacementsPage() {
   const [alumni, setAlumni] = useState([]);
@@ -28,6 +29,9 @@ export default function AdminPlacementsPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAlumni, setSelectedAlumni] = useState(null);
+
+  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -91,18 +95,20 @@ export default function AdminPlacementsPage() {
     }
   };
 
-  const handleAddPartner = async () => {
-    const name = prompt("Enter Partner Name:");
-    if (!name) return;
+  const handleSavePartner = async (formData) => {
     try {
+      const method = formData.id ? "PUT" : "POST";
       const res = await fetch("/api/placements/partners", {
-        method: "POST",
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name })
+        body: JSON.stringify(formData)
       });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        setIsPartnerModalOpen(false);
+        fetchData();
+      }
     } catch (error) {
-      console.error("Add partner failed:", error);
+      console.error("Save partner failed:", error);
     }
   };
 
@@ -263,7 +269,10 @@ export default function AdminPlacementsPage() {
             <div className="space-y-8">
               <div className="flex justify-end">
                 <button 
-                  onClick={handleAddPartner}
+                  onClick={() => {
+                    setSelectedPartner(null);
+                    setIsPartnerModalOpen(true);
+                  }}
                   className="bg-navy text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-navy/20"
                 >
                   <Plus size={16} className="text-primary" /> Add Partner
@@ -272,13 +281,29 @@ export default function AdminPlacementsPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 {partners.map(p => (
                   <div key={p.id} className="bg-white p-6 rounded-3xl border border-slate-100 relative group text-center shadow-sm hover:shadow-xl transition-all">
-                    <span className="text-xs font-black text-navy">{p.name}</span>
-                    <button 
-                      onClick={() => handleDeletePartner(p.id)}
-                      className="absolute -top-2 -right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                    >
-                      <Trash2 size={12} />
-                    </button>
+                    {p.logo_url && (
+                      <div className="h-12 w-full mb-3">
+                        <img src={p.logo_url} className="h-full w-full object-contain grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all" alt="" />
+                      </div>
+                    )}
+                    <span className="text-[10px] font-black text-navy uppercase tracking-widest">{p.name}</span>
+                    <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => {
+                          setSelectedPartner(p);
+                          setIsPartnerModalOpen(true);
+                        }}
+                        className="p-2 bg-white text-navy rounded-xl shadow-lg border border-slate-100 hover:text-primary transition-colors"
+                      >
+                        <Pencil size={12} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeletePartner(p.id)}
+                        className="p-2 bg-rose-500 text-white rounded-xl shadow-lg hover:bg-rose-600 transition-colors"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -292,6 +317,13 @@ export default function AdminPlacementsPage() {
         onClose={() => setIsModalOpen(false)}
         alumni={selectedAlumni}
         onSave={handleSaveAlumni}
+      />
+
+      <PartnerModal 
+        isOpen={isPartnerModalOpen}
+        onClose={() => setIsPartnerModalOpen(false)}
+        partner={selectedPartner}
+        onSave={handleSavePartner}
       />
     </div>
   );

@@ -10,7 +10,7 @@ export default function Partners() {
   useEffect(() => {
     async function fetchPartners() {
       try {
-        const res = await fetch("/api/partners");
+        const res = await fetch("/api/placements/partners");
         const data = await res.json();
         setPartners(data);
       } catch (err) {
@@ -38,7 +38,7 @@ export default function Partners() {
             >
               {[...partners, ...partners].map((partner, i) => (
                 <div key={i} className="flex-shrink-0 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
-                  <img src={partner.logo} alt={partner.name} className="h-6 md:h-8 w-auto object-contain" />
+                  <img src={partner.logo_url || partner.logo} alt={partner.name} className="h-6 md:h-8 w-auto object-contain" />
                 </div>
               ))}
             </motion.div>

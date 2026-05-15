@@ -32,17 +32,20 @@ export async function PUT(req) {
     const data = await req.json();
     const { 
       logo_url, footer_address, footer_phone, footer_email, 
-      facebook_url, youtube_url, linkedin_url, instagram_url 
+      facebook_url, youtube_url, linkedin_url, instagram_url,
+      training_title, training_description, training_image, training_features
     } = data;
 
     await pool.query(
       `UPDATE site_settings SET 
         logo_url = ?, footer_address = ?, footer_phone = ?, footer_email = ?, 
-        facebook_url = ?, youtube_url = ?, linkedin_url = ?, instagram_url = ?
+        facebook_url = ?, youtube_url = ?, linkedin_url = ?, instagram_url = ?,
+        training_title = ?, training_description = ?, training_image = ?, training_features = ?
        WHERE id = 1`,
       [
         logo_url, footer_address, footer_phone, footer_email, 
-        facebook_url, youtube_url, linkedin_url, instagram_url
+        facebook_url, youtube_url, linkedin_url, instagram_url,
+        training_title, training_description, training_image, training_features
       ]
     );
 

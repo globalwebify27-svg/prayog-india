@@ -46,8 +46,9 @@ export default function StudentsAdmin() {
     name: "",
     email: "",
     phone: "",
+    emergency_contact: "",
     password: "Password@123",
-    course: "",
+    course_id: "",
     mode: "offline",
     batch: "Morning (9AM - 11AM)",
     isInstallment: true,
@@ -95,7 +96,7 @@ export default function StudentsAdmin() {
     } else if (newStudent.password.length < 6) {
       newErrors.password = "Min 6 characters.";
     }
-    if (!newStudent.course) newErrors.course = "Course selection is required.";
+    if (!newStudent.course_id) newErrors.course_id = "Course selection is required.";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -122,7 +123,7 @@ export default function StudentsAdmin() {
       if (Array.isArray(data)) {
         setCourses(data);
         if (data.length > 0) {
-          setNewStudent(prev => ({ ...prev, course: data[0].title }));
+          setNewStudent(prev => ({ ...prev, course_id: data[0].id }));
         }
       }
     } catch (err) {
@@ -163,7 +164,7 @@ export default function StudentsAdmin() {
           email: "",
           phone: "",
           password: "Password@123",
-          course: courses[0]?.title || "",
+          course_id: courses[0]?.id || "",
           mode: "offline",
           batch: "Morning (9AM - 11AM)",
           isInstallment: true,
@@ -308,7 +309,6 @@ export default function StudentsAdmin() {
                 <option value="all">All Methods</option>
                 <option value="online">Online</option>
                 <option value="cash">Cash</option>
-                <option value="bank_transfer">Bank Transfer</option>
               </select>
             </div>
           </motion.div>
@@ -566,16 +566,16 @@ export default function StudentsAdmin() {
                       <label className="text-[9px] font-bold text-slate-500">Course</label>
                       <select 
                         required
-                        value={newStudent.course}
-                        onChange={(e) => setNewStudent({...newStudent, course: e.target.value})}
+                        value={newStudent.course_id}
+                        onChange={(e) => setNewStudent({...newStudent, course_id: e.target.value})}
                         className={`w-full px-4 py-2.5 bg-white border rounded-xl text-xs font-semibold outline-none transition-all ${
-                          errors.course ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                          errors.course_id ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
                         }`}
                       >
                         <option value="">Select Course</option>
-                        {courses.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
+                        {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                       </select>
-                      {errors.course && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.course}</p>}
+                      {errors.course_id && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.course_id}</p>}
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[9px] font-bold text-slate-500">Batch</label>
@@ -610,23 +610,52 @@ export default function StudentsAdmin() {
                         className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
                       >
                         <option value="true">Installments (EMI)</option>
-                        <option value="false">Lump-sum Payment</option>
+                        <option value="false">Full Payment</option>
                       </select>
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-slate-500">Initial Payment Mode</label>
-                    <select 
-                      value={newStudent.payment_method}
-                      onChange={(e) => setNewStudent({...newStudent, payment_method: e.target.value})}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
-                    >
-                      <option value="online">Online (Gateway)</option>
-                      <option value="cash">Cash Payment</option>
-                      <option value="bank_transfer">Bank Transfer</option>
-                    </select>
-                    <p className="text-[9px] text-slate-400 font-medium italic mt-1">Select 'Cash' for walk-in enrollments to maintain accurate cashflow records.</p>
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-500">Initial Payment Mode</label>
+                      <select 
+                        value={newStudent.payment_method}
+                        onChange={(e) => setNewStudent({...newStudent, payment_method: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-navy transition-all"
+                      >
+                        <option value="online">Online (Gateway)</option>
+                        <option value="cash">Cash Payment</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-navy/5 rounded-2xl border border-navy/10">
+                      <div>
+                        <p className="text-[10px] font-bold text-navy/40 uppercase tracking-widest">
+                          {newStudent.isInstallment ? "Installment Plan" : "Full Course Fee"}
+                        </p>
+                        <p className="text-xl font-black text-navy">
+                          ₹{(() => {
+                            const course = courses.find(c => c.id == newStudent.course_id);
+                            if (!course) return "0.00";
+                            if (newStudent.isInstallment) {
+                              const instAmount = (course.price / (course.installments_count || 1)).toFixed(2);
+                              return `${instAmount} x ${course.installments_count || 1} Months`;
+                            }
+                            return Number(course.price).toFixed(2);
+                          })()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] font-bold text-navy/40 uppercase tracking-widest">Payment Mode</p>
+                        <p className={`text-xs font-bold uppercase tracking-tight ${newStudent.payment_method === 'cash' ? 'text-emerald-600' : 'text-navy'}`}>
+                          {newStudent.payment_method === 'cash' ? '● Collect Cash Now' : 'Online Gateway'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="text-[9px] text-slate-400 font-medium italic -mt-2 ml-1">
+                      Select 'Cash' for walk-in enrollments to maintain accurate cashflow records.
+                    </p>
                   </div>
                 </div>
 

@@ -21,7 +21,9 @@ import {
   Fingerprint,
   Upload,
   CheckCircle,
-  FileText
+  FileText,
+  BookOpen,
+  X
 } from "lucide-react";
 
 import CustomModal from "@/components/CustomModal";
@@ -34,6 +36,15 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Password Change State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
 
   // Modal State
   const [modalConfig, setModalConfig] = useState({
@@ -74,13 +85,23 @@ export default function ProfilePage() {
     id_number: "",
     id_image: "",
     school_id_card: "",
-    school_id_number: ""
+    school_id_number: "",
+    // Faculty specific
+    bio: "",
+    specialty: "",
+    expertise: "",
+    faculty_education: ""
   });
 
   const tabs = [
     { id: "personal", label: "General details", icon: <User size={16} /> },
-    { id: "academic", label: "Academic records", icon: <GraduationCap size={16} /> },
-    { id: "kyc", label: "Student Verification", icon: <Fingerprint size={16} /> },
+    ...(user?.role === 'teacher' 
+      ? [{ id: "professional", label: "Professional Info", icon: <BookOpen size={16} /> }]
+      : [
+          { id: "academic", label: "Academic records", icon: <GraduationCap size={16} /> },
+          { id: "kyc", label: "Student Verification", icon: <Fingerprint size={16} /> }
+        ]
+    ),
     { id: "security", label: "Login & Security", icon: <Shield size={16} /> }
   ];
 
@@ -111,7 +132,11 @@ export default function ProfilePage() {
           id_number: u.id_number || "",
           id_image: u.id_image || "",
           school_id_card: u.school_id_card || "",
-          school_id_number: u.school_id_number || ""
+          school_id_number: u.school_id_number || "",
+          bio: u.bio || "",
+          specialty: u.specialty || "",
+          expertise: Array.isArray(u.expertise) ? u.expertise.join(", ") : (u.expertise || ""),
+          faculty_education: u.faculty_education || ""
         });
       } else {
         setError(data.message || "Failed to load profile");
@@ -157,7 +182,10 @@ export default function ProfilePage() {
       const res = await fetch("/api/student/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          expertise: typeof formData.expertise === 'string' ? formData.expertise.split(',').map(e => e.trim()).filter(e => e) : formData.expertise
+        })
       });
       const data = await res.json();
       if (data.success) {
@@ -170,6 +198,38 @@ export default function ProfilePage() {
       showAlert("Technical Error", "Failed to save changes due to a connectivity issue.", "error");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      showAlert("Verification Error", "New password and confirmation do not match.", "error");
+      return;
+    }
+
+    setIsSavingPassword(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShowPasswordModal(false);
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        showAlert("Security Updated", "Your login credentials have been successfully updated.", "success");
+      } else {
+        showAlert("Security Error", data.message || "Unable to update password.", "error");
+      }
+    } catch (err) {
+      showAlert("Technical Error", "Failed to reach security server.", "error");
+    } finally {
+      setIsSavingPassword(false);
     }
   };
 
@@ -236,10 +296,16 @@ export default function ProfilePage() {
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{user?.name}</h1>
-            <p className="text-slate-500 text-sm mt-1">Student ID: PR-{10000 + user?.id} | Enrollment: 2026</p>
+            <p className="text-slate-500 text-sm mt-1">
+              {user?.role === 'teacher' ? 'Faculty Member' : `Student ID: PR-${10000 + user?.id}`} | Session: 2026
+            </p>
             <div className="flex items-center space-x-3 mt-3">
-              <span className="px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase border border-emerald-100">Verified identity</span>
-              <span className="px-2.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold uppercase border border-blue-100">Active scholar</span>
+              <span className="px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase border border-emerald-100">
+                {user?.role === 'teacher' ? 'Official Mentor' : 'Verified identity'}
+              </span>
+              <span className="px-2.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold uppercase border border-blue-100">
+                {user?.role === 'teacher' ? 'Institutional Faculty' : 'Active scholar'}
+              </span>
             </div>
           </div>
         </div>
@@ -660,6 +726,63 @@ export default function ProfilePage() {
             </motion.div>
           )}
 
+          {activeTab === "professional" && (
+            <motion.div
+              key="professional"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="p-8 space-y-8"
+            >
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-700 ml-1">Academic Specialty</label>
+                    <input 
+                      type="text" 
+                      value={formData.specialty} 
+                      onChange={(e) => setFormData({...formData, specialty: e.target.value})}
+                      placeholder="e.g. Robotics & AI Expert" 
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-700 ml-1">Highest Education</label>
+                    <input 
+                      type="text" 
+                      value={formData.faculty_education} 
+                      onChange={(e) => setFormData({...formData, faculty_education: e.target.value})}
+                      placeholder="Your academic degrees" 
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-6">
+                   <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-700 ml-1">Core Expertise (comma separated)</label>
+                    <input 
+                      type="text" 
+                      value={formData.expertise} 
+                      onChange={(e) => setFormData({...formData, expertise: e.target.value})}
+                      placeholder="e.g. Python, ROS, IoT" 
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 ml-1">Professional Biography</label>
+                <textarea 
+                  rows={4} 
+                  value={formData.bio} 
+                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                  placeholder="Share your journey and expertise with students..." 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium resize-none"
+                ></textarea>
+              </div>
+            </motion.div>
+          )}
+
           {activeTab === "security" && (
             <motion.div
               key="security"
@@ -675,12 +798,70 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-slate-900">Security password</h4>
-                    <p className="text-[11px] text-slate-500 font-medium">Last updated 12 days ago</p>
+                    <p className="text-[11px] text-slate-500 font-medium">Protect your institutional account</p>
                   </div>
                 </div>
-                <button className="text-xs font-bold text-navy hover:underline">Change</button>
+                <button 
+                  onClick={() => setShowPasswordModal(true)}
+                  className="px-4 py-2 bg-navy text-white text-xs font-bold rounded-lg hover:bg-black transition-all"
+                >
+                  Update Password
+                </button>
               </div>
 
+              {showPasswordModal && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border border-white/20"
+                  >
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-xl font-bold text-slate-900">Update Password</h3>
+                      <button onClick={() => setShowPasswordModal(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+                    </div>
+                    <form onSubmit={handlePasswordChange} className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Current Password</label>
+                        <input 
+                          required
+                          type="password" 
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all"
+                          value={passwordData.currentPassword}
+                          onChange={e => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">New Password</label>
+                        <input 
+                          required
+                          type="password" 
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all"
+                          value={passwordData.newPassword}
+                          onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Confirm New Password</label>
+                        <input 
+                          required
+                          type="password" 
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all"
+                          value={passwordData.confirmPassword}
+                          onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        />
+                      </div>
+                      <button 
+                        disabled={isSavingPassword}
+                        className="w-full bg-navy text-white py-4 rounded-xl font-bold text-sm shadow-lg shadow-navy/20 hover:bg-black transition-all flex items-center justify-center gap-2"
+                      >
+                        {isSavingPassword ? <Loader2 size={18} className="animate-spin" /> : <Shield size={18} />}
+                        <span>Update Credentials</span>
+                      </button>
+                    </form>
+                  </motion.div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
