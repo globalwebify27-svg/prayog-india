@@ -55,3 +55,22 @@ export async function GET() {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const type = searchParams.get("type"); // 'Contact' or 'Enquiry'
+
+    if (!id || !type) {
+      return NextResponse.json({ success: false, message: "ID and Type are required" }, { status: 400 });
+    }
+
+    const table = type === "Contact" ? "contact_messages" : "enquiries";
+    
+    await pool.query(`DELETE FROM ${table} WHERE id = ?`, [id]);
+
+    return NextResponse.json({ success: true, message: "Lead deleted successfully" });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}

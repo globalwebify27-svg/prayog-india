@@ -15,7 +15,9 @@ import {
   CheckCircle2,
   MoreVertical,
   ChevronRight,
-  Phone
+  Phone,
+  AlertCircle,
+  X
 } from "lucide-react";
 
 export default function LeadsPage() {
@@ -23,6 +25,8 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLead, setSelectedLead] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchLeads();
@@ -47,6 +51,27 @@ export default function LeadsPage() {
     lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lead.subject.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleDelete = async () => {
+    if (!selectedLead) return;
+    setIsDeleting(true);
+
+    try {
+      const res = await fetch(`/api/contact?id=${selectedLead.id}&type=${selectedLead.type}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedLead(null);
+        setIsDeleteModalOpen(false);
+        fetchLeads();
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -205,7 +230,10 @@ export default function LeadsPage() {
                     <button className="px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-navy hover:text-navy transition-all">
                       Archive Lead
                     </button>
-                    <button className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
+                    <button 
+                      onClick={() => setIsDeleteModalOpen(true)}
+                      className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                    >
                       <Trash2 size={20} />
                     </button>
                   </div>
@@ -225,6 +253,60 @@ export default function LeadsPage() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="absolute inset-0 bg-navy/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-[2.5rem] p-8 max-w-md w-full relative z-10 shadow-2xl border border-white/20"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center">
+                  <AlertCircle size={28} className="text-rose-500" />
+                </div>
+                <button 
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="p-2 text-slate-400 hover:text-navy hover:bg-slate-100 rounded-xl transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <h3 className="text-2xl font-bold text-navy mb-2 tracking-tight">Delete this Lead?</h3>
+              <p className="text-slate-500 text-sm leading-relaxed mb-8 font-medium">
+                Are you sure you want to delete the enquiry from <span className="text-navy font-bold">{selectedLead?.name}</span>? This action cannot be undone.
+              </p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button 
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl text-sm font-bold hover:bg-slate-200 transition-all"
+                >
+                  Keep Lead
+                </button>
+                <button 
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="px-6 py-4 bg-rose-500 text-white rounded-2xl text-sm font-bold hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
+                >
+                  {isDeleting ? "Deleting..." : "Yes, Delete"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
