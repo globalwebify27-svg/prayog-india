@@ -1,19 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Send, Phone, Mail, MapPin } from "lucide-react";
+import { Send, Phone, Mail, MapPin, ChevronDown } from "lucide-react";
 
 export default function EnquiryForm() {
+  const [courses, setCourses] = useState([]);
+  const [dynamicCourses, setDynamicCourses] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    course: "Industrial Robotics",
+    course: "",
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const res = await fetch("/api/courses");
+        const data = await res.json();
+        setCourses(data);
+        
+        // Group courses
+        const grouped = {
+          "Certification Programs": [],
+          "Internship Programs": [],
+          "1:1 Specialized Training": []
+        };
+
+        data.forEach(c => {
+          if (c.is_internship === 1) grouped["Internship Programs"].push(c.title);
+          else if (c.is_one_to_one === 1) grouped["1:1 Specialized Training"].push(c.title);
+          else grouped["Certification Programs"].push(c.title);
+        });
+
+        if (data.length > 0) {
+          setFormData(prev => ({ ...prev, course: data[0].title }));
+        }
+
+        setDynamicCourses(grouped);
+      } catch (err) {
+        console.error("Failed to fetch courses:", err);
+      }
+    }
+    fetchCourses();
+  }, []);
 
   const validate = () => {
     let newErrors = {};
@@ -68,9 +102,9 @@ export default function EnquiryForm() {
   return (
     <section className="py-10 md:py-20 bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col lg:flex-row">
+        <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col lg:grid lg:grid-cols-12">
           {/* Form Side */}
-          <div className="flex-grow p-6 md:p-10 lg:p-12">
+          <div className="lg:col-span-7 p-6 md:p-10 lg:p-12">
             <h2 className="text-2xl md:text-4xl font-heading font-black text-slate-900 mb-6">Send an Enquiry</h2>
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -89,17 +123,25 @@ export default function EnquiryForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest ml-1">Phone Number</label>
-                  <input name="phone" value={formData.phone} onChange={handleChange} type="tel" placeholder="+91 98765 43210" className={`w-full bg-slate-50 border rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:bg-white transition-all text-sm ${errors.phone ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`} />
+                  <input name="phone" value={formData.phone} onChange={handleChange} type="tel" placeholder="+91 70330 66338" className={`w-full bg-slate-50 border rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:bg-white transition-all text-sm ${errors.phone ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy'}`} />
                   {errors.phone && <p className="text-[10px] text-rose-500 font-bold ml-1">{errors.phone}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest ml-1">Interested Course</label>
-                  <select name="course" value={formData.course} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:border-navy focus:bg-white transition-all appearance-none text-sm">
-                    <option>Industrial Robotics</option>
-                    <option>AI & Machine Learning</option>
-                    <option>STEM Foundation</option>
-                    <option>Drone Technology</option>
-                  </select>
+                  <div className="relative group">
+                    <select name="course" value={formData.course} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 md:px-6 md:py-4 outline-none focus:border-navy focus:bg-white transition-all appearance-none text-sm font-semibold">
+                      {Object.entries(dynamicCourses).map(([category, courses]) => (
+                        <optgroup key={category} label={category}>
+                          {courses.map(course => (
+                            <option key={course} value={course}>{course}</option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <ChevronDown size={16} />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -117,45 +159,45 @@ export default function EnquiryForm() {
           </div>
 
           {/* Contact Info Side */}
-          <div className="lg:w-[350px] bg-navy p-6 md:p-10 lg:p-12 text-white flex flex-col justify-between">
+          <div className="lg:col-span-5 bg-navy p-6 md:p-10 lg:p-12 text-white flex flex-col justify-between">
             <div>
-              <h3 className="text-xl md:text-2xl font-heading font-black mb-6 md:mb-10">Contact Information</h3>
+              <h3 className="text-xl md:text-2xl font-heading font-black mb-6 md:mb-10 uppercase tracking-tight">Contact Information</h3>
               <div className="space-y-6 md:space-y-10">
-                <div className="flex items-start space-x-3 md:space-x-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                    <Phone size={18} className="text-primary md:w-5 md:h-5" />
+                <div className="flex items-start space-x-3 md:space-x-5">
+                  <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
+                    <Phone size={18} className="text-primary md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <p className="text-blue-100/50 text-[9px] md:text-xs font-bold uppercase tracking-widest mb-1">Call Us</p>
-                    <p className="font-bold text-sm md:text-base">+91 98765 43210</p>
+                    <p className="text-blue-100/50 text-[9px] md:text-xs font-bold uppercase tracking-[0.2em] mb-2">Institutional Support</p>
+                    <p className="font-bold text-sm md:text-lg tracking-tight">+91 70330 66338</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 md:space-x-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                    <Mail size={18} className="text-primary md:w-5 md:h-5" />
+                <div className="flex items-start space-x-3 md:space-x-5">
+                  <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
+                    <Mail size={18} className="text-primary md:w-6 md:h-6" />
                   </div>
-                  <div>
-                    <p className="text-blue-100/50 text-[9px] md:text-xs font-bold uppercase tracking-widest mb-1">Email Us</p>
-                    <p className="font-bold text-sm md:text-base">info@prayogindia.com</p>
+                  <div className="min-w-0">
+                    <p className="text-blue-100/50 text-[9px] md:text-xs font-bold uppercase tracking-[0.2em] mb-2">Direct Inquiry</p>
+                    <p className="font-bold text-sm md:text-lg tracking-tight break-all">info@prayogindiarobotics.com</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 md:space-x-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                    <MapPin size={18} className="text-primary md:w-5 md:h-5" />
+                <div className="flex items-start space-x-3 md:space-x-5">
+                  <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
+                    <MapPin size={18} className="text-primary md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <p className="text-blue-100/50 text-[9px] md:text-xs font-bold uppercase tracking-widest mb-1">Visit Us</p>
-                    <p className="font-bold text-sm md:text-base leading-snug">123 Robotics Lane, Mumbai, Maharashtra 400001</p>
+                    <p className="text-blue-100/50 text-[9px] md:text-xs font-bold uppercase tracking-[0.2em] mb-2">Regional Hub</p>
+                    <p className="font-bold text-sm md:text-lg tracking-tight leading-snug">1st Floor, City Centre, Club Road, Ranchi - 834001</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="mt-8 md:mt-12 pt-8 md:pt-12 border-t border-white/10">
-              <p className="text-blue-100/60 text-[11px] md:text-sm leading-relaxed">
-                Follow us on social media for daily updates and student projects!
+              <p className="text-blue-100/60 text-xs md:text-sm leading-relaxed font-medium">
+                Our academic counselors are available Mon-Sat (9AM - 7PM) for immediate assistance.
               </p>
             </div>
           </div>

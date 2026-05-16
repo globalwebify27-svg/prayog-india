@@ -25,13 +25,15 @@ import {
   IdCard,
   Tag,
   Zap,
-  Briefcase
+  Briefcase,
+  MessageSquare
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin", roles: ["admin", "teacher"] },
+  { icon: MessageSquare, label: "Leads & Enquiries", href: "/admin/leads", roles: ["admin"] },
   { 
     icon: Users, 
     label: "Students", 

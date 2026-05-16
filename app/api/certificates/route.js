@@ -107,6 +107,24 @@ export async function POST(request) {
       qrData
     ]);
 
+    // Send Email Notification
+    try {
+      const { sendMail, getCertificateEmailTemplate } = require("@/lib/mailer");
+      const [studentRows] = await pool.query(
+        "SELECT u.name, u.email, c.title as course_name FROM users u JOIN enrollments e ON e.user_id = u.id JOIN courses c ON e.course_id = c.id WHERE u.id = ? AND c.id = ?",
+        [userId, courseId]
+      );
+      
+      if (studentRows.length > 0) {
+        const student = studentRows[0];
+        const certLink = `${baseUrl}/verify/${certNo}`;
+        const emailHtml = getCertificateEmailTemplate(student.name, student.course_name, certLink);
+        await sendMail(student.email, "Certificate Issued - Prayog India", emailHtml);
+      }
+    } catch (mailErr) {
+      console.error("Certificate Mail Error:", mailErr);
+    }
+
     return NextResponse.json({ 
       success: true, 
       certificateId: result.insertId, 
