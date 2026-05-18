@@ -56,6 +56,15 @@ function RegisterForm() {
   const [couponDetails, setCouponDetails] = useState(null);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
+  // OTP Verification States
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [resendCountdown, setResendCountdown] = useState(0);
+
   // Modal State
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
@@ -229,16 +238,92 @@ function RegisterForm() {
 
   const selectedCourse = courses.find(c => c.id == formData.courseId);
 
+  // Resend OTP countdown timer
+  useEffect(() => {
+    let timer;
+    if (resendCountdown > 0) {
+      timer = setTimeout(() => setResendCountdown(prev => prev - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendCountdown]);
+
+  // Reset verification if user changes email
+  useEffect(() => {
+    setIsEmailVerified(false);
+    setIsOtpModalOpen(false);
+    setOtpCode("");
+  }, [formData.email]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSendOtp = async (targetEmail = formData.email) => {
+    if (!targetEmail || !/\S+@\S+\.\S+/.test(targetEmail)) {
+      setErrors({ email: "Please enter a valid email address first." });
+      return;
+    }
+    setIsSendingOtp(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/register/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: targetEmail })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsOtpModalOpen(true);
+        setResendCountdown(30); // 30 seconds cooldown
+      } else {
+        setErrors({ email: data.message || "Failed to send verification code." });
+        setIsOtpModalOpen(false);
+      }
+    } catch (error) {
+      setOtpError("Failed to send code due to a network error.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode || otpCode.length < 6) {
+      setOtpError("Please enter a valid 6-digit code.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/register/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, otp: otpCode })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsEmailVerified(true);
+        setIsOtpModalOpen(false);
+        setOtpCode("");
+      } else {
+        setOtpError(data.message || "Incorrect verification code.");
+      }
+    } catch (error) {
+      setOtpError("Verification failed due to a network error.");
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
   const nextStep = () => {
     if (validateStep()) {
+      if (step === 2 && !isEmailVerified) {
+        return;
+      }
       setStep(prev => Math.min(prev + 1, 3));
     }
   };
+
   const prevStep = () => {
     setErrors({});
     setStep(prev => Math.max(prev - 1, 1));
@@ -519,27 +604,67 @@ function RegisterForm() {
                       </p>
                     )}
                   </div>
+                  
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Institutional Email</label>
-                    <div className="relative group">
-                      <Mail size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.email ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
-                      <input 
-                        type="email" 
-                        name="email" 
-                        value={formData.email} 
-                        onChange={handleInputChange} 
-                        placeholder="name@email.com" 
-                        className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
-                          errors.email ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
-                        }`} 
-                      />
+                    <div className="relative flex items-center gap-2">
+                      <div className="relative flex-grow">
+                        <Mail size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.email ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
+                        <input 
+                          type="email" 
+                          name="email" 
+                          value={formData.email} 
+                          onChange={handleInputChange} 
+                          disabled={isEmailVerified}
+                          placeholder="name@email.com" 
+                          className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
+                            errors.email ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                          } ${isEmailVerified ? "border-emerald-300 bg-emerald-50/20 text-emerald-800" : ""}`} 
+                        />
+                      </div>
+                      
+                      {isEmailVerified ? (
+                        <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-3 border border-emerald-200 rounded-lg text-xs font-bold whitespace-nowrap shadow-sm">
+                          <CheckCircle2 size={14} className="text-emerald-600 animate-bounce" />
+                          <span>Verified</span>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSendOtp()}
+                          disabled={isSendingOtp || !formData.email || !/\S+@\S+\.\S+/.test(formData.email)}
+                          className="bg-navy hover:bg-black text-white px-4 py-3 rounded-lg font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-md flex items-center gap-1.5 hover:scale-105 active:scale-95"
+                        >
+                          {isSendingOtp ? (
+                            <span className="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
+                          ) : (
+                            "Verify"
+                          )}
+                        </button>
+                      )}
                     </div>
+                    {isEmailVerified && (
+                      <div className="flex justify-between items-center mt-1 ml-1">
+                        <p className="text-[10px] text-emerald-600 font-bold">Email verified successfully.</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsEmailVerified(false);
+                            setOtpCode("");
+                          }}
+                          className="text-[10px] text-rose-500 font-bold hover:underline"
+                        >
+                          Change Email
+                        </button>
+                      </div>
+                    )}
                     {errors.email && (
                       <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
                         <AlertCircle size={10} /> {errors.email}
                       </p>
                     )}
                   </div>
+
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Mobile number</label>
                     <div className="relative group">
@@ -766,14 +891,109 @@ function RegisterForm() {
           </button>
           <button 
             onClick={step === 3 ? handleRegister : nextStep} 
-            disabled={isSubmitting} 
-            className="bg-navy text-white px-10 py-3 rounded-lg font-bold text-xs uppercase tracking-wide shadow-lg hover:bg-black transition-all flex items-center gap-2"
+            disabled={isSubmitting || (step === 2 && !isEmailVerified)} 
+            className="bg-navy text-white px-10 py-3 rounded-lg font-bold text-xs uppercase tracking-wide shadow-lg hover:bg-black transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <span>{isSubmitting ? "Processing..." : step === 3 ? "Process enrollment" : "Continue"}</span>
+            <span>
+              {isSubmitting 
+                ? "Processing..." 
+                : step === 3 
+                  ? "Process enrollment" 
+                  : step === 2 && !isEmailVerified
+                    ? "Verify Email to Continue"
+                    : "Continue"
+              }
+            </span>
             <ChevronRight size={16} />
           </button>
         </div>
       </div>
+
+      {/* OTP Verification Modal */}
+      <AnimatePresence>
+        {isOtpModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-slate-100 space-y-6 text-center"
+            >
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Verify Your Email</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  We have sent a 6-digit verification code to <span className="font-semibold text-navy">{formData.email}</span>.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="relative max-w-[280px] mx-auto">
+                  <input 
+                    type="text" 
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setOtpCode(val);
+                    }}
+                    placeholder="000000"
+                    className="w-full text-center tracking-[0.75em] text-2xl font-black py-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-navy focus:bg-white transition-all shadow-inner text-slate-800"
+                  />
+                </div>
+                
+                {otpError && (
+                  <p className="text-[11px] text-rose-500 font-bold flex items-center justify-center gap-1 animate-pulse">
+                    <AlertCircle size={12} /> {otpError}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <button 
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={isVerifyingOtp || otpCode.length < 6}
+                  className="w-full bg-navy text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isVerifyingOtp ? (
+                    <span className="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent mr-2" />
+                  ) : null}
+                  <span>Verify Code</span>
+                  <ShieldCheck size={16} />
+                </button>
+
+                <div className="flex items-center justify-between text-xs font-semibold px-2">
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setIsOtpModalOpen(false);
+                      setOtpCode("");
+                      setOtpError("");
+                    }} 
+                    className="text-slate-400 hover:text-navy transition-colors flex items-center gap-1"
+                  >
+                    <ChevronLeft size={16} />
+                    <span>Cancel</span>
+                  </button>
+
+                  {resendCountdown > 0 ? (
+                    <span className="text-slate-400 font-medium">Resend in {resendCountdown}s</span>
+                  ) : (
+                    <button 
+                      type="button" 
+                      onClick={() => handleSendOtp()} 
+                      disabled={isSendingOtp}
+                      className="text-primary hover:text-navy transition-colors font-bold"
+                    >
+                      {isSendingOtp ? "Sending..." : "Resend Code"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <CustomModal 
         isOpen={modalConfig.isOpen}
