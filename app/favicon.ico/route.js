@@ -6,6 +6,22 @@ import path from "path";
 export const dynamic = "force-dynamic";
 
 export async function GET(request) {
+  // Try to serve user-defined favicon.jpeg first
+  try {
+    const faviconPath = path.join(process.cwd(), "public", "favicon.jpeg");
+    if (fs.existsSync(faviconPath)) {
+      const fileBuffer = fs.readFileSync(faviconPath);
+      return new Response(fileBuffer, {
+        headers: {
+          "Content-Type": "image/jpeg",
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error reading favicon.jpeg in favicon route:", error);
+  }
+
   let logoUrl = "/assets/logo.png";
 
   try {

@@ -14,7 +14,7 @@ export const metadata = {
   title: "Prayog India | Premier Robotics & STEM Education",
   description: "Empowering the next generation with hands-on robotics, AI, and STEM workshops.",
   icons: {
-    icon: "/icon.png?v=2",
+    icon: "/favicon.jpeg",
   },
 };
 

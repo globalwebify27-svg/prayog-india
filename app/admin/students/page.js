@@ -55,6 +55,30 @@ export default function StudentsAdmin() {
     payment_method: "online"
   });
   const [errors, setErrors] = useState({});
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+
+  const checkEmailAvailability = async (email) => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return;
+    }
+    setIsCheckingEmail(true);
+    try {
+      const res = await fetch(`/api/register/check-email?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (data.success && data.exists) {
+        setErrors(prev => ({ ...prev, email: "Email is already registered." }));
+      } else {
+        setErrors(prev => {
+          const { email: removed, ...rest } = prev;
+          return rest;
+        });
+      }
+    } catch (err) {
+      console.error("Error checking email availability:", err);
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
 
   // Modal State
   const [modalConfig, setModalConfig] = useState({
@@ -84,6 +108,8 @@ export default function StudentsAdmin() {
       newErrors.email = "Email is required.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newStudent.email)) {
       newErrors.email = "Invalid email format.";
+    } else if (errors.email === "Email is already registered.") {
+      newErrors.email = "Email is already registered.";
     }
     const phoneClean = newStudent.phone.replace(/[^0-9]/g, '');
     if (!newStudent.phone.trim()) {
@@ -503,17 +529,33 @@ export default function StudentsAdmin() {
                     {errors.name && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.name}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
-                    <input 
-                      required
-                      type="email" 
-                      placeholder="john@example.com"
-                      value={newStudent.email}
-                      onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
-                      className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-xs font-semibold outline-none focus:bg-white transition-all ${
-                        errors.email ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
-                      }`}
-                    />
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                      Email Address {isCheckingEmail && <span className="text-[9px] text-slate-400 animate-pulse ml-1">(Checking...)</span>}
+                    </label>
+                    <div className="relative">
+                      <input 
+                        required
+                        type="email" 
+                        placeholder="john@example.com"
+                        value={newStudent.email}
+                        onChange={(e) => {
+                          setNewStudent({...newStudent, email: e.target.value});
+                          setErrors(prev => {
+                            const { email: removed, ...rest } = prev;
+                            return rest;
+                          });
+                        }}
+                        onBlur={(e) => checkEmailAvailability(e.target.value)}
+                        className={`w-full px-4 py-2.5 pr-10 bg-slate-50 border rounded-xl text-xs font-semibold outline-none focus:bg-white transition-all ${
+                          errors.email ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                        }`}
+                      />
+                      {isCheckingEmail && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                          <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-navy border-t-transparent" />
+                        </div>
+                      )}
+                    </div>
                     {errors.email && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
                   </div>
                 </div>

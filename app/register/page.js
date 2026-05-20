@@ -59,6 +59,30 @@ function RegisterForm() {
   // OTP Verification States
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+
+  const checkEmailAvailability = async (email) => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return;
+    }
+    setIsCheckingEmail(true);
+    try {
+      const res = await fetch(`/api/register/check-email?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (data.success && data.exists) {
+        setErrors(prev => ({ ...prev, email: "This email is already registered." }));
+      } else {
+        setErrors(prev => {
+          const { email: removed, ...rest } = prev;
+          return rest;
+        });
+      }
+    } catch (err) {
+      console.error("Error checking email availability:", err);
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
   const [otpCode, setOtpCode] = useState("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
@@ -115,6 +139,8 @@ function RegisterForm() {
         newErrors.email = "Institutional email is required.";
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
         newErrors.email = "Please enter a valid institutional email address.";
+      } else if (errors.email === "This email is already registered.") {
+        newErrors.email = "This email is already registered.";
       }
 
       const phoneClean = formData.phone.replace(/[^0-9]/g, '');
@@ -257,6 +283,12 @@ function RegisterForm() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === "email") {
+      setErrors(prev => {
+        const { email: removed, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const handleSendOtp = async (targetEmail = formData.email) => {
@@ -606,7 +638,9 @@ function RegisterForm() {
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Institutional Email</label>
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">
+                      Institutional Email {isCheckingEmail && <span className="text-[9px] text-slate-400 animate-pulse ml-1">(Checking...)</span>}
+                    </label>
                     <div className="relative flex items-center gap-2">
                       <div className="relative flex-grow">
                         <Mail size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.email ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
@@ -616,11 +650,17 @@ function RegisterForm() {
                           value={formData.email} 
                           onChange={handleInputChange} 
                           disabled={isEmailVerified}
+                          onBlur={(e) => checkEmailAvailability(e.target.value)}
                           placeholder="name@email.com" 
-                          className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
+                          className={`w-full pl-11 pr-10 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
                             errors.email ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
                           } ${isEmailVerified ? "border-emerald-300 bg-emerald-50/20 text-emerald-800" : ""}`} 
                         />
+                        {isCheckingEmail && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                            <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-navy border-t-transparent" />
+                          </div>
+                        )}
                       </div>
                       
                       {isEmailVerified ? (
