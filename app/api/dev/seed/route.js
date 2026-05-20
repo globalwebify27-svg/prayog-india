@@ -103,7 +103,117 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ success: true, message: "Database seeded with workshop case studies!" });
+    // 7. Seed about_team
+    const [teamRows] = await pool.query("SHOW TABLES LIKE 'about_team'");
+    if (teamRows.length > 0) {
+      const [teamCountRows] = await pool.query("SELECT COUNT(*) as count FROM about_team");
+      if (teamCountRows[0].count === 0) {
+        const team = [
+          { 
+            name: "Enamul Hassan", 
+            role: "Founder & Visionary", 
+            initial: "EH", 
+            img: "/assets/t1.png",
+            bio: "Founder of PRAYOG INDIA ROBOTICS PVT. LTD. — the visionary who started this journey in 2015 during his Engineering days, driven by a passion for Robotics, Embedded Systems, and practical education.", 
+            color: "#01254d",
+            specialties: ["Strategic Growth", "Embedded Systems", "Robotics"],
+            focus: "National STEM Scaling"
+          },
+          { 
+            name: "Md. Shahnawaz Abbas", 
+            role: "Research & Training Manager", 
+            initial: "SA", 
+            img: "/assets/t2.png",
+            bio: "One of the strongest pillars behind PRAYOG's growth. With co-founder-level dedication, he shaped the research, learning methodology, workshops, and innovation culture of the organization.", 
+            color: "#1a3f70",
+            specialties: ["IoT Networks", "Applied Research", "STEM Labs Setup"],
+            focus: "Ecosystem Development"
+          },
+          { 
+            name: "Emraan Hassan", 
+            role: "Robotics & Emerging Tech Specialist", 
+            initial: "EH", 
+            img: "/assets/t3.png",
+            bio: "A driving force with expertise in Robotics, Embedded Systems, IoT, and Drone Technology. His passion for hands-on learning embodies the spirit of innovation at PRAYOG.", 
+            color: "#0d2d52",
+            specialties: ["Drone Engineering", "Sensors & Telemetry", "Workshop Design"],
+            focus: "UAV Systems & Flight Control"
+          },
+          { 
+            name: "Jay Prakash Kumar", 
+            role: "Sr. Embedded Engineer", 
+            initial: "JK", 
+            img: "/assets/t1.png",
+            bio: "Specialized in Embedded Systems, IoT, Electronics Design, and Hardware Prototyping with deep expertise in real-time embedded technologies.", 
+            color: "#01254d",
+            specialties: ["Circuit Design", "Firmware (C++)", "Prototyping"],
+            focus: "Microcontrollers & RTOS"
+          },
+          { 
+            name: "Nikhil Khakha", 
+            role: "Drone Engineer", 
+            initial: "NK", 
+            img: "/assets/t2.png",
+            bio: "Focused on Drone Technology, UAV Systems, and aerial robotics — guiding students through the technical and regulatory aspects of drone engineering.", 
+            color: "#1a3f70",
+            specialties: ["Aerodynamics", "PX4 Autopilot", "DGCA Compliance"],
+            focus: "UAV Assembly & Flight Operations"
+          },
+          { 
+            name: "Saheb Ali", 
+            role: "Automation Engineer", 
+            initial: "SA", 
+            img: "/assets/t3.png",
+            bio: "Specialized in Industrial Automation, Control Systems, and Smart Technologies — bridging the gap between academic theory and real industrial practice.", 
+            color: "#0d2d52",
+            specialties: ["PLC Programming", "SCADA Integration", "Control Logic"],
+            focus: "Industrial Automation Systems"
+          },
+          { 
+            name: "Vivek Ranjan", 
+            role: "Sr. Graphic Designer", 
+            initial: "VR", 
+            img: "/assets/t1.png",
+            bio: "One of the earliest members who shaped PRAYOG's entire visual identity, creative branding, and digital presence through impactful graphic design.", 
+            color: "#01254d",
+            specialties: ["Visual Design", "Creative Branding", "UX/UI Prototyping"],
+            focus: "Digital & Media Presence"
+          }
+        ];
+
+        for (let i = 0; i < team.length; i++) {
+          const m = team[i];
+          await pool.query(
+            "INSERT INTO about_team (name, role, initial, img, bio, color, specialties, focus, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [m.name, m.role, m.initial, m.img, m.bio, m.color, JSON.stringify(m.specialties), m.focus, i]
+          );
+        }
+      }
+    }
+
+    // 8. Seed about_faculty
+    const [facultyRows] = await pool.query("SHOW TABLES LIKE 'about_faculty'");
+    if (facultyRows.length > 0) {
+      const [facCountRows] = await pool.query("SELECT COUNT(*) as count FROM about_faculty");
+      if (facCountRows[0].count === 0) {
+        const guestFaculty = [
+          { name: "Aman Raj", role: "Robotics & Automation Engineer", desc: "Guest Faculty and technical mentor specializing in Robotics, Automation Systems, and practical engineering applications.", initial: "AR" },
+          { name: "Anant Verma", role: "Robotics Engineer", desc: "Focused on Robotics System Design, robotics implementation, and innovation-based project development.", initial: "AV" },
+          { name: "Sunny Kumar", role: "Sr. Web Developer", desc: "Responsible for advanced web technologies, platform development, and digital infrastructure supporting modern EdTech ecosystems.", initial: "SK" },
+          { name: "Belal Khan", role: "Sr. Android Developer", desc: "Specialized in Android Application Development, mobile technology solutions, and software-driven innovation systems.", initial: "BK" }
+        ];
+
+        for (let i = 0; i < guestFaculty.length; i++) {
+          const f = guestFaculty[i];
+          await pool.query(
+            "INSERT INTO about_faculty (name, role, desc_text, initial, sort_order) VALUES (?, ?, ?, ?, ?)",
+            [f.name, f.role, f.desc, f.initial, i]
+          );
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true, message: "Database seeded with workshop case studies, team and faculty data!" });
   } catch (err) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
