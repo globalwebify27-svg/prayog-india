@@ -217,9 +217,11 @@ export default function AboutPage() {
 
   // Telemetry items for interactive hero list
   const heroBadges = [
-    { title: "Robotics", desc: "Autonomous mechanical rigs & kinematics", color: "from-[#FFC107] to-amber-500" },
-    { title: "IoT & Embedded", desc: "Microcontroller logic & cloud telemetry", color: "from-blue-400 to-[#01254d]" },
-    { title: "Drone Tech", desc: "Autopilot flight dynamics & UAV structural builds", color: "from-emerald-400 to-teal-600" },
+    { title: "ROBOTICS", desc: "Autonomous mechanical rigs, kinematics & industrial control", color: "from-[#FFC107] to-amber-500" },
+    { title: "IOT & EMBEDDED SYSTEMS", desc: "Microcontroller programming, telemetry & smart sensing", color: "from-blue-400 to-cyan-500" },
+    { title: "3D DESIGNS & SLICING", desc: "Additive manufacturing, parametric modeling & slicer optimization", color: "from-purple-400 to-pink-500" },
+    { title: "PCB DESIGNING", desc: "Schematics routing, multilayer board layouts & prototyping", color: "from-orange-400 to-red-500" },
+    { title: "DRONE TECH", desc: "Flight controller algorithms, autonomous navigation & aerodynamics", color: "from-emerald-400 to-teal-600" },
   ];
 
   return (
@@ -687,10 +689,16 @@ export default function AboutPage() {
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-[#FFC107]/40 transition-all duration-300 group">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm text-white mb-5"
-                  style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
-                  {g.initial}
-                </div>
+                {g.img_url ? (
+                  <div className="w-12 h-12 rounded-xl overflow-hidden mb-5 border border-slate-100 bg-slate-50 relative shrink-0">
+                    <Image src={g.img_url} alt={g.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm text-white mb-5"
+                    style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
+                    {g.initial}
+                  </div>
+                )}
                 <h3 className="font-bold text-[#01254d] text-base mb-1">{g.name}</h3>
                 <p className="text-[#FFC107] text-xs font-semibold uppercase tracking-wider mb-3">{g.role}</p>
                 <p className="text-slate-500 text-sm leading-relaxed">{g.desc}</p>

@@ -168,6 +168,7 @@ CREATE TABLE IF NOT EXISTS about_faculty (
   role VARCHAR(255) NOT NULL,
   desc_text TEXT NOT NULL,
   initial VARCHAR(10) DEFAULT '',
+  img_url VARCHAR(255) DEFAULT '',
   sort_order INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -8,6 +8,13 @@ export async function GET() {
     // 0. Init Schema
     await initDb();
 
+    // Ensure about_faculty has img_url column
+    try {
+      await pool.query("ALTER TABLE about_faculty ADD COLUMN img_url VARCHAR(255) DEFAULT ''");
+    } catch (e) {
+      // Column might already exist, ignore error
+    }
+
     // 1. Admin
     const adminPass = await bcrypt.hash("admin123", 10);
     await pool.query(
@@ -197,17 +204,17 @@ export async function GET() {
       const [facCountRows] = await pool.query("SELECT COUNT(*) as count FROM about_faculty");
       if (facCountRows[0].count === 0) {
         const guestFaculty = [
-          { name: "Aman Raj", role: "Robotics & Automation Engineer", desc: "Guest Faculty and technical mentor specializing in Robotics, Automation Systems, and practical engineering applications.", initial: "AR" },
-          { name: "Anant Verma", role: "Robotics Engineer", desc: "Focused on Robotics System Design, robotics implementation, and innovation-based project development.", initial: "AV" },
-          { name: "Sunny Kumar", role: "Sr. Web Developer", desc: "Responsible for advanced web technologies, platform development, and digital infrastructure supporting modern EdTech ecosystems.", initial: "SK" },
-          { name: "Belal Khan", role: "Sr. Android Developer", desc: "Specialized in Android Application Development, mobile technology solutions, and software-driven innovation systems.", initial: "BK" }
+          { name: "Aman Raj", role: "Robotics & Automation Engineer", desc: "Guest Faculty and technical mentor specializing in Robotics, Automation Systems, and practical engineering applications.", initial: "AR", img_url: "" },
+          { name: "Anant Verma", role: "Robotics Engineer", desc: "Focused on Robotics System Design, robotics implementation, and innovation-based project development.", initial: "AV", img_url: "" },
+          { name: "Sunny Kumar", role: "Sr. Web Developer", desc: "Responsible for advanced web technologies, platform development, and digital infrastructure supporting modern EdTech ecosystems.", initial: "SK", img_url: "" },
+          { name: "Belal Khan", role: "Sr. Android Developer", desc: "Specialized in Android Application Development, mobile technology solutions, and software-driven innovation systems.", initial: "BK", img_url: "" }
         ];
 
         for (let i = 0; i < guestFaculty.length; i++) {
           const f = guestFaculty[i];
           await pool.query(
-            "INSERT INTO about_faculty (name, role, desc_text, initial, sort_order) VALUES (?, ?, ?, ?, ?)",
-            [f.name, f.role, f.desc, f.initial, i]
+            "INSERT INTO about_faculty (name, role, desc_text, initial, img_url, sort_order) VALUES (?, ?, ?, ?, ?, ?)",
+            [f.name, f.role, f.desc, f.initial, f.img_url, i]
           );
         }
       }

@@ -32,6 +32,7 @@ export default function AdminAboutPage() {
     role: "",
     desc_text: "",
     initial: "",
+    img_url: "",
     sort_order: 0
   });
 
@@ -66,7 +67,7 @@ export default function AdminAboutPage() {
   };
 
   // Image upload handler
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = async (e, type = "team") => {
     const file = e.target.files[0];
     if (!file) return;
     setIsUploading(true);
@@ -80,7 +81,11 @@ export default function AdminAboutPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setTeamForm(prev => ({ ...prev, img: data.url }));
+        if (type === "team") {
+          setTeamForm(prev => ({ ...prev, img: data.url }));
+        } else {
+          setFacultyForm(prev => ({ ...prev, img_url: data.url }));
+        }
       } else {
         alert("Upload failed: " + data.error);
       }
@@ -196,6 +201,7 @@ export default function AdminAboutPage() {
         role: faculty.role,
         desc_text: faculty.desc_text,
         initial: faculty.initial || "",
+        img_url: faculty.img_url || "",
         sort_order: faculty.sort_order || 0
       });
     } else {
@@ -205,6 +211,7 @@ export default function AdminAboutPage() {
         role: "",
         desc_text: "",
         initial: "",
+        img_url: "",
         sort_order: facultyList.length
       });
     }
@@ -369,9 +376,13 @@ export default function AdminAboutPage() {
               {facultyList.map((f) => (
                 <tr key={f.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="w-8 h-8 rounded-lg bg-[#01254d] text-white flex items-center justify-center font-bold text-xs">
-                      {f.initial}
-                    </div>
+                    {f.img_url ? (
+                      <img src={f.img_url} alt={f.name} className="w-8 h-8 rounded-lg object-cover border border-slate-100 bg-slate-50" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-[#01254d] text-white flex items-center justify-center font-bold text-xs">
+                        {f.initial}
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-800">{f.name}</td>
                   <td className="px-6 py-4 text-slate-500 font-semibold">{f.role}</td>
@@ -461,7 +472,7 @@ export default function AdminAboutPage() {
                     <input 
                       type="file" 
                       accept="image/*"
-                      onChange={handleImageUpload}
+                      onChange={(e) => handleImageUpload(e, "team")}
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none file:mr-2 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-black file:bg-navy file:text-white hover:file:bg-black cursor-pointer"
                     />
                   </div>
@@ -559,6 +570,21 @@ export default function AdminAboutPage() {
                   <div>
                     <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Sort Order</label>
                     <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none" value={facultyForm.sort_order} onChange={e => setFacultyForm({...facultyForm, sort_order: parseInt(e.target.value) || 0})} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 items-end">
+                  <div>
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Portrait Image (Optional)</label>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, "faculty")}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none file:mr-2 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-black file:bg-navy file:text-white hover:file:bg-black cursor-pointer"
+                    />
+                  </div>
+                  <div className="text-xs text-slate-400 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 h-9 truncate font-mono">
+                    {isUploading ? <Loader2 size={12} className="animate-spin text-[#01254d]" /> : <Check size={12} className="text-emerald-500" />}
+                    <span>{facultyForm.img_url ? facultyForm.img_url.substring(facultyForm.img_url.lastIndexOf("/") + 1) : "No file uploaded"}</span>
                   </div>
                 </div>
                 <div>

@@ -33,12 +33,12 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 
-    const { name, role, desc_text, initial, sort_order } = await req.json();
+    const { name, role, desc_text, initial, img_url, sort_order } = await req.json();
 
     const [result] = await pool.query(
-      `INSERT INTO about_faculty (name, role, desc_text, initial, sort_order) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [name, role, desc_text, initial || "", sort_order || 0]
+      `INSERT INTO about_faculty (name, role, desc_text, initial, img_url, sort_order) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, role, desc_text, initial || "", img_url || "", sort_order || 0]
     );
 
     return NextResponse.json({ success: true, id: result.insertId, message: "Guest faculty added successfully" });
@@ -53,13 +53,13 @@ export async function PUT(req) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 
-    const { id, name, role, desc_text, initial, sort_order } = await req.json();
+    const { id, name, role, desc_text, initial, img_url, sort_order } = await req.json();
 
     await pool.query(
       `UPDATE about_faculty SET 
-         name = ?, role = ?, desc_text = ?, initial = ?, sort_order = ? 
+         name = ?, role = ?, desc_text = ?, initial = ?, img_url = ?, sort_order = ? 
        WHERE id = ?`,
-      [name, role, desc_text, initial || "", sort_order || 0, id]
+      [name, role, desc_text, initial || "", img_url || "", sort_order || 0, id]
     );
 
     return NextResponse.json({ success: true, message: "Guest faculty updated successfully" });
