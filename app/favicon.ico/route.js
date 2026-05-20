@@ -43,8 +43,8 @@ export async function GET(request) {
     const filePath = path.join(process.cwd(), "public", logoUrl);
     if (fs.existsSync(filePath)) {
       const fileBuffer = fs.readFileSync(filePath);
-      let contentType = "image/png";
-      if (logoUrl.endsWith(".ico")) contentType = "image/x-icon";
+      let contentType = "image/x-icon"; // default for favicon.ico route
+      if (logoUrl.endsWith(".png")) contentType = "image/png";
       else if (logoUrl.endsWith(".jpg") || logoUrl.endsWith(".jpeg")) contentType = "image/jpeg";
       else if (logoUrl.endsWith(".svg")) contentType = "image/svg+xml";
       else if (logoUrl.endsWith(".gif")) contentType = "image/gif";
@@ -74,4 +74,3 @@ export async function GET(request) {
     return new Response("Icon not found", { status: 404 });
   }
 }
-
