@@ -9,72 +9,72 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const team = [
-  { 
-    name: "Enamul Hassan", 
-    role: "Founder & Visionary", 
-    initial: "EH", 
+  {
+    name: "Enamul Hassan",
+    role: "Founder & Visionary",
+    initial: "EH",
     img: "/assets/t1.png",
-    bio: "Founder of PRAYOG INDIA ROBOTICS PVT. LTD. — the visionary who started this journey in 2015 during his Engineering days, driven by a passion for Robotics, Embedded Systems, and practical education.", 
+    bio: "Founder of PRAYOG INDIA ROBOTICS PVT. LTD. — the visionary who started this journey in 2015 during his Engineering days, driven by a passion for Robotics, Embedded Systems, and practical education.",
     color: "#01254d",
     specialties: ["Strategic Growth", "Embedded Systems", "Robotics"],
     focus: "National STEM Scaling"
   },
-  { 
-    name: "Md. Shahnawaz Abbas", 
-    role: "Research & Training Manager", 
-    initial: "SA", 
+  {
+    name: "Md. Shahnawaz Abbas",
+    role: "Research & Training Manager",
+    initial: "SA",
     img: "/assets/t2.png",
-    bio: "One of the strongest pillars behind PRAYOG's growth. With co-founder-level dedication, he shaped the research, learning methodology, workshops, and innovation culture of the organization.", 
+    bio: "One of the strongest pillars behind PRAYOG's growth. With co-founder-level dedication, he shaped the research, learning methodology, workshops, and innovation culture of the organization.",
     color: "#1a3f70",
     specialties: ["IoT Networks", "Applied Research", "STEM Labs Setup"],
     focus: "Ecosystem Development"
   },
-  { 
-    name: "Emraan Hassan", 
-    role: "Robotics & Emerging Tech Specialist", 
-    initial: "EH", 
+  {
+    name: "Emraan Hassan",
+    role: "Robotics & Emerging Tech Specialist",
+    initial: "EH",
     img: "/assets/t3.png",
-    bio: "A driving force with expertise in Robotics, Embedded Systems, IoT, and Drone Technology. His passion for hands-on learning embodies the spirit of innovation at PRAYOG.", 
+    bio: "A driving force with expertise in Robotics, Embedded Systems, IoT, and Drone Technology. His passion for hands-on learning embodies the spirit of innovation at PRAYOG.",
     color: "#0d2d52",
     specialties: ["Drone Engineering", "Sensors & Telemetry", "Workshop Design"],
     focus: "UAV Systems & Flight Control"
   },
-  { 
-    name: "Jay Prakash Kumar", 
-    role: "Sr. Embedded Engineer", 
-    initial: "JK", 
+  {
+    name: "Jay Prakash Kumar",
+    role: "Sr. Embedded Engineer",
+    initial: "JK",
     img: "/assets/t1.png",
-    bio: "Specialized in Embedded Systems, IoT, Electronics Design, and Hardware Prototyping with deep expertise in real-time embedded technologies.", 
+    bio: "Specialized in Embedded Systems, IoT, Electronics Design, and Hardware Prototyping with deep expertise in real-time embedded technologies.",
     color: "#01254d",
     specialties: ["Circuit Design", "Firmware (C++)", "Prototyping"],
     focus: "Microcontrollers & RTOS"
   },
-  { 
-    name: "Nikhil Khakha", 
-    role: "Drone Engineer", 
-    initial: "NK", 
+  {
+    name: "Nikhil Khakha",
+    role: "Drone Engineer",
+    initial: "NK",
     img: "/assets/t2.png",
-    bio: "Focused on Drone Technology, UAV Systems, and aerial robotics — guiding students through the technical and regulatory aspects of drone engineering.", 
+    bio: "Focused on Drone Technology, UAV Systems, and aerial robotics — guiding students through the technical and regulatory aspects of drone engineering.",
     color: "#1a3f70",
     specialties: ["Aerodynamics", "PX4 Autopilot", "DGCA Compliance"],
     focus: "UAV Assembly & Flight Operations"
   },
-  { 
-    name: "Saheb Ali", 
-    role: "Automation Engineer", 
-    initial: "SA", 
+  {
+    name: "Saheb Ali",
+    role: "Automation Engineer",
+    initial: "SA",
     img: "/assets/t3.png",
-    bio: "Specialized in Industrial Automation, Control Systems, and Smart Technologies — bridging the gap between academic theory and real industrial practice.", 
+    bio: "Specialized in Industrial Automation, Control Systems, and Smart Technologies — bridging the gap between academic theory and real industrial practice.",
     color: "#0d2d52",
     specialties: ["PLC Programming", "SCADA Integration", "Control Logic"],
     focus: "Industrial Automation Systems"
   },
-  { 
-    name: "Vivek Ranjan", 
-    role: "Sr. Graphic Designer", 
-    initial: "VR", 
+  {
+    name: "Vivek Ranjan",
+    role: "Sr. Graphic Designer",
+    initial: "VR",
     img: "/assets/t1.png",
-    bio: "One of the earliest members who shaped PRAYOG's entire visual identity, creative branding, and digital presence through impactful graphic design.", 
+    bio: "One of the earliest members who shaped PRAYOG's entire visual identity, creative branding, and digital presence through impactful graphic design.",
     color: "#01254d",
     specialties: ["Visual Design", "Creative Branding", "UX/UI Prototyping"],
     focus: "Digital & Media Presence"
@@ -82,61 +82,61 @@ const team = [
 ];
 
 const guestFaculty = [
-  { 
-    name: "Aman Raj", 
-    role: "Robotics & Automation Engineer", 
-    desc: "Aman Raj is a seasoned Robotics & Automation Engineer who has dedicated years to designing complex control loops and automated factory systems. As a guest mentor, he guides students through practical hardware interfaces, sensor calibration, and embedded microcontroller architectures, ensuring they build robust, production-ready engineering applications.", 
-    initial: "AR" 
+  {
+    name: "Aman Raj",
+    role: "Robotics & Automation Engineer",
+    desc: "Aman Raj is a seasoned Robotics & Automation Engineer who has dedicated years to designing complex control loops and automated factory systems. As a guest mentor, he guides students through practical hardware interfaces, sensor calibration, and embedded microcontroller architectures, ensuring they build robust, production-ready engineering applications.",
+    initial: "AR"
   },
-  { 
-    name: "Anant Verma", 
-    role: "Robotics Engineer", 
-    desc: "Anant Verma is an expert Robotics Engineer specializing in kinematics, mechanical structural designs, and control systems. He provides guest lectures and mentorship on advanced robot assembly, custom structural designs, and innovative project developments. His guidance helps students conceptualize and manufacture their own functional robotic platforms from scratch.", 
-    initial: "AV" 
+  {
+    name: "Anant Verma",
+    role: "Robotics Engineer",
+    desc: "Anant Verma is an expert Robotics Engineer specializing in kinematics, mechanical structural designs, and control systems. He provides guest lectures and mentorship on advanced robot assembly, custom structural designs, and innovative project developments. His guidance helps students conceptualize and manufacture their own functional robotic platforms from scratch.",
+    initial: "AV"
   },
-  { 
-    name: "Sunny Kumar", 
-    role: "Sr. Web Developer", 
-    desc: "Sunny Kumar is a Senior Web Developer with extensive experience building highly scalable enterprise web systems, database architectures, and API integrations. He oversees web infrastructure projects at Prayog India and guides students on modern stack deployment, microservices, cloud database architectures, and software engineering practices.", 
-    initial: "SK" 
+  {
+    name: "Sunny Kumar",
+    role: "Sr. Web Developer",
+    desc: "Sunny Kumar is a Senior Web Developer with extensive experience building highly scalable enterprise web systems, database architectures, and API integrations. He oversees web infrastructure projects at Prayog India and guides students on modern stack deployment, microservices, cloud database architectures, and software engineering practices.",
+    initial: "SK"
   },
-  { 
-    name: "Belal Khan", 
-    role: "Sr. Android Developer", 
-    desc: "Belal Khan is a Senior Android Developer with a rich history of building consumer-grade mobile applications and digital platforms. He focuses on mobile application architectures, Android SDK, and hardware-mobile integration (like Bluetooth/WiFi control for robots), allowing students to develop wireless interfaces for their physical projects.", 
-    initial: "BK" 
+  {
+    name: "Belal Khan",
+    role: "Sr. Android Developer",
+    desc: "Belal Khan is a Senior Android Developer with a rich history of building consumer-grade mobile applications and digital platforms. He focuses on mobile application architectures, Android SDK, and hardware-mobile integration (like Bluetooth/WiFi control for robots), allowing students to develop wireless interfaces for their physical projects.",
+    initial: "BK"
   },
 ];
 
 const milestones = [
-  { 
-    year: "2015", 
-    title: "The Beginning", 
-    desc: "Enamul Hassan founded PRAYOGTECH during his engineering days with a bold vision to bridge the massive gap between academic theory and practical engineering. Armed with only a handful of robotics kits and embedded hardware, he embarked on a mission to make advanced technological learning affordable and accessible to every aspiring student in India, laying down the groundwork for hands-on, innovation-driven learning frameworks.", 
-    img: "/assets/hero1.png" 
+  {
+    year: "2015",
+    title: "The Beginning",
+    desc: "Enamul Hassan founded PRAYOGTECH during his engineering days with a bold vision to bridge the massive gap between academic theory and practical engineering. Armed with only a handful of robotics kits and embedded hardware, he embarked on a mission to make advanced technological learning affordable and accessible to every aspiring student in India, laying down the groundwork for hands-on, innovation-driven learning frameworks.",
+    img: "/assets/hero1.png"
   },
-  { 
-    year: "2016–2024", 
-    title: "Ecosystem Growth", 
-    desc: "What started as local training programs with basic Arduino kits quickly expanded into a comprehensive educational ecosystem. Over these years, we developed specialized training modules across advanced domains including IoT Networks, Embedded Systems, UAV & Drone Technology, 3D Parametric Modeling, Industrial Automation (PLC/SCADA), and Artificial Intelligence. During this phase, we empowered thousands of students and helped over a hundred educational institutions design and set up state-of-the-art STEM laboratories.", 
-    img: "/assets/one_on_one_robotics_training.png" 
+  {
+    year: "2016–2024",
+    title: "Ecosystem Growth",
+    desc: "What started as local training programs with basic Arduino kits quickly expanded into a comprehensive educational ecosystem. Over these years, we developed specialized training modules across advanced domains including IoT Networks, Embedded Systems, UAV & Drone Technology, 3D Parametric Modeling, Industrial Automation (PLC/SCADA), and Artificial Intelligence. During this phase, we empowered thousands of students and helped over a hundred educational institutions design and set up state-of-the-art STEM laboratories.",
+    img: "/assets/one_on_one_robotics_training.png"
   },
-  { 
-    year: "2025", 
-    title: "Corporate Leap", 
-    desc: "To accommodate our rapid growth and serve nationwide institutions, the vision was formalized into PRAYOG INDIA ROBOTICS PRIVATE LIMITED. This milestone established a robust corporate infrastructure, enabling us to forge strategic academic collaborations, deliver enterprise-level innovation workshops, scale our curriculum, and build a stronger foundation for next-generation technical training and research.", 
-    img: "/assets/internship.png" 
+  {
+    year: "2025",
+    title: "Corporate Leap",
+    desc: "To accommodate our rapid growth and serve nationwide institutions, the vision was formalized into PRAYOG INDIA ROBOTICS PRIVATE LIMITED. This milestone established a robust corporate infrastructure, enabling us to forge strategic academic collaborations, deliver enterprise-level innovation workshops, scale our curriculum, and build a stronger foundation for next-generation technical training and research.",
+    img: "/assets/internship.png"
   },
-  { 
-    year: "Today", 
-    title: "Bridging the Gap", 
-    desc: "Today, we stand as one of India's premier technical training providers, actively bridging the gap between university curriculum requirements and real-world industrial expectations. Through hands-on summer camps, extensive vocational internships, specialized research-oriented training courses, and custom robotics kits, we empower the next generation of engineers, builders, and innovators to solve complex, real-world problems.", 
-    img: "/assets/summer_camp.png" 
+  {
+    year: "Today",
+    title: "Bridging the Gap",
+    desc: "Today, we stand as one of India's premier technical training providers, actively bridging the gap between university curriculum requirements and real-world industrial expectations. Through hands-on summer camps, extensive vocational internships, specialized research-oriented training courses, and custom robotics kits, we empower the next generation of engineers, builders, and innovators to solve complex, real-world problems.",
+    img: "/assets/summer_camp.png"
   },
 ];
 
 const services = [
-  "Robotics Training", "Embedded Systems & IoT", "Drone Technology", 
+  "Robotics Training", "Embedded Systems & IoT", "Drone Technology",
   "AI & STEM Education", "3D Design & Printing", "Automation Projects",
   "Internship Programs", "STEM Lab Setup", "Industry Workshops", "Hardware Learning"
 ];
@@ -151,7 +151,7 @@ const stats = [
 export default function AboutPage() {
   const [showVideo, setShowVideo] = useState(false);
   const [activeMilestone, setActiveMilestone] = useState(0);
-  
+
   // Core Team States
   const [selectedTeamMember, setSelectedTeamMember] = useState(null);
   const [isSliderHovered, setIsSliderHovered] = useState(false);
@@ -167,7 +167,7 @@ export default function AboutPage() {
   const facultySliderRef = useRef(null);
 
   const heroRef = useRef(null);
-  
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -205,7 +205,7 @@ export default function AboutPage() {
       } else {
         nextIndex = Math.min(teamList.length - 1, activeTeamIndex + 1);
       }
-      
+
       const children = sliderRef.current.children;
       if (children && children[nextIndex]) {
         const targetScroll = children[nextIndex].offsetLeft - sliderRef.current.offsetLeft;
@@ -246,7 +246,7 @@ export default function AboutPage() {
       } else {
         nextIndex = Math.min(facultyList.length - 1, activeFacultyIndex + 1);
       }
-      
+
       const children = facultySliderRef.current.children;
       if (children && children[nextIndex]) {
         const targetScroll = children[nextIndex].offsetLeft - facultySliderRef.current.offsetLeft;
@@ -355,12 +355,12 @@ export default function AboutPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 w-full mt-10 md:mt-0">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
-            
+
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              <motion.div 
-                initial={{ opacity: 0, y: 15 }} 
-                animate={{ opacity: 1, y: 0 }} 
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md"
               >
@@ -370,9 +370,9 @@ export default function AboutPage() {
                 </span>
               </motion.div>
 
-              <motion.h1 
-                initial={{ opacity: 0, y: 25 }} 
-                animate={{ opacity: 1, y: 0 }} 
+              <motion.h1
+                initial={{ opacity: 0, y: 25 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-[1.05] tracking-tight"
               >
@@ -384,18 +384,18 @@ export default function AboutPage() {
                 </span>
               </motion.h1>
 
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="text-blue-100/80 text-base sm:text-lg max-w-xl leading-relaxed"
               >
                 An EdTech and Innovation enterprise transforming technical education in India through practical learning, active research, and industry-oriented skill development.
               </motion.p>
 
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="flex flex-wrap gap-4 pt-2"
               >
@@ -410,9 +410,9 @@ export default function AboutPage() {
             </div>
 
             {/* Right Interactive Telemetry Console */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, x: 30 }} 
-              animate={{ opacity: 1, scale: 1, x: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, x: 30 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
               className="lg:col-span-5"
             >
@@ -425,7 +425,7 @@ export default function AboutPage() {
 
                 <div className="space-y-4">
                   {heroBadges.map((badge, idx) => (
-                    <motion.div 
+                    <motion.div
                       key={idx}
                       whileHover={{ scale: 1.02, x: 4 }}
                       className="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-white/15 transition-all duration-300 group cursor-default"
@@ -500,7 +500,6 @@ export default function AboutPage() {
               <p>Over a decade, that seed grew into a full-fledged EdTech and Innovation company serving 10,000+ students, setting up STEM labs in 100+ institutions, and building one of India&apos;s most practical technical learning ecosystems.</p>
             </div>
             <div className="mt-8 flex items-center gap-4">
-              <Image src="/assets/signature.png" alt="Founder signature" width={120} height={50} className="object-contain opacity-70" />
               <div>
                 <div className="font-bold text-[#01254d]">Enamul Hassan</div>
                 <div className="text-sm text-slate-500">Founder, Prayog India Robotics</div>
@@ -633,7 +632,8 @@ export default function AboutPage() {
       {/* ── PREMIUM INTERACTIVE TEAM SLIDER & PROFILE MODAL ── */}
       <section className="py-28 bg-slate-50/70 border-y border-slate-200/60 relative overflow-hidden">
         {/* Custom scrollbar hiding styling injected directly */}
-        <style dangerouslySetInnerHTML={{__html: `
+        <style dangerouslySetInnerHTML={{
+          __html: `
           .no-scrollbar::-webkit-scrollbar { display: none; }
           .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}} />
@@ -641,7 +641,7 @@ export default function AboutPage() {
         {/* Soft elegant blur decorations */}
         <div className="absolute top-0 right-1/4 w-[350px] h-[350px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 w-[350px] h-[350px] bg-[#FFC107]/5 rounded-full blur-[120px] pointer-events-none" />
-        
+
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div className="text-left">
@@ -649,17 +649,17 @@ export default function AboutPage() {
               <h2 className="text-3xl md:text-4xl font-extrabold text-[#01254d] tracking-tight">Meet Our Core Team</h2>
               <p className="text-slate-500 text-sm mt-2 max-w-xl">Slide through our core engineering and leadership team. Click any card to explore their full professional profile and specialties.</p>
             </div>
-            
+
             {/* Navigation buttons */}
             <div className="flex gap-3 shrink-0">
-              <button 
+              <button
                 onClick={() => scrollSlider("left")}
                 className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
                 aria-label="Scroll left"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={() => scrollSlider("right")}
                 className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
                 aria-label="Scroll right"
@@ -670,7 +670,7 @@ export default function AboutPage() {
           </motion.div>
 
           {/* Horizontal Slider Track */}
-          <div 
+          <div
             ref={sliderRef}
             onMouseEnter={() => setIsSliderHovered(true)}
             onMouseLeave={() => setIsSliderHovered(false)}
@@ -678,7 +678,7 @@ export default function AboutPage() {
             className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-6 no-scrollbar cursor-grab active:cursor-grabbing"
           >
             {teamList.map((m, idx) => (
-              <motion.div 
+              <motion.div
                 key={idx}
                 onClick={() => setSelectedTeamMember(m)}
                 whileHover={{ y: -6 }}
@@ -687,17 +687,17 @@ export default function AboutPage() {
                 <div>
                   <div className="relative h-[250px] w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100/50">
                     <Image src={m.img} alt={m.name} fill className="object-cover group-hover:scale-102 transition-transform duration-500" />
-                    
+
                     {/* Focus badge overlay */}
                     <div className="absolute bottom-3 left-3 bg-white/95 px-3 py-1 rounded-full shadow-sm">
                       <p className="text-[#01254d] text-[10px] font-bold tracking-wider">{m.focus}</p>
                     </div>
                   </div>
-                  
+
                   <h3 className="text-[#01254d] text-lg font-bold tracking-tight mt-4 group-hover:text-[#01254d]/85 transition-colors">{m.name}</h3>
                   <p className="text-slate-500 text-sm font-medium mt-0.5">{m.role}</p>
                 </div>
-                
+
                 <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-3">
                   <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors">View Profile</span>
                   <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#01254d] group-hover:translate-x-1 transition-all duration-300" />
@@ -710,22 +710,22 @@ export default function AboutPage() {
         {/* ── MODAL OVERLAY ── */}
         <AnimatePresence>
           {selectedTeamMember && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md"
               onClick={() => setSelectedTeamMember(null)}
             >
-              <motion.div 
-                initial={{ scale: 0.94, y: 20, opacity: 0 }} 
-                animate={{ scale: 1, y: 0, opacity: 1 }} 
+              <motion.div
+                initial={{ scale: 0.94, y: 20, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
                 exit={{ scale: 0.94, y: 20, opacity: 0 }}
                 transition={{ type: "spring", damping: 28, stiffness: 350 }}
                 className="relative w-full max-w-3xl bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-2xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
               >
-                <button 
+                <button
                   onClick={() => setSelectedTeamMember(null)}
                   className="absolute top-4 right-4 sm:top-6 sm:right-6 w-9 h-9 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-full flex items-center justify-center border border-slate-200/50 transition-all duration-200 z-10"
                 >
@@ -762,7 +762,7 @@ export default function AboutPage() {
                       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Core Competencies</span>
                       <div className="flex flex-wrap gap-2">
                         {selectedTeamMember.specialties.map((spec, sIdx) => (
-                          <span 
+                          <span
                             key={sIdx}
                             className="px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-slate-600 text-xs font-medium"
                           >
@@ -796,17 +796,17 @@ export default function AboutPage() {
               <h2 className="text-3xl md:text-4xl font-black text-[#01254d]">Guest Faculty & Technical Experts</h2>
               <p className="text-slate-500 text-sm mt-3 max-w-xl">Seasoned industry professionals who bring real-world expertise directly into our learning ecosystem. Click any card to see details.</p>
             </div>
-            
+
             {/* Navigation buttons */}
             <div className="flex gap-3 shrink-0">
-              <button 
+              <button
                 onClick={() => scrollFacultySlider("left")}
                 className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
                 aria-label="Scroll left"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={() => scrollFacultySlider("right")}
                 className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
                 aria-label="Scroll right"
@@ -816,7 +816,7 @@ export default function AboutPage() {
             </div>
           </motion.div>
 
-          <div 
+          <div
             ref={facultySliderRef}
             onMouseEnter={() => setIsFacultySliderHovered(true)}
             onMouseLeave={() => setIsFacultySliderHovered(false)}
@@ -824,7 +824,7 @@ export default function AboutPage() {
             className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-6 no-scrollbar cursor-grab active:cursor-grabbing"
           >
             {facultyList.map((g, idx) => (
-              <motion.div 
+              <motion.div
                 key={idx}
                 onClick={() => setSelectedFacultyMember(g)}
                 whileHover={{ y: -6 }}
@@ -857,22 +857,22 @@ export default function AboutPage() {
         {/* Guest Faculty Modal */}
         <AnimatePresence>
           {selectedFacultyMember && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md"
               onClick={() => setSelectedFacultyMember(null)}
             >
-              <motion.div 
-                initial={{ scale: 0.94, y: 20, opacity: 0 }} 
-                animate={{ scale: 1, y: 0, opacity: 1 }} 
+              <motion.div
+                initial={{ scale: 0.94, y: 20, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
                 exit={{ scale: 0.94, y: 20, opacity: 0 }}
                 transition={{ type: "spring", damping: 28, stiffness: 350 }}
                 className="relative w-full max-w-2xl bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-2xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
               >
-                <button 
+                <button
                   onClick={() => setSelectedFacultyMember(null)}
                   className="absolute top-4 right-4 sm:top-6 sm:right-6 w-9 h-9 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-full flex items-center justify-center border border-slate-200/50 transition-all duration-200 z-10"
                 >
