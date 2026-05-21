@@ -82,17 +82,57 @@ const team = [
 ];
 
 const guestFaculty = [
-  { name: "Aman Raj", role: "Robotics & Automation Engineer", desc: "Guest Faculty and technical mentor specializing in Robotics, Automation Systems, and practical engineering applications.", initial: "AR" },
-  { name: "Anant Verma", role: "Robotics Engineer", desc: "Focused on Robotics System Design, robotics implementation, and innovation-based project development.", initial: "AV" },
-  { name: "Sunny Kumar", role: "Sr. Web Developer", desc: "Responsible for advanced web technologies, platform development, and digital infrastructure supporting modern EdTech ecosystems.", initial: "SK" },
-  { name: "Belal Khan", role: "Sr. Android Developer", desc: "Specialized in Android Application Development, mobile technology solutions, and software-driven innovation systems.", initial: "BK" },
+  { 
+    name: "Aman Raj", 
+    role: "Robotics & Automation Engineer", 
+    desc: "Aman Raj is a seasoned Robotics & Automation Engineer who has dedicated years to designing complex control loops and automated factory systems. As a guest mentor, he guides students through practical hardware interfaces, sensor calibration, and embedded microcontroller architectures, ensuring they build robust, production-ready engineering applications.", 
+    initial: "AR" 
+  },
+  { 
+    name: "Anant Verma", 
+    role: "Robotics Engineer", 
+    desc: "Anant Verma is an expert Robotics Engineer specializing in kinematics, mechanical structural designs, and control systems. He provides guest lectures and mentorship on advanced robot assembly, custom structural designs, and innovative project developments. His guidance helps students conceptualize and manufacture their own functional robotic platforms from scratch.", 
+    initial: "AV" 
+  },
+  { 
+    name: "Sunny Kumar", 
+    role: "Sr. Web Developer", 
+    desc: "Sunny Kumar is a Senior Web Developer with extensive experience building highly scalable enterprise web systems, database architectures, and API integrations. He oversees web infrastructure projects at Prayog India and guides students on modern stack deployment, microservices, cloud database architectures, and software engineering practices.", 
+    initial: "SK" 
+  },
+  { 
+    name: "Belal Khan", 
+    role: "Sr. Android Developer", 
+    desc: "Belal Khan is a Senior Android Developer with a rich history of building consumer-grade mobile applications and digital platforms. He focuses on mobile application architectures, Android SDK, and hardware-mobile integration (like Bluetooth/WiFi control for robots), allowing students to develop wireless interfaces for their physical projects.", 
+    initial: "BK" 
+  },
 ];
 
 const milestones = [
-  { year: "2015", title: "The Beginning", desc: "Enamul Hassan founded PRAYOGTECH during his engineering days — a bold vision to make advanced technology affordable and accessible for every student in India.", img: "/assets/hero1.png" },
-  { year: "2016–2024", title: "Ecosystem Growth", desc: "What started with Robotics kits and Arduino accessories grew into a full ecosystem — Embedded Systems, IoT, Drone Technology, AI, Automation, and STEM Education.", img: "/assets/one_on_one_robotics_training.png" },
-  { year: "2025", title: "Corporate Leap", desc: "The vision formalized into PRAYOG INDIA ROBOTICS PVT. LTD. — a stronger foundation to build India's next-generation EdTech and Innovation ecosystem.", img: "/assets/internship.png" },
-  { year: "Today", title: "Bridging the Gap", desc: "Bridging theory and industry through practical learning, research-driven training, innovation workshops, STEM Labs, and internship programs across India.", img: "/assets/summer_camp.png" },
+  { 
+    year: "2015", 
+    title: "The Beginning", 
+    desc: "Enamul Hassan founded PRAYOGTECH during his engineering days with a bold vision to bridge the massive gap between academic theory and practical engineering. Armed with only a handful of robotics kits and embedded hardware, he embarked on a mission to make advanced technological learning affordable and accessible to every aspiring student in India, laying down the groundwork for hands-on, innovation-driven learning frameworks.", 
+    img: "/assets/hero1.png" 
+  },
+  { 
+    year: "2016–2024", 
+    title: "Ecosystem Growth", 
+    desc: "What started as local training programs with basic Arduino kits quickly expanded into a comprehensive educational ecosystem. Over these years, we developed specialized training modules across advanced domains including IoT Networks, Embedded Systems, UAV & Drone Technology, 3D Parametric Modeling, Industrial Automation (PLC/SCADA), and Artificial Intelligence. During this phase, we empowered thousands of students and helped over a hundred educational institutions design and set up state-of-the-art STEM laboratories.", 
+    img: "/assets/one_on_one_robotics_training.png" 
+  },
+  { 
+    year: "2025", 
+    title: "Corporate Leap", 
+    desc: "To accommodate our rapid growth and serve nationwide institutions, the vision was formalized into PRAYOG INDIA ROBOTICS PRIVATE LIMITED. This milestone established a robust corporate infrastructure, enabling us to forge strategic academic collaborations, deliver enterprise-level innovation workshops, scale our curriculum, and build a stronger foundation for next-generation technical training and research.", 
+    img: "/assets/internship.png" 
+  },
+  { 
+    year: "Today", 
+    title: "Bridging the Gap", 
+    desc: "Today, we stand as one of India's premier technical training providers, actively bridging the gap between university curriculum requirements and real-world industrial expectations. Through hands-on summer camps, extensive vocational internships, specialized research-oriented training courses, and custom robotics kits, we empower the next generation of engineers, builders, and innovators to solve complex, real-world problems.", 
+    img: "/assets/summer_camp.png" 
+  },
 ];
 
 const services = [
@@ -111,13 +151,22 @@ const stats = [
 export default function AboutPage() {
   const [showVideo, setShowVideo] = useState(false);
   const [activeMilestone, setActiveMilestone] = useState(0);
+  
+  // Core Team States
   const [selectedTeamMember, setSelectedTeamMember] = useState(null);
   const [isSliderHovered, setIsSliderHovered] = useState(false);
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
   const [teamList, setTeamList] = useState(team);
-  const [facultyList, setFacultyList] = useState(guestFaculty);
-  const heroRef = useRef(null);
   const sliderRef = useRef(null);
+
+  // Guest Faculty States
+  const [selectedFacultyMember, setSelectedFacultyMember] = useState(null);
+  const [isFacultySliderHovered, setIsFacultySliderHovered] = useState(false);
+  const [activeFacultyIndex, setActiveFacultyIndex] = useState(0);
+  const [facultyList, setFacultyList] = useState(guestFaculty);
+  const facultySliderRef = useRef(null);
+
+  const heroRef = useRef(null);
   
   useEffect(() => {
     async function loadData() {
@@ -189,6 +238,46 @@ export default function AboutPage() {
     }
   };
 
+  const scrollFacultySlider = (direction) => {
+    if (facultySliderRef.current) {
+      let nextIndex = activeFacultyIndex;
+      if (direction === "left") {
+        nextIndex = Math.max(0, activeFacultyIndex - 1);
+      } else {
+        nextIndex = Math.min(facultyList.length - 1, activeFacultyIndex + 1);
+      }
+      
+      const children = facultySliderRef.current.children;
+      if (children && children[nextIndex]) {
+        const targetScroll = children[nextIndex].offsetLeft - facultySliderRef.current.offsetLeft;
+        facultySliderRef.current.scrollTo({
+          left: targetScroll,
+          behavior: "smooth"
+        });
+        setActiveFacultyIndex(nextIndex);
+      }
+    }
+  };
+
+  const handleFacultySliderScroll = () => {
+    if (facultySliderRef.current) {
+      const { scrollLeft } = facultySliderRef.current;
+      const children = facultySliderRef.current.children;
+      if (children && children.length > 0) {
+        let closestIndex = 0;
+        let minDiff = Infinity;
+        for (let i = 0; i < children.length; i++) {
+          const diff = Math.abs(children[i].offsetLeft - facultySliderRef.current.offsetLeft - scrollLeft);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIndex = i;
+          }
+        }
+        setActiveFacultyIndex((prev) => (closestIndex !== prev ? closestIndex : prev));
+      }
+    }
+  };
+
   // Smooth Autosliding Effect (Index-Based for CSS Snap compatibility)
   useEffect(() => {
     if (selectedTeamMember || isSliderHovered || teamList.length === 0) return;
@@ -210,6 +299,28 @@ export default function AboutPage() {
 
     return () => clearInterval(interval);
   }, [selectedTeamMember, isSliderHovered, activeTeamIndex, teamList]);
+
+  // Smooth Autosliding for Faculty
+  useEffect(() => {
+    if (selectedFacultyMember || isFacultySliderHovered || facultyList.length === 0) return;
+
+    const interval = setInterval(() => {
+      if (facultySliderRef.current) {
+        const nextIndex = (activeFacultyIndex + 1) % facultyList.length;
+        const children = facultySliderRef.current.children;
+        if (children && children[nextIndex]) {
+          const targetScroll = children[nextIndex].offsetLeft - facultySliderRef.current.offsetLeft;
+          facultySliderRef.current.scrollTo({
+            left: targetScroll,
+            behavior: "smooth"
+          });
+          setActiveFacultyIndex(nextIndex);
+        }
+      }
+    }, 4200); // Trigger every 4.2s for natural pacing
+
+    return () => clearInterval(interval);
+  }, [selectedFacultyMember, isFacultySliderHovered, activeFacultyIndex, facultyList]);
 
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
@@ -677,35 +788,135 @@ export default function AboutPage() {
       </section>
 
       {/* ── GUEST FACULTY ── */}
-      <section className="py-20 bg-slate-50 border-t border-slate-200/80">
+      <section className="py-20 bg-slate-50 border-t border-slate-200/80 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
-            <p className="text-[#FFC107] font-bold uppercase tracking-widest text-sm mb-2">Extended Network</p>
-            <h2 className="text-3xl md:text-4xl font-black text-[#01254d]">Guest Faculty & Technical Experts</h2>
-            <p className="text-slate-500 text-sm mt-3 max-w-xl">Seasoned industry professionals who bring real-world expertise directly into our learning ecosystem.</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div className="text-left">
+              <p className="text-[#FFC107] font-bold uppercase tracking-widest text-sm mb-2 font-mono">Extended Network</p>
+              <h2 className="text-3xl md:text-4xl font-black text-[#01254d]">Guest Faculty & Technical Experts</h2>
+              <p className="text-slate-500 text-sm mt-3 max-w-xl">Seasoned industry professionals who bring real-world expertise directly into our learning ecosystem. Click any card to see details.</p>
+            </div>
+            
+            {/* Navigation buttons */}
+            <div className="flex gap-3 shrink-0">
+              <button 
+                onClick={() => scrollFacultySlider("left")}
+                className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={() => scrollFacultySlider("right")}
+                className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </motion.div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {facultyList.map((g, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-[#FFC107]/40 transition-all duration-300 group">
-                {g.img_url ? (
-                  <div className="w-12 h-12 rounded-xl overflow-hidden mb-5 border border-slate-100 bg-slate-50 relative shrink-0">
-                    <Image src={g.img_url} alt={g.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                ) : (
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm text-white mb-5"
-                    style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
-                    {g.initial}
-                  </div>
-                )}
-                <h3 className="font-bold text-[#01254d] text-base mb-1">{g.name}</h3>
-                <p className="text-[#FFC107] text-xs font-semibold uppercase tracking-wider mb-3">{g.role}</p>
-                <p className="text-slate-500 text-sm leading-relaxed">{g.desc}</p>
+
+          <div 
+            ref={facultySliderRef}
+            onMouseEnter={() => setIsFacultySliderHovered(true)}
+            onMouseLeave={() => setIsFacultySliderHovered(false)}
+            onScroll={handleFacultySliderScroll}
+            className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-6 no-scrollbar cursor-grab active:cursor-grabbing"
+          >
+            {facultyList.map((g, idx) => (
+              <motion.div 
+                key={idx}
+                onClick={() => setSelectedFacultyMember(g)}
+                whileHover={{ y: -6 }}
+                className="snap-start shrink-0 w-[280px] sm:w-[310px] bg-white border border-slate-200 rounded-2xl p-6 transition-all duration-300 cursor-pointer group flex flex-col justify-between h-[320px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)] hover:border-[#FFC107]/45"
+              >
+                <div>
+                  {g.img_url ? (
+                    <div className="w-14 h-14 rounded-xl overflow-hidden mb-5 border border-slate-100 bg-slate-50 relative shrink-0">
+                      <Image src={g.img_url} alt={g.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl flex items-center justify-center font-black text-base text-white mb-5 shadow-inner"
+                      style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
+                      {g.initial || (g.name ? g.name.split(" ").map(n => n[0]).join("") : "GF")}
+                    </div>
+                  )}
+                  <h3 className="font-bold text-[#01254d] text-lg mb-1 group-hover:text-[#FFC107] transition-colors">{g.name}</h3>
+                  <p className="text-[#FFC107] text-xs font-semibold uppercase tracking-wider mb-4">{g.role}</p>
+                  <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">{g.desc}</p>
+                </div>
+                <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-4">
+                  <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors">Read Biography</span>
+                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#01254d] group-hover:translate-x-1 transition-all duration-300" />
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
+
+        {/* Guest Faculty Modal */}
+        <AnimatePresence>
+          {selectedFacultyMember && (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md"
+              onClick={() => setSelectedFacultyMember(null)}
+            >
+              <motion.div 
+                initial={{ scale: 0.94, y: 20, opacity: 0 }} 
+                animate={{ scale: 1, y: 0, opacity: 1 }} 
+                exit={{ scale: 0.94, y: 20, opacity: 0 }}
+                transition={{ type: "spring", damping: 28, stiffness: 350 }}
+                className="relative w-full max-w-2xl bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-2xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto"
+                onClick={e => e.stopPropagation()}
+              >
+                <button 
+                  onClick={() => setSelectedFacultyMember(null)}
+                  className="absolute top-4 right-4 sm:top-6 sm:right-6 w-9 h-9 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-full flex items-center justify-center border border-slate-200/50 transition-all duration-200 z-10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex flex-col sm:flex-row gap-6 items-start mt-6 sm:mt-0">
+                  <div className="shrink-0">
+                    {selectedFacultyMember.img_url ? (
+                      <div className="relative w-28 h-28 rounded-2xl overflow-hidden border border-slate-100 shadow-md bg-slate-50">
+                        <Image src={selectedFacultyMember.img_url} alt={selectedFacultyMember.name} fill className="object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-28 h-28 rounded-2xl flex items-center justify-center font-black text-3xl text-white shadow-md"
+                        style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
+                        {selectedFacultyMember.initial || (selectedFacultyMember.name ? selectedFacultyMember.name.split(" ").map(n => n[0]).join("") : "GF")}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-left flex-grow">
+                    <span className="text-[#FFC107] font-semibold text-xs uppercase tracking-widest font-mono">Guest Faculty</span>
+                    <h2 className="text-3xl font-extrabold text-[#01254d] tracking-tight mt-1">
+                      {selectedFacultyMember.name}
+                    </h2>
+                    <p className="text-[#FFC107] text-xs font-semibold uppercase tracking-wider mt-1">
+                      {selectedFacultyMember.role}
+                    </p>
+
+                    <div className="border-t border-slate-100 pt-5 mt-5">
+                      <p className="text-slate-600 text-sm sm:text-base leading-relaxed border-l-2 border-[#FFC107] pl-4 italic">
+                        {selectedFacultyMember.desc}
+                      </p>
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-5 mt-5 flex items-center justify-between">
+                      <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold">Prayog India Technical Expert Network</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* ── NATION BUILDING ── */}

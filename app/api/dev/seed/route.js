@@ -201,22 +201,45 @@ export async function GET() {
     // 8. Seed about_faculty
     const [facultyRows] = await pool.query("SHOW TABLES LIKE 'about_faculty'");
     if (facultyRows.length > 0) {
-      const [facCountRows] = await pool.query("SELECT COUNT(*) as count FROM about_faculty");
-      if (facCountRows[0].count === 0) {
-        const guestFaculty = [
-          { name: "Aman Raj", role: "Robotics & Automation Engineer", desc: "Guest Faculty and technical mentor specializing in Robotics, Automation Systems, and practical engineering applications.", initial: "AR", img_url: "" },
-          { name: "Anant Verma", role: "Robotics Engineer", desc: "Focused on Robotics System Design, robotics implementation, and innovation-based project development.", initial: "AV", img_url: "" },
-          { name: "Sunny Kumar", role: "Sr. Web Developer", desc: "Responsible for advanced web technologies, platform development, and digital infrastructure supporting modern EdTech ecosystems.", initial: "SK", img_url: "" },
-          { name: "Belal Khan", role: "Sr. Android Developer", desc: "Specialized in Android Application Development, mobile technology solutions, and software-driven innovation systems.", initial: "BK", img_url: "" }
-        ];
-
-        for (let i = 0; i < guestFaculty.length; i++) {
-          const f = guestFaculty[i];
-          await pool.query(
-            "INSERT INTO about_faculty (name, role, desc_text, initial, img_url, sort_order) VALUES (?, ?, ?, ?, ?, ?)",
-            [f.name, f.role, f.desc, f.initial, f.img_url, i]
-          );
+      // Clear existing records to ensure we load the fresh expanded descriptions
+      await pool.query("DELETE FROM about_faculty");
+      const guestFaculty = [
+        { 
+          name: "Aman Raj", 
+          role: "Robotics & Automation Engineer", 
+          desc: "Aman Raj is a seasoned Robotics & Automation Engineer who has dedicated years to designing complex control loops and automated factory systems. As a guest mentor, he guides students through practical hardware interfaces, sensor calibration, and embedded microcontroller architectures, ensuring they build robust, production-ready engineering applications.", 
+          initial: "AR", 
+          img_url: "" 
+        },
+        { 
+          name: "Anant Verma", 
+          role: "Robotics Engineer", 
+          desc: "Anant Verma is an expert Robotics Engineer specializing in kinematics, mechanical structural designs, and control systems. He provides guest lectures and mentorship on advanced robot assembly, custom structural designs, and innovative project developments. His guidance helps students conceptualize and manufacture their own functional robotic platforms from scratch.", 
+          initial: "AV", 
+          img_url: "" 
+        },
+        { 
+          name: "Sunny Kumar", 
+          role: "Sr. Web Developer", 
+          desc: "Sunny Kumar is a Senior Web Developer with extensive experience building highly scalable enterprise web systems, database architectures, and API integrations. He oversees web infrastructure projects at Prayog India and guides students on modern stack deployment, microservices, cloud database architectures, and software engineering practices.", 
+          initial: "SK", 
+          img_url: "" 
+        },
+        { 
+          name: "Belal Khan", 
+          role: "Sr. Android Developer", 
+          desc: "Belal Khan is a Senior Android Developer with a rich history of building consumer-grade mobile applications and digital platforms. He focuses on mobile application architectures, Android SDK, and hardware-mobile integration (like Bluetooth/WiFi control for robots), allowing students to develop wireless interfaces for their physical projects.", 
+          initial: "BK", 
+          img_url: "" 
         }
+      ];
+
+      for (let i = 0; i < guestFaculty.length; i++) {
+        const f = guestFaculty[i];
+        await pool.query(
+          "INSERT INTO about_faculty (name, role, desc_text, initial, img_url, sort_order) VALUES (?, ?, ?, ?, ?, ?)",
+          [f.name, f.role, f.desc, f.initial, f.img_url, i]
+        );
       }
     }
 
