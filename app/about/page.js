@@ -584,24 +584,26 @@ export default function AboutPage() {
                 key={idx}
                 onClick={() => setSelectedTeamMember(m)}
                 whileHover={{ y: -6 }}
-                className="shrink-0 w-[260px] lg:w-[230px] bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 transition-all duration-300 cursor-pointer group flex flex-col justify-between h-[360px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)]"
+                className="shrink-0 w-[240px] bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 transition-all duration-300 cursor-pointer group flex flex-col shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)]"
               >
-                <div>
-                  <div className="relative h-[250px] w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100/50">
-                    <Image src={m.img} alt={m.name} fill className="object-cover group-hover:scale-102 transition-transform duration-500" />
-
-                    {/* Focus badge overlay */}
-                    <div className="absolute bottom-3 left-3 bg-white/95 px-3 py-1 rounded-full shadow-sm">
-                      <p className="text-[#01254d] text-[10px] font-bold tracking-wider">{m.focus}</p>
-                    </div>
+                {/* Image - fixed height */}
+                <div className="relative h-[200px] w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100/50 shrink-0">
+                  <Image src={m.img} alt={m.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {/* Focus badge overlay */}
+                  <div className="absolute bottom-3 left-3 right-3 bg-white/95 px-2 py-1 rounded-full shadow-sm">
+                    <p className="text-[#01254d] text-[9px] font-bold tracking-wide truncate text-center">{m.focus}</p>
                   </div>
-
-                  <h3 className="text-[#01254d] text-lg font-bold tracking-tight mt-4 group-hover:text-[#01254d]/85 transition-colors">{m.name}</h3>
-                  <p className="text-slate-500 text-sm font-medium mt-0.5">{m.role}</p>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-3">
-                  <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors">View Profile</span>
+                {/* Text content - grows to fill space */}
+                <div className="flex-grow mt-3">
+                  <h3 className="text-[#01254d] text-base font-bold leading-tight group-hover:text-[#01254d]/85 transition-colors line-clamp-2">{m.name}</h3>
+                  <p className="text-slate-500 text-xs font-medium mt-1 line-clamp-1">{m.role}</p>
+                </div>
+
+                {/* Footer - always at bottom */}
+                <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-3 shrink-0">
+                  <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors font-medium">View Profile</span>
                   <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#01254d] group-hover:translate-x-1 transition-all duration-300" />
                 </div>
               </motion.div>
@@ -733,7 +735,7 @@ export default function AboutPage() {
                   <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">{g.desc}</p>
                 </div>
                 <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-4">
-                  <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors">Read Biography</span>
+                  <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors">View Profile</span>
                   <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#01254d] group-hover:translate-x-1 transition-all duration-300" />
                 </div>
               </motion.div>
