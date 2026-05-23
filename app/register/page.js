@@ -24,7 +24,8 @@ import {
   Smartphone,
   IndianRupee,
   BadgeInfo,
-  Tag
+  Tag,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import Header from "../../components/Header";
@@ -39,7 +40,7 @@ const STEPS = [
   { id: 3, title: "Payment", sub: "Secure fee processing" }
 ];
 
-function RegisterForm() {
+function RegisterForm({ pageContent }) {
   const searchParams = useSearchParams();
   const preSelectedCourseId = searchParams.get("course");
   const shouldLock = searchParams.get("lock") === "true";
@@ -482,6 +483,26 @@ function RegisterForm() {
                 </div>
               </div>
             ))}
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+              <h3 className="font-bold text-navy mb-4 text-lg flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                {pageContent?.aboutTitle || "What happens next?"}
+              </h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3 text-sm text-slate-600">
+                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">1</span>
+                  {pageContent?.aboutDescription1 || "Submit your registration details securely."}
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-600">
+                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">2</span>
+                  {pageContent?.aboutDescription2 || "Our academic counselor will contact you within 24 hours."}
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-600">
+                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">3</span>
+                  {pageContent?.aboutDescription3 || "Complete the fee payment to confirm your batch allocation."}
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
         <div className="pt-12 border-t border-white/5 flex items-center gap-3 text-white/30">
@@ -1049,6 +1070,27 @@ function RegisterForm() {
 }
 
 export default function RegisterPage() {
+  const [pageContent, setPageContent] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/pages?slug=admission')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data?.content) {
+          setPageContent(data.data.content);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const content = pageContent || {
+    heroTitleLine1: "Start Your Innovation",
+    heroTitleLine2: "Journey Today",
+    heroSubtitle: "Secure your seat in our upcoming batches.",
+    heroDescription: "Complete the registration form to enroll in Prayog India's technology training programs. Our team will contact you shortly after submission.",
+    heroBadge: "Student Enrollment"
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 font-body">
       <Header />
@@ -1057,8 +1099,22 @@ export default function RegisterPage() {
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">Student Enrollment</h1>
-            <p className="text-blue-100/60 text-base md:text-lg max-w-xl">Initialize your academic journey at Prayog India for the 2026 specialization cohort.</p>
+            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-sm font-bold mb-6 text-gold shadow-sm">
+              <Sparkles className="w-4 h-4" />
+              <span className="tracking-widest uppercase text-xs">{content.heroBadge}</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tight leading-tight text-white">
+              {content.heroTitleLine1} <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-300 to-amber-200 drop-shadow-sm">
+                {content.heroTitleLine2}
+              </span>
+            </h1>
+            <p className="text-xl text-blue-100 mb-6 font-medium">
+              {content.heroSubtitle}
+            </p>
+            <p className="text-blue-100/70 leading-relaxed mb-8 max-w-2xl">
+              {content.heroDescription}
+            </p>
           </div>
         </div>
       </section>
@@ -1066,7 +1122,7 @@ export default function RegisterPage() {
       <section className="py-12 md:py-20">
         <div className="max-w-6xl mx-auto px-6">
           <Suspense fallback={<div className="h-[600px] bg-white rounded-2xl flex items-center justify-center">Loading enrollment gateway...</div>}>
-            <RegisterForm />
+            <RegisterForm pageContent={pageContent} />
           </Suspense>
         </div>
       </section>

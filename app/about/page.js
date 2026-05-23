@@ -197,130 +197,47 @@ export default function AboutPage() {
     loadData();
   }, []);
 
-  const scrollSlider = (direction) => {
-    if (sliderRef.current) {
-      let nextIndex = activeTeamIndex;
-      if (direction === "left") {
-        nextIndex = Math.max(0, activeTeamIndex - 1);
-      } else {
-        nextIndex = Math.min(teamList.length - 1, activeTeamIndex + 1);
-      }
-
-      const children = sliderRef.current.children;
-      if (children && children[nextIndex]) {
-        const targetScroll = children[nextIndex].offsetLeft - sliderRef.current.offsetLeft;
-        sliderRef.current.scrollTo({
-          left: targetScroll,
-          behavior: "smooth"
-        });
-        setActiveTeamIndex(nextIndex);
-      }
-    }
-  };
-
-  const handleSliderScroll = () => {
-    if (sliderRef.current) {
-      const { scrollLeft } = sliderRef.current;
-      const children = sliderRef.current.children;
-      if (children && children.length > 0) {
-        let closestIndex = 0;
-        let minDiff = Infinity;
-        for (let i = 0; i < children.length; i++) {
-          const diff = Math.abs(children[i].offsetLeft - sliderRef.current.offsetLeft - scrollLeft);
-          if (diff < minDiff) {
-            minDiff = diff;
-            closestIndex = i;
-          }
-        }
-        // Only update state if it actually changed to prevent unnecessary renders
-        setActiveTeamIndex((prev) => (closestIndex !== prev ? closestIndex : prev));
-      }
-    }
-  };
-
-  const scrollFacultySlider = (direction) => {
-    if (facultySliderRef.current) {
-      let nextIndex = activeFacultyIndex;
-      if (direction === "left") {
-        nextIndex = Math.max(0, activeFacultyIndex - 1);
-      } else {
-        nextIndex = Math.min(facultyList.length - 1, activeFacultyIndex + 1);
-      }
-
-      const children = facultySliderRef.current.children;
-      if (children && children[nextIndex]) {
-        const targetScroll = children[nextIndex].offsetLeft - facultySliderRef.current.offsetLeft;
-        facultySliderRef.current.scrollTo({
-          left: targetScroll,
-          behavior: "smooth"
-        });
-        setActiveFacultyIndex(nextIndex);
-      }
-    }
-  };
-
   const handleFacultySliderScroll = () => {
-    if (facultySliderRef.current) {
-      const { scrollLeft } = facultySliderRef.current;
-      const children = facultySliderRef.current.children;
-      if (children && children.length > 0) {
-        let closestIndex = 0;
-        let minDiff = Infinity;
-        for (let i = 0; i < children.length; i++) {
-          const diff = Math.abs(children[i].offsetLeft - facultySliderRef.current.offsetLeft - scrollLeft);
-          if (diff < minDiff) {
-            minDiff = diff;
-            closestIndex = i;
-          }
-        }
-        setActiveFacultyIndex((prev) => (closestIndex !== prev ? closestIndex : prev));
-      }
-    }
+    // We don't need active index tracking for smooth continuous scroll
   };
 
-  // Smooth Autosliding Effect (Index-Based for CSS Snap compatibility)
+  // Smooth Continuous Autosliding Effect
   useEffect(() => {
     if (selectedTeamMember || isSliderHovered || teamList.length === 0) return;
 
-    const interval = setInterval(() => {
+    let animationFrameId;
+    const autoScroll = () => {
       if (sliderRef.current) {
-        const nextIndex = (activeTeamIndex + 1) % teamList.length;
-        const children = sliderRef.current.children;
-        if (children && children[nextIndex]) {
-          const targetScroll = children[nextIndex].offsetLeft - sliderRef.current.offsetLeft;
-          sliderRef.current.scrollTo({
-            left: targetScroll,
-            behavior: "smooth"
-          });
-          setActiveTeamIndex(nextIndex);
+        sliderRef.current.scrollLeft += 1;
+        if (sliderRef.current.scrollLeft >= sliderRef.current.scrollWidth / 2) {
+          sliderRef.current.scrollLeft -= sliderRef.current.scrollWidth / 2;
         }
       }
-    }, 3800); // Trigger every 3.8s for natural pacing
+      animationFrameId = requestAnimationFrame(autoScroll);
+    };
 
-    return () => clearInterval(interval);
-  }, [selectedTeamMember, isSliderHovered, activeTeamIndex, teamList]);
+    animationFrameId = requestAnimationFrame(autoScroll);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [selectedTeamMember, isSliderHovered, teamList.length]);
 
-  // Smooth Autosliding for Faculty
+  // Smooth Continuous Autosliding for Faculty
   useEffect(() => {
     if (selectedFacultyMember || isFacultySliderHovered || facultyList.length === 0) return;
 
-    const interval = setInterval(() => {
+    let animationFrameId;
+    const autoScroll = () => {
       if (facultySliderRef.current) {
-        const nextIndex = (activeFacultyIndex + 1) % facultyList.length;
-        const children = facultySliderRef.current.children;
-        if (children && children[nextIndex]) {
-          const targetScroll = children[nextIndex].offsetLeft - facultySliderRef.current.offsetLeft;
-          facultySliderRef.current.scrollTo({
-            left: targetScroll,
-            behavior: "smooth"
-          });
-          setActiveFacultyIndex(nextIndex);
+        facultySliderRef.current.scrollLeft += 1;
+        if (facultySliderRef.current.scrollLeft >= facultySliderRef.current.scrollWidth / 2) {
+          facultySliderRef.current.scrollLeft -= facultySliderRef.current.scrollWidth / 2;
         }
       }
-    }, 4200); // Trigger every 4.2s for natural pacing
+      animationFrameId = requestAnimationFrame(autoScroll);
+    };
 
-    return () => clearInterval(interval);
-  }, [selectedFacultyMember, isFacultySliderHovered, activeFacultyIndex, facultyList]);
+    animationFrameId = requestAnimationFrame(autoScroll);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [selectedFacultyMember, isFacultySliderHovered, facultyList.length]);
 
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
@@ -650,23 +567,7 @@ export default function AboutPage() {
               <p className="text-slate-500 text-sm mt-2 max-w-xl">Slide through our core engineering and leadership team. Click any card to explore their full professional profile and specialties.</p>
             </div>
 
-            {/* Navigation buttons */}
-            <div className="flex gap-3 shrink-0">
-              <button
-                onClick={() => scrollSlider("left")}
-                className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => scrollSlider("right")}
-                className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
-                aria-label="Scroll right"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+            {/* Navigation buttons removed per request */}
           </motion.div>
 
           {/* Horizontal Slider Track */}
@@ -674,15 +575,16 @@ export default function AboutPage() {
             ref={sliderRef}
             onMouseEnter={() => setIsSliderHovered(true)}
             onMouseLeave={() => setIsSliderHovered(false)}
-            onScroll={handleSliderScroll}
-            className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-6 no-scrollbar cursor-grab active:cursor-grabbing"
+            onTouchStart={() => setIsSliderHovered(true)}
+            onTouchEnd={() => setIsSliderHovered(false)}
+            className="flex gap-6 overflow-x-auto py-6 no-scrollbar cursor-grab active:cursor-grabbing"
           >
-            {teamList.map((m, idx) => (
+            {[...teamList, ...teamList, ...teamList, ...teamList].map((m, idx) => (
               <motion.div
                 key={idx}
                 onClick={() => setSelectedTeamMember(m)}
                 whileHover={{ y: -6 }}
-                className="snap-start shrink-0 w-[290px] sm:w-[325px] bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 transition-all duration-300 cursor-pointer group flex flex-col justify-between h-[440px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)]"
+                className="shrink-0 w-[260px] lg:w-[230px] bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 transition-all duration-300 cursor-pointer group flex flex-col justify-between h-[360px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)]"
               >
                 <div>
                   <div className="relative h-[250px] w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100/50">
@@ -797,38 +699,23 @@ export default function AboutPage() {
               <p className="text-slate-500 text-sm mt-3 max-w-xl">Seasoned industry professionals who bring real-world expertise directly into our learning ecosystem. Click any card to see details.</p>
             </div>
 
-            {/* Navigation buttons */}
-            <div className="flex gap-3 shrink-0">
-              <button
-                onClick={() => scrollFacultySlider("left")}
-                className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => scrollFacultySlider("right")}
-                className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-[#01254d] hover:text-white text-[#01254d] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md"
-                aria-label="Scroll right"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+            {/* Navigation buttons removed per request */}
           </motion.div>
 
           <div
             ref={facultySliderRef}
             onMouseEnter={() => setIsFacultySliderHovered(true)}
             onMouseLeave={() => setIsFacultySliderHovered(false)}
-            onScroll={handleFacultySliderScroll}
-            className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-6 no-scrollbar cursor-grab active:cursor-grabbing"
+            onTouchStart={() => setIsFacultySliderHovered(true)}
+            onTouchEnd={() => setIsFacultySliderHovered(false)}
+            className="flex gap-6 overflow-x-auto py-6 no-scrollbar cursor-grab active:cursor-grabbing"
           >
-            {facultyList.map((g, idx) => (
+            {[...facultyList, ...facultyList, ...facultyList, ...facultyList].map((g, idx) => (
               <motion.div
                 key={idx}
                 onClick={() => setSelectedFacultyMember(g)}
                 whileHover={{ y: -6 }}
-                className="snap-start shrink-0 w-[280px] sm:w-[310px] bg-white border border-slate-200 rounded-2xl p-6 transition-all duration-300 cursor-pointer group flex flex-col justify-between h-[320px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)] hover:border-[#FFC107]/45"
+                className="shrink-0 w-[260px] lg:w-[230px] bg-white border border-slate-200 rounded-2xl p-6 transition-all duration-300 cursor-pointer group flex flex-col justify-between h-[340px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)] hover:border-[#FFC107]/45"
               >
                 <div>
                   {g.img_url ? (

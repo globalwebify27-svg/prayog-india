@@ -336,21 +336,16 @@ export default function CourseDetailPage() {
 
                 {/* Outcomes */}
                 {course.outcomes && (
-                  <div className="mt-12 space-y-6">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 size={18} className="text-primary" />
-                      <h4 className="text-sm font-bold text-navy uppercase tracking-widest">Learning Outcomes</h4>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="mt-16 space-y-6">
+                    <h3 className="text-2xl font-bold text-navy tracking-tight mb-6">What you will learn</h3>
+                    <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
                       {((course.outcomes || "").includes('^') ? course.outcomes.split('^') : (course.outcomes || "").split('\n')).filter(Boolean).map((item, i) => (
-                        <div key={i} className="flex items-center gap-3 p-4 bg-white rounded-xl border border-navy/5 shadow-sm hover:shadow-md transition-all">
-                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <CheckCircle2 size={12} className="text-primary" />
-                          </div>
-                          <span className="text-[10px] font-bold text-navy uppercase tracking-wide leading-tight">{item.trim()}</span>
-                        </div>
+                        <li key={i} className="flex items-start gap-3">
+                          <CheckCircle2 size={20} className="text-emerald-500 shrink-0 mt-0.5" />
+                          <span className="text-navy/80 font-medium leading-relaxed text-sm md:text-base">{item.trim()}</span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 )}
 

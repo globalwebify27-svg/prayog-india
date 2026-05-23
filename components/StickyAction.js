@@ -77,7 +77,16 @@ export default function StickyAction() {
           exit={{ y: 100 }}
           className="fixed bottom-0 left-0 w-full z-[100] bg-primary shadow-[0_-10px_40px_rgba(255,193,7,0.3)] border-t border-accent"
         >
-          <div className="max-w-7xl mx-auto px-4 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* Mobile Close Button */}
+          <button 
+            onClick={() => setIsDismissed(true)}
+            className="md:hidden absolute top-2 right-2 p-1 text-secondary/60 hover:text-secondary transition-colors z-10"
+            title="Dismiss"
+          >
+            <X size={18} />
+          </button>
+          
+          <div className="max-w-7xl mx-auto px-4 pt-5 pb-4 md:py-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 relative">
             <div className="flex items-center gap-4">
               <div className="hidden md:flex bg-secondary/10 p-2 rounded-lg">
                 <Clock className="text-secondary" size={20} />
@@ -87,9 +96,9 @@ export default function StickyAction() {
               </p>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 md:gap-6 w-full justify-center md:justify-end">
               {/* Timer */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 md:gap-2">
                 {[
                   { val: timeLeft.days, unit: "d" },
                   { val: timeLeft.hours, unit: "h" },
@@ -97,22 +106,22 @@ export default function StickyAction() {
                   { val: timeLeft.seconds, unit: "s" }
                 ].map((item, i) => (
                   <div key={i} className="flex items-baseline gap-0.5">
-                    <span className="bg-white px-2 py-1 rounded text-secondary font-black text-sm md:text-base min-w-[32px] text-center shadow-sm">
+                    <span className="bg-white px-1.5 md:px-2 py-0.5 md:py-1 rounded text-secondary font-black text-xs md:text-base min-w-[28px] md:min-w-[32px] text-center shadow-sm">
                       {item.val}
                     </span>
-                    <span className="text-secondary/60 text-[10px] font-bold uppercase">{item.unit}</span>
+                    <span className="text-secondary/60 text-[9px] md:text-[10px] font-bold uppercase">{item.unit}</span>
                   </div>
                 ))}
               </div>
 
-              <Link href={promo?.registration_link || "/register"} className="bg-secondary text-white px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-black transition-colors group shadow-lg">
+              <Link href={promo?.registration_link || "/register"} className="bg-secondary text-white px-4 md:px-6 py-2 md:py-2.5 rounded-full font-bold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 hover:bg-black transition-colors group shadow-lg whitespace-nowrap">
                 Register Now
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               
               <button 
                 onClick={() => setIsDismissed(true)}
-                className="p-1 md:p-2 text-secondary/40 hover:text-secondary transition-colors"
+                className="hidden md:block p-2 text-secondary/40 hover:text-secondary transition-colors shrink-0"
                 title="Dismiss"
               >
                 <X size={20} />

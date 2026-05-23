@@ -179,10 +179,11 @@ function CoursesPageContent() {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={`bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all flex group overflow-hidden ${
+                className={`bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all flex group overflow-hidden relative ${
                   viewMode === 'grid' ? 'flex-col rounded-2xl' : 'flex-row items-center rounded-xl p-3'
                 }`}
               >
+                <Link href={`/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />
                 {/* Image */}
                 <div className={`relative overflow-hidden shrink-0 bg-slate-100 ${
                   viewMode === 'grid' ? 'h-52 w-full' : 'h-24 w-36 rounded-lg'
@@ -229,7 +230,7 @@ function CoursesPageContent() {
                       </div>
                       
                       <div className="flex flex-wrap items-center gap-3">
-                        <Link href={`/courses/${course.id}`} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-navy/5 text-navy rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-navy hover:text-white transition-all">
+                        <Link href={`/courses/${course.id}`} className="relative z-20 inline-flex items-center gap-1.5 px-3 py-1.5 bg-navy/5 text-navy rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-navy hover:text-white transition-all">
                           <BookOpen size={12} />
                           <span>Learning Path</span>
                         </Link>
@@ -239,7 +240,7 @@ function CoursesPageContent() {
                             href={course.brochure} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-primary/20 text-primary rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-primary hover:text-navy transition-all"
+                            className="relative z-20 inline-flex items-center gap-1.5 px-3 py-1.5 border border-primary/20 text-primary rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-primary hover:text-navy transition-all"
                           >
                             <FileText size={12} />
                             <span>Brochure</span>
@@ -248,7 +249,7 @@ function CoursesPageContent() {
                       </div>
                     </div>
                     
-                    <Link href={`/register?course=${course.id}`} className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm group-hover:shadow-md shrink-0">
+                    <Link href={`/register?course=${course.id}`} className="relative z-20 w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm group-hover:shadow-md shrink-0">
                       <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </Link>
                   </div>

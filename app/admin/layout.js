@@ -91,6 +91,7 @@ const menuItems = [
       { label: "Success Narratives", href: "/admin/stories", icon: BookOpen },
       { label: "Career Placements", href: "/admin/placements", icon: Award },
       { label: "About Page Team", href: "/admin/about", icon: Users },
+      { label: "Static Pages", href: "/admin/pages", icon: FileText },
     ]
   },
   { icon: Award, label: "Certificates", href: "/admin/certificates", roles: ["admin"] },

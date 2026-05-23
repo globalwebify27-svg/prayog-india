@@ -93,9 +93,10 @@ export default function FeaturedCourses() {
         >
           {courses.map((course) => (
             <SwiperSlide key={course.id}>
-              <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all group h-full flex flex-col">
+              <div className="relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all group h-full flex flex-col">
+                <Link href={course.id === 6 ? "/summer-camp" : `/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />
                 {/* Image Area */}
-                <div className="relative h-44 overflow-hidden shrink-0">
+                <div className="relative h-44 overflow-hidden shrink-0 pointer-events-none">
                   <img 
                     src={course.image} 
                     alt={course.title} 
@@ -135,7 +136,7 @@ export default function FeaturedCourses() {
                       <div className="flex space-x-2">
                         <Link 
                           href={course.id === 6 ? "/summer-camp" : `/register?course=${course.id}`}
-                          className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all group-hover:rotate-[-45deg] shadow-lg shadow-navy/20"
+                          className="relative z-20 w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all group-hover:rotate-[-45deg] shadow-lg shadow-navy/20"
                         >
                           <ArrowRight size={18} />
                         </Link>

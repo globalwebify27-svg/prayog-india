@@ -20,6 +20,7 @@ export default function MediaCoverage() {
   const [mediaItems, setMediaItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -37,19 +38,26 @@ export default function MediaCoverage() {
     fetchMedia();
   }, []);
 
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left' 
-        ? scrollLeft - clientWidth / 2 
-        : scrollLeft + clientWidth / 2;
-      
-      scrollRef.current.scrollTo({
-        left: scrollTo,
-        behavior: 'smooth'
-      });
-    }
-  };
+  // Auto scroll logic
+  useEffect(() => {
+    let animationFrameId;
+    const autoScroll = () => {
+      if (scrollRef.current && !isHovered && mediaItems.length > 0) {
+        scrollRef.current.scrollLeft += 1;
+        
+        // Seamless loop jump back when we pass half
+        if (scrollRef.current.scrollLeft >= scrollRef.current.scrollWidth / 2) {
+          scrollRef.current.scrollLeft -= scrollRef.current.scrollWidth / 2;
+        }
+      }
+      animationFrameId = requestAnimationFrame(autoScroll);
+    };
+
+    animationFrameId = requestAnimationFrame(autoScroll);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isHovered, mediaItems]);
+
+  const displayItems = [...mediaItems, ...mediaItems, ...mediaItems, ...mediaItems];
 
   const openLightbox = (index) => setSelectedIndex(index);
   const closeLightbox = () => setSelectedIndex(null);
@@ -103,20 +111,7 @@ export default function MediaCoverage() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-               <button 
-                onClick={() => scroll('left')}
-                className="w-12 h-12 rounded-xl bg-white border border-slate-200 text-navy flex items-center justify-center hover:bg-navy hover:text-white transition-all shadow-sm"
-               >
-                 <ChevronLeft size={20} />
-               </button>
-               <button 
-                onClick={() => scroll('right')}
-                className="w-12 h-12 rounded-xl bg-white border border-slate-200 text-navy flex items-center justify-center hover:bg-navy hover:text-white transition-all shadow-sm"
-               >
-                 <ChevronRight size={20} />
-               </button>
-            </div>
+            {/* Buttons removed per request */}
             <Link 
               href="/gallery?category=Media Coverage"
               className="group flex items-center space-x-3 text-navy font-bold text-xs uppercase tracking-widest bg-slate-50 px-8 py-4 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-xl hover:shadow-navy/5 transition-all"
@@ -132,23 +127,27 @@ export default function MediaCoverage() {
         {/* Carousel Container */}
         <div 
           ref={scrollRef}
-          className="flex overflow-x-auto gap-8 pb-12 no-scrollbar snap-x snap-mandatory"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onTouchStart={() => setIsHovered(true)}
+          onTouchEnd={() => setIsHovered(false)}
+          className="flex overflow-x-auto gap-6 pb-12 no-scrollbar"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {loading ? (
-            Array(4).fill(0).map((_, i) => (
-              <div key={i} className="animate-pulse bg-slate-100 rounded-[2.5rem] min-w-[300px] h-[450px] shrink-0" />
+            Array(5).fill(0).map((_, i) => (
+              <div key={i} className="animate-pulse bg-slate-100 rounded-3xl w-[260px] lg:w-[230px] h-[340px] shrink-0" />
             ))
           ) : (
-            mediaItems.map((item, i) => (
+            displayItems.map((item, i) => (
               <motion.div
-                key={item.id}
+                key={`${item.id}-${i}`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                onClick={() => openLightbox(i)}
-                className="group relative min-w-[320px] md:min-w-[380px] h-[480px] rounded-[2.5rem] overflow-hidden bg-slate-900 shadow-2xl shadow-navy/10 border border-slate-100 cursor-pointer snap-start shrink-0"
+                transition={{ delay: (i % mediaItems.length) * 0.05 }}
+                onClick={() => openLightbox(i % mediaItems.length)}
+                className="group relative w-[260px] lg:w-[230px] h-[340px] rounded-[2rem] overflow-hidden bg-slate-900 shadow-2xl shadow-navy/10 border border-slate-100 cursor-pointer shrink-0"
               >
                 <img 
                   src={item.image_url} 
@@ -156,11 +155,11 @@ export default function MediaCoverage() {
                   className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700"
                 />
                 
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/20 to-transparent opacity-90" />
+                {/* Overlay Gradient (appears on hover) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
-                {/* Content */}
-                <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                {/* Content fading and sliding up on hover */}
+                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
                   <div className="flex items-center justify-between mb-4">
                     <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 flex items-center space-x-2">
                       {item.title.toLowerCase().includes('tv') ? <Tv size={12} className="text-primary" /> : <Newspaper size={12} className="text-primary" />}
@@ -168,11 +167,11 @@ export default function MediaCoverage() {
                     </div>
                   </div>
                   
-                  <h3 className="text-xl font-bold text-white mb-6 leading-tight group-hover:text-primary transition-colors">
+                  <h3 className="text-xl font-bold text-white mb-6 leading-tight group-hover:text-primary transition-colors h-[75px] line-clamp-3">
                     {item.title}
                   </h3>
                   
-                  <div className="flex items-center justify-between border-t border-white/10 pt-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                  <div className="flex items-center justify-between border-t border-white/10 pt-6 mt-2">
                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest flex items-center gap-2">
                       <Globe size={12} /> News Feature
                     </span>

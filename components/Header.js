@@ -43,10 +43,11 @@ export default function Header() {
             <nav className="hidden lg:flex items-center space-x-8 text-sm font-semibold text-white/80">
               <Link href="/about" className="hover:text-primary transition-colors">About</Link>
               <Link href="/courses" className="hover:text-primary transition-colors">Programs</Link>
-              <Link href="/courses?tab=1:1 Training" className="hover:text-primary transition-colors">Training</Link>
-              <Link href="/admissions" className="hover:text-primary transition-colors">Admissions</Link>
+              <Link href="/training" className="hover:text-primary transition-colors">Training</Link>
               <Link href="/internships" className="hover:text-primary transition-colors">Internships</Link>
-              <Link href="/placements" className="hover:text-primary transition-colors">Placements</Link>
+              <Link href="/one-on-one-training" className="hover:text-primary transition-colors">1:1 Training</Link>
+              <Link href="/admissions" className="hover:text-primary transition-colors">Admissions</Link>
+              {/* <Link href="/placements" className="hover:text-primary transition-colors">Placements</Link> */}
               <Link href="/gallery" className="hover:text-primary transition-colors">Media</Link>
             </nav>
 
@@ -85,10 +86,11 @@ export default function Header() {
           </button>
           <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">About</Link>
           <Link href="/courses" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Programs</Link>
-          <Link href="/courses?tab=1:1 Training" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Training</Link>
-          <Link href="/admissions" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Admissions</Link>
+          <Link href="/training" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Training</Link>
           <Link href="/internships" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Internships</Link>
-          <Link href="/placements" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Placements</Link>
+          <Link href="/one-on-one-training" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">1:1 Training</Link>
+          <Link href="/admissions" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Admissions</Link>
+          {/* <Link href="/placements" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Placements</Link> */}
           <Link href="/gallery" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Media</Link>
           <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="bg-primary text-navy px-10 py-3 rounded-xl text-sm font-bold uppercase tracking-widest shadow-lg">Enroll Now</Link>
         </div>
