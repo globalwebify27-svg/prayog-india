@@ -5,14 +5,18 @@ import jwt from "jsonwebtoken";
 
 export async function GET() {
   try {
-    const [timings] = await pool.query("SELECT * FROM timings ORDER BY created_at DESC");
+    const [timings] = await pool.query(`
+      SELECT t.*, (SELECT COUNT(*) FROM course_timings ct WHERE ct.timing_id = t.id) as course_count 
+      FROM timings t 
+      ORDER BY t.created_at DESC
+    `);
     return NextResponse.json({ success: true, timings });
   } catch (error) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
-export async function POST(req) {
+export async function PUT(req) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
@@ -20,15 +24,15 @@ export async function POST(req) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (decoded.role !== 'admin') {
-      return NextResponse.json({ success: false, message: "Only admins can manage timings" }, { status: 403 });
+      return NextResponse.json({ success: false, message: "Only admins can update timings" }, { status: 403 });
     }
 
-    const { name, slot } = await req.json();
-    const [result] = await pool.query(
-      "INSERT INTO timings (name, slot) VALUES (?, ?)",
-      [name, slot]
+    const { id, name, slot } = await req.json();
+    await pool.query(
+      "UPDATE timings SET name = ?, slot = ? WHERE id = ?",
+      [name, slot, id]
     );
-    return NextResponse.json({ success: true, id: result.insertId });
+    return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }

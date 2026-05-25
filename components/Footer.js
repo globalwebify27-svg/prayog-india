@@ -45,8 +45,8 @@ export default function Footer() {
               <li><Link href="/about" className="hover:text-white transition-colors">Our Vision</Link></li>
               <li><Link href="/faculties" className="hover:text-white transition-colors">Expert Faculty</Link></li>
               <li><Link href="/infrastructure" className="hover:text-white transition-colors">Research Labs</Link></li>
-              <li><Link href="/placements" className="hover:text-white transition-colors">Career Records</Link></li>
-              <li><Link href="/admissions" className="hover:text-white transition-colors">Admissions 2026</Link></li>
+
+              <li><Link href="/stories" className="hover:text-white transition-colors">Our Stories</Link></li>
             </ul>
           </div>
 
@@ -56,7 +56,7 @@ export default function Footer() {
             <ul className="space-y-4 text-[13px] text-blue-100/50 font-medium">
               <li><Link href="/courses" className="hover:text-white transition-colors">Academic Programs</Link></li>
               <li><Link href="/internships" className="hover:text-white transition-colors">Industrial Internship</Link></li>
-              <li><Link href="/scholarships" className="hover:text-white transition-colors">Scholarship Hub</Link></li>
+
               <li><Link href="/stories" className="hover:text-white transition-colors">Success Stories</Link></li>
               <li><Link href="/faq" className="hover:text-white transition-colors">Knowledge Base</Link></li>
             </ul>

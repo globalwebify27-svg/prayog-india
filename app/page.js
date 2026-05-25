@@ -29,7 +29,6 @@ export default function Home() {
       <ShortTermActivities />
       <Categories />
       <Stats />
-      <Partners />
       <MediaCoverage />
       <AboutSection />
       <FeaturedCourses />

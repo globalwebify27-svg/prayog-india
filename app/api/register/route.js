@@ -7,12 +7,6 @@ export async function POST(req) {
   try {
     const { name, email, phone, emergency_contact = null, password, course_id, mode, batch, isInstallment, coupon_code, payment_method } = await req.json();
 
-    // Check if user already exists
-    const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
-    if (existing.length > 0) {
-      return NextResponse.json({ success: false, message: "Email already registered" }, { status: 400 });
-    }
-
     // 1. Fetch Course Details (Price, Installments)
     const [courseRows] = await pool.query("SELECT * FROM courses WHERE id = ?", [course_id]);
     if (courseRows.length === 0) {
@@ -37,15 +31,35 @@ export async function POST(req) {
       }
     }
 
-    // 2. Hash Password
-    const hashedPassword = await bcrypt.hash(password || "Prayog@2026", 10);
+    // Check if user already exists
+    const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
+    let userId;
+    
+    if (existing.length > 0) {
+      userId = existing[0].id;
+      // Check if they have any paid enrollment
+      const [paidEnrollments] = await pool.query("SELECT id FROM enrollments WHERE user_id = ? AND payment_status != 'pending'", [userId]);
+      if (paidEnrollments.length > 0) {
+        return NextResponse.json({ success: false, message: "Email already registered with active enrollments. Please login." }, { status: 400 });
+      } else {
+        // Ghost user (failed payment previously). Update details so they can try again.
+        const hashedPassword = await bcrypt.hash(password || "Prayog@2026", 10);
+        await pool.query(
+          "UPDATE users SET name = ?, password = ?, phone = ?, emergency_contact = ? WHERE id = ?",
+          [name, hashedPassword, phone, emergency_contact, userId]
+        );
+      }
+    } else {
+      // 2. Hash Password
+      const hashedPassword = await bcrypt.hash(password || "Prayog@2026", 10);
 
-    // 3. Create User
-    const [userResult] = await pool.execute(
-      "INSERT INTO users (name, email, password, phone, emergency_contact, role) VALUES (?, ?, ?, ?, ?, 'student')",
-      [name, email, hashedPassword, phone, emergency_contact]
-    );
-    const userId = userResult.insertId;
+      // 3. Create User
+      const [userResult] = await pool.execute(
+        "INSERT INTO users (name, email, password, phone, emergency_contact, role) VALUES (?, ?, ?, ?, ?, 'student')",
+        [name, email, hashedPassword, phone, emergency_contact]
+      );
+      userId = userResult.insertId;
+    }
 
     // 4. Resolve/Create Batch
     let [batchRows] = await pool.execute("SELECT id FROM batches WHERE name = ? AND course_id = ?", [batch, course_id]);
@@ -83,23 +97,7 @@ export async function POST(req) {
       }
     }
     
-    // 7. Send Welcome Email
-    try {
-      const emailHtml = getOnboardingEmailTemplate(
-        name, 
-        email, 
-        password || "Prayog@2026",
-        course.title,
-        batch,
-        payment_method || 'online',
-        amount,
-        installmentData
-      );
-      await sendMail(email, "Welcome to Prayog India - Your Student Account", emailHtml);
-    } catch (mailError) {
-      console.error("Failed to send onboarding mail:", mailError);
-      // Don't fail registration if mail fails, but log it
-    }
+    // Email sending moved to payment verification
 
     return NextResponse.json({ 
       success: true, 

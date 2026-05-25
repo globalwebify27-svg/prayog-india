@@ -46,8 +46,8 @@ export default function Header() {
               <Link href="/training" className="hover:text-primary transition-colors">Training</Link>
               <Link href="/internships" className="hover:text-primary transition-colors">Internships</Link>
               <Link href="/one-on-one-training" className="hover:text-primary transition-colors">1:1 Training</Link>
-              <Link href="/admissions" className="hover:text-primary transition-colors">Admissions</Link>
-              {/* <Link href="/placements" className="hover:text-primary transition-colors">Placements</Link> */}
+              <Link href="/stories" className="hover:text-primary transition-colors">Our Stories</Link>
+
               <Link href="/gallery" className="hover:text-primary transition-colors">Media</Link>
             </nav>
 
@@ -89,8 +89,8 @@ export default function Header() {
           <Link href="/training" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Training</Link>
           <Link href="/internships" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Internships</Link>
           <Link href="/one-on-one-training" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">1:1 Training</Link>
-          <Link href="/admissions" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Admissions</Link>
-          {/* <Link href="/placements" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Placements</Link> */}
+          <Link href="/stories" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Our Stories</Link>
+
           <Link href="/gallery" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary transition-colors">Media</Link>
           <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="bg-primary text-navy px-10 py-3 rounded-xl text-sm font-bold uppercase tracking-widest shadow-lg">Enroll Now</Link>
         </div>

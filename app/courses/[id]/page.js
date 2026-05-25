@@ -146,7 +146,23 @@ export default function CourseDetailPage() {
                 <p className="text-navy/70 text-base leading-relaxed mb-8">
                   {course.description}
                 </p>
+                {course.important_note && (
+                  <div className="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-r-xl mt-4">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-amber-100 rounded-lg text-amber-600 mt-1">
+                        <FileText size={20} />
+                      </div>
+                      <div>
+                        <h4 className="text-amber-800 font-bold text-sm uppercase tracking-widest mb-1">Important Note</h4>
+                        <p className="text-amber-700/80 text-sm font-medium leading-relaxed">
+                          {course.important_note}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
+
 
               {/* Learning Path Accordion */}
               <div className="mb-16">

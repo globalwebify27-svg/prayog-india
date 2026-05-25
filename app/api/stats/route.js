@@ -9,9 +9,9 @@ export async function GET() {
     const [partnerCount] = await pool.query("SELECT COUNT(*) as count FROM partners");
 
     const stats = [
-      { id: "students", value: 500 + userCount[0].count, suffix: "+", label: "Students Trained" },
+      { id: "students", value: "10K", suffix: "+", label: "Students Trained" },
       { id: "courses", value: 10 + courseCount[0].count, suffix: "+", label: "Courses & Programs" },
-      { id: "awards", value: "120", suffix: "+", label: "Awards Won" }, // Static for now
+      { id: "awards", value: "120", suffix: "+", label: "Institutional Clients" },
       { id: "partners", value: 15 + partnerCount[0].count, suffix: "+", label: "Corporate Partners" }
     ];
 

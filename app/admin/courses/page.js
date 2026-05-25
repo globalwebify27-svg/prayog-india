@@ -124,7 +124,8 @@ export default function AdminCoursesPage() {
     outcomes: "",
     certification: "",
     who_can_join: "",
-    methodology: ""
+    methodology: "",
+    important_note: ""
   });
 
   useEffect(() => {
@@ -239,7 +240,7 @@ export default function AdminCoursesPage() {
     if (result.success) {
       setShowAddModal(false);
       setModalStep(1);
-      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "", is_internship: false, is_one_to_one: false, outcomes: "", certification: "", who_can_join: "", methodology: "" });
+      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "", is_internship: false, is_one_to_one: false, outcomes: "", certification: "", who_can_join: "", methodology: "", important_note: "" });
       fetchCourses();
       setErrors({});
       showAlert("Course Launched", "The new academic program has been successfully initialized.", "success", () => {}, "OK", false);
@@ -434,7 +435,8 @@ export default function AdminCoursesPage() {
                             outcomes: course.outcomes || "",
                             certification: course.certification || "",
                             who_can_join: course.who_can_join || "",
-                            methodology: course.methodology || ""
+                            methodology: course.methodology || "",
+                            important_note: course.important_note || ""
                           });
                           setModalStep(1);
                           setShowEditModal(true);
@@ -841,6 +843,19 @@ export default function AdminCoursesPage() {
                             />
                           </div>
                         </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                            Important Note
+                            <span className="text-[8px] bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">Optional</span>
+                          </label>
+                          <textarea 
+                            className="w-full bg-amber-50/30 border border-amber-200 rounded-lg px-4 py-2.5 text-xs focus:border-amber-400 focus:bg-amber-50/50 outline-none transition-all placeholder:text-amber-600/30 text-amber-900 font-medium"
+                            rows={2}
+                            placeholder="e.g. A laptop with minimum 8GB RAM is mandatory for this program."
+                            value={newCourse.important_note}
+                            onChange={e => setNewCourse({...newCourse, important_note: e.target.value})}
+                          />
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -1240,6 +1255,19 @@ export default function AdminCoursesPage() {
                               onChange={e => setCourseToEdit({...courseToEdit, methodology: e.target.value})}
                             />
                           </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                            Important Note
+                            <span className="text-[8px] bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">Optional</span>
+                          </label>
+                          <textarea 
+                            className="w-full bg-amber-50/30 border border-amber-200 rounded-lg px-4 py-2.5 text-xs focus:border-amber-400 focus:bg-amber-50/50 outline-none transition-all placeholder:text-amber-600/30 text-amber-900 font-medium"
+                            rows={2}
+                            placeholder="e.g. A laptop with minimum 8GB RAM is mandatory for this program."
+                            value={courseToEdit.important_note}
+                            onChange={e => setCourseToEdit({...courseToEdit, important_note: e.target.value})}
+                          />
                         </div>
                       </motion.div>
                     )}

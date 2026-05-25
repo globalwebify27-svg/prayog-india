@@ -91,7 +91,7 @@ export default function StickyAction() {
               <div className="hidden md:flex bg-secondary/10 p-2 rounded-lg">
                 <Clock className="text-secondary" size={20} />
               </div>
-              <p className="text-secondary font-bold text-sm md:text-base text-center md:text-left">
+              <p className="text-secondary font-bold text-sm md:text-base text-center md:text-left md:whitespace-nowrap">
                 Limited seats left for <span className="underline decoration-2">{promo?.title || "Special Program"}</span>. Book yours now!
               </p>
             </div>

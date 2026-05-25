@@ -78,11 +78,11 @@ export default function AboutSection() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-4">
-              <Link href="/courses" className="w-full sm:w-auto bg-navy text-white px-10 py-5 rounded-2xl font-heading font-bold hover:bg-black hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 text-center">
+              <Link href="/one-on-one-training" className="w-full sm:w-auto bg-navy text-white px-10 py-5 rounded-2xl font-heading font-bold hover:bg-black hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 text-center">
                 Explore 1:1 Programs
               </Link>
-              <Link href="/about" className="w-full sm:w-auto text-navy font-bold text-sm uppercase tracking-widest border-b-2 border-primary pb-1 hover:text-primary transition-all">
-                Why Choose 1:1?
+              <Link href="/one-on-one-training#how-it-works" className="w-full sm:w-auto text-navy font-bold text-sm uppercase tracking-widest border-b-2 border-primary pb-1 hover:text-primary transition-all">
+                How It Works
               </Link>
             </div>
           </motion.div>

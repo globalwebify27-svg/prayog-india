@@ -75,6 +75,7 @@ const menuItems = [
     roles: ["admin"],
     subItems: [
       { label: "Payment Ledger", href: "/admin/payments", icon: CreditCard },
+      { label: "Coupons", href: "/admin/coupons", icon: Tag },
     ]
   },
   { 
@@ -89,7 +90,6 @@ const menuItems = [
       { label: "Media Gallery", href: "/admin/gallery", icon: Image },
       { label: "Active Internships", href: "/admin/internships", icon: Briefcase },
       { label: "Success Narratives", href: "/admin/stories", icon: BookOpen },
-      { label: "Career Placements", href: "/admin/placements", icon: Award },
       { label: "About Page Team", href: "/admin/about", icon: Users },
       { label: "Static Pages", href: "/admin/pages", icon: FileText },
     ]

@@ -4,33 +4,33 @@ import { Award, ShieldCheck, Star, Users } from "lucide-react";
 import { motion } from "framer-motion";
 
 const rankings = [
-  { 
-    rank: "01", 
-    suffix: "ST", 
-    label: "Ranked STEM Hub", 
-    sub: "In North India Regions",
-    icon: <Star className="text-primary" size={24} /> 
+  {
+    rank: "ISO",
+    suffix: "",
+    label: "Certified",
+    sub: "9001:2015 Standards",
+    icon: <ShieldCheck className="text-primary" size={24} />
   },
-  { 
-    rank: "15", 
-    suffix: "TH", 
-    label: "Innovation Awards", 
-    sub: "National Robotics Expo",
-    icon: <Award className="text-primary" size={24} /> 
+  {
+    rank: "500",
+    suffix: "+",
+    label: "Projects Built",
+    sub: "By Our Students",
+    icon: <Award className="text-primary" size={24} />
   },
-  { 
-    rank: "100", 
-    suffix: "%", 
-    label: "Hands-on Learning", 
+  {
+    rank: "100",
+    suffix: "%",
+    label: "Hands-on Learning",
     sub: "Practical Implementation",
-    icon: <ShieldCheck className="text-primary" size={24} /> 
+    icon: <ShieldCheck className="text-primary" size={24} />
   },
-  { 
-    rank: "50", 
-    suffix: "K+", 
-    label: "Lives Impacted", 
+  {
+    rank: "10",
+    suffix: "K+",
+    label: "Lives Impacted",
     sub: "Through STEM Workshops",
-    icon: <Users className="text-primary" size={24} /> 
+    icon: <Users className="text-primary" size={24} />
   }
 ];
 

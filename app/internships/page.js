@@ -159,6 +159,60 @@ export default function InternshipsPage() {
         </div>
       </section>
 
+      {/* Active Openings / Dynamic Feed */}
+      <section id="openings" className="py-20 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">Active Internship Openings</h2>
+            <p className="text-slate-600 text-lg">Explore and apply for our current hands-on internship opportunities.</p>
+          </div>
+
+          <div className="space-y-6">
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="w-12 h-12 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : internships.length === 0 ? (
+              <div className="text-center py-12 text-slate-500 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <Briefcase size={40} className="text-slate-200 mx-auto mb-4" />
+                <p className="font-medium">No active internship openings at the moment. Please check back later.</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {internships.map(course => (
+                  <div key={course.id} className="relative bg-white border border-slate-200 rounded-3xl overflow-hidden hover:shadow-xl hover:border-gold/30 transition-all flex flex-col group">
+                    <Link href={`/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />
+                    <div className="h-48 bg-slate-100 relative overflow-hidden pointer-events-none">
+                      <img src={course.image || "/assets/logo.png"} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <div className="absolute top-4 left-4">
+                        <span className="text-xs font-bold px-3 py-1 bg-white/90 text-navy backdrop-blur-sm rounded-full shadow-sm">
+                          Internship
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-6 flex flex-col flex-grow">
+                      <h3 className="font-bold text-xl text-navy mb-4 line-clamp-2 group-hover:text-gold transition-colors">{course.title}</h3>
+                      <div className="flex-grow"></div>
+                      <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
+                        <span className="text-lg font-black text-slate-700">
+                          {Number(course.price) > 0 ? `₹${Number(course.price).toLocaleString('en-IN')}` : 'Stipend Based'}
+                        </span>
+                        <Link
+                          href={`/courses/${course.id}`}
+                          className="relative z-20 px-6 py-2 bg-navy text-white font-bold rounded-full text-sm hover:bg-gold hover:text-navy transition-colors shadow-md"
+                        >
+                          View Details
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Programs Offered */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -171,7 +225,7 @@ export default function InternshipsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Robotics */}
-            <div onClick={() => setIsModalOpen(true)} className="cursor-pointer bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
+            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
               <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Bot size={28} />
               </div>
@@ -188,7 +242,7 @@ export default function InternshipsPage() {
             </div>
 
             {/* Embedded */}
-            <div onClick={() => setIsModalOpen(true)} className="cursor-pointer bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
+            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
               <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Cpu size={28} />
               </div>
@@ -205,7 +259,7 @@ export default function InternshipsPage() {
             </div>
 
             {/* IoT */}
-            <div onClick={() => setIsModalOpen(true)} className="cursor-pointer bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
+            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
               <div className="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Wifi size={28} />
               </div>
@@ -222,7 +276,7 @@ export default function InternshipsPage() {
             </div>
 
             {/* Drone */}
-            <div onClick={() => setIsModalOpen(true)} className="cursor-pointer bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
+            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
               <div className="w-14 h-14 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Rocket size={28} />
               </div>
@@ -239,7 +293,7 @@ export default function InternshipsPage() {
             </div>
 
             {/* 3D Design */}
-            <div onClick={() => setIsModalOpen(true)} className="cursor-pointer bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
+            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl hover:border-gold/30 transition-all group">
               <div className="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Box size={28} />
               </div>
@@ -367,87 +421,7 @@ export default function InternshipsPage() {
         </div>
       </section>
 
-      {/* Active Openings / Dynamic Feed */}
-      <section id="openings" className="py-20 bg-slate-50 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-navy mb-4">Active Internship Openings</h2>
-            <p className="text-slate-600">Explore and apply for our current hands-on internship opportunities.</p>
-          </div>
 
-          <div className="space-y-6 max-w-5xl">
-            {loading ? (
-              <div className="py-20 text-center">
-                <div className="w-10 h-10 border-4 border-navy border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading opportunities...</p>
-              </div>
-            ) : internships.length === 0 ? (
-              <div className="bg-white rounded-2xl p-20 text-center border border-slate-200">
-                <Briefcase size={40} className="text-slate-200 mx-auto mb-4" />
-                <p className="text-slate-500 font-medium">No active internship openings at the moment.</p>
-              </div>
-            ) : (
-              internships.map((job, i) => {
-                let perks = [];
-                try { perks = typeof job.perks === 'string' ? JSON.parse(job.perks) : (job.perks || []); } catch (e) { perks = []; }
-
-                return (
-                  <motion.div key={job.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }} className="relative bg-white rounded-3xl p-1 border-0 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-orange-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
-                    <div className="relative z-10 bg-white/60 backdrop-blur-sm rounded-[22px] p-8 h-full flex flex-col border border-white">
-                      <Link href={`/courses/${job.id}`} className="absolute inset-0 z-10 rounded-[22px]" aria-label={`View details for ${job.title}`} />
-                      
-                      <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-6 relative z-10 pointer-events-none">
-                        <div className="flex-grow">
-                          <div className="flex items-center space-x-2 text-primary font-black text-[10px] uppercase tracking-widest mb-3">
-                            <Briefcase size={14} className="text-gold" />
-                            <span>{job.company || "Prayog India Robotics"}</span>
-                          </div>
-                          <h3 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-navy transition-colors">{job.title}</h3>
-                          <div className="flex flex-wrap items-center gap-6 text-slate-500 font-bold text-xs uppercase tracking-tight bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            {job.location && <span className="flex items-center gap-2"><MapPin size={16} className="text-blue-500" /> {job.location}</span>}
-                            {job.duration && <span className="flex items-center gap-2"><Calendar size={16} className="text-purple-500" /> {job.duration}</span>}
-                            {job.stipend && <span className="flex items-center gap-2 text-emerald-600"><Building2 size={16} /> {job.stipend}</span>}
-                          </div>
-                        </div>
-                        {job.slots && (
-                          <div className="bg-navy/5 text-navy px-4 py-2 rounded-xl font-black text-xs uppercase border border-navy/10 shrink-0 shadow-inner group-hover:bg-navy group-hover:text-white transition-colors">
-                            {job.slots}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <p className="text-slate-600 text-sm leading-relaxed mb-6 font-medium line-clamp-3">
-                        {job.description}
-                      </p>
-                      
-                      <div className="flex flex-wrap gap-2 mb-8">
-                        {Array.isArray(perks) && perks.map(perk => (
-                          <span key={perk} className="px-3 py-1.5 bg-white text-slate-600 rounded-lg text-[10px] font-black uppercase border border-slate-200 shadow-sm flex items-center gap-2 group-hover:border-blue-200 transition-colors">
-                            <CheckCircle2 size={14} className="text-emerald-500" />
-                            {perk}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      <div className="flex-grow"></div>
-                      
-                      <div className="flex items-center justify-between pt-6 border-t border-slate-100 mt-auto relative z-20">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1.5 rounded-full">Internship Certificate Included</span>
-                        <Link href={`/courses/${job.id}`} className="flex items-center space-x-2 bg-navy text-white px-6 py-2.5 rounded-xl font-bold text-xs uppercase group/btn hover:bg-gold hover:text-navy hover:shadow-lg transition-all shadow-md">
-                          <span>View Details & Apply</span>
-                          <ArrowUpRight size={16} className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
-                        </Link>
-                      </div>
-
-                    </div>
-                  </motion.div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-16 bg-navy relative overflow-hidden border-t-8 border-gold">
@@ -474,10 +448,10 @@ export default function InternshipsPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto inline-flex items-center justify-center px-12 py-5 bg-gold text-navy font-black text-lg hover:bg-yellow-400 transition-all shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none group uppercase">
+            <Link href="#openings" className="w-full sm:w-auto inline-flex items-center justify-center px-12 py-5 bg-gold text-navy font-black text-lg hover:bg-yellow-400 transition-all shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none group uppercase">
               Enroll for Internship
               <ArrowRight className="ml-3 w-6 h-6" />
-            </button>
+            </Link>
             <Link href="/contact" className="w-full sm:w-auto inline-flex items-center justify-center px-12 py-5 bg-transparent text-white font-black text-lg border-2 border-white hover:bg-white hover:text-navy transition-all uppercase">
               Contact Us
             </Link>

@@ -74,11 +74,11 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Only admins can create courses" }, { status: 403 });
     }
 
-    const { title, description, price, type, duration, image, teacher_id, selectedTimings, selectedSpecializations, allow_partial_payment, installments_count, rating, level, category, brochure, is_internship, is_one_to_one, outcomes, certification, who_can_join, methodology } = await req.json();
+    const { title, description, price, type, duration, image, teacher_id, selectedTimings, selectedSpecializations, allow_partial_payment, installments_count, rating, level, category, brochure, is_internship, is_one_to_one, outcomes, certification, who_can_join, methodology, important_note } = await req.json();
 
     const [result] = await pool.query(
-      "INSERT INTO courses (title, description, price, type, duration, image, teacher_id, allow_partial_payment, installments_count, rating, level, category, brochure, is_internship, is_one_to_one, outcomes, certification, who_can_join, methodology) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1, rating || "4.5", level || "Beginner", category || "Robotics", brochure || null, is_internship ? 1 : 0, is_one_to_one ? 1 : 0, outcomes || null, certification || null, who_can_join || null, methodology || null]
+      "INSERT INTO courses (title, description, price, type, duration, image, teacher_id, allow_partial_payment, installments_count, rating, level, category, brochure, is_internship, is_one_to_one, outcomes, certification, who_can_join, methodology, important_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1, rating || "4.5", level || "Beginner", category || "Robotics", brochure || null, is_internship ? 1 : 0, is_one_to_one ? 1 : 0, outcomes || null, certification || null, who_can_join || null, methodology || null, important_note || null]
     );
 
     const courseId = result.insertId;
@@ -114,11 +114,11 @@ export async function PUT(req) {
       return NextResponse.json({ success: false, message: "Only admins can edit courses" }, { status: 403 });
     }
 
-    const { id, title, description, price, type, duration, image, teacher_id, selectedTimings, selectedSpecializations, allow_partial_payment, installments_count, rating, level, category, brochure, is_internship, is_one_to_one, outcomes, certification, who_can_join, methodology } = await req.json();
+    const { id, title, description, price, type, duration, image, teacher_id, selectedTimings, selectedSpecializations, allow_partial_payment, installments_count, rating, level, category, brochure, is_internship, is_one_to_one, outcomes, certification, who_can_join, methodology, important_note } = await req.json();
 
     await pool.query(
-      "UPDATE courses SET title = ?, description = ?, price = ?, type = ?, duration = ?, image = ?, teacher_id = ?, allow_partial_payment = ?, installments_count = ?, rating = ?, level = ?, category = ?, brochure = ?, is_internship = ?, is_one_to_one = ?, outcomes = ?, certification = ?, who_can_join = ?, methodology = ? WHERE id = ?",
-      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1, rating, level, category, brochure || null, is_internship ? 1 : 0, is_one_to_one ? 1 : 0, outcomes || null, certification || null, who_can_join || null, methodology || null, id]
+      "UPDATE courses SET title = ?, description = ?, price = ?, type = ?, duration = ?, image = ?, teacher_id = ?, allow_partial_payment = ?, installments_count = ?, rating = ?, level = ?, category = ?, brochure = ?, is_internship = ?, is_one_to_one = ?, outcomes = ?, certification = ?, who_can_join = ?, methodology = ?, important_note = ? WHERE id = ?",
+      [title, description, price, type, duration, image, teacher_id || null, allow_partial_payment ? 1 : 0, installments_count || 1, rating, level, category, brochure || null, is_internship ? 1 : 0, is_one_to_one ? 1 : 0, outcomes || null, certification || null, who_can_join || null, methodology || null, important_note || null, id]
     );
 
     // Update timings

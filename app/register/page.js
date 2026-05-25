@@ -25,7 +25,9 @@ import {
   IndianRupee,
   BadgeInfo,
   Tag,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon
 } from "lucide-react";
 import Link from "next/link";
 import Header from "../../components/Header";
@@ -256,11 +258,9 @@ function RegisterForm({ pageContent }) {
   }, [formData.specialization, availableModesForSpecialization, formData.mode, isLocked]);
 
   const filteredCourses = courses.filter(c => {
-    const matchesSpec = formData.specialization === "Internships" ? c.is_internship === 1 :
-                       formData.specialization === "1:1 Training" ? c.is_one_to_one === 1 :
-                       (c.specializations && c.specializations.some(s => s.name === formData.specialization));
-    const matchesMode = c.type.toLowerCase() === formData.mode.toLowerCase();
-    return matchesSpec && matchesMode;
+    return formData.specialization === "Internships" ? c.is_internship === 1 :
+           formData.specialization === "1:1 Training" ? c.is_one_to_one === 1 :
+           (c.specializations && c.specializations.some(s => s.name === formData.specialization));
   });
 
   const selectedCourse = courses.find(c => c.id == formData.courseId);
@@ -366,90 +366,109 @@ function RegisterForm({ pageContent }) {
     if (!validateStep()) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/register", {
+      // 1. Create Payment Order (NO database insertion yet)
+      const orderRes = await fetch("/api/register/create-payment-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phone,
-          emergency_contact: formData.emergencyContact,
           course_id: formData.courseId,
-          mode: formData.mode,
-          batch: formData.batch,
-          isInstallment: formData.isInstallment,
-          coupon_code: couponDetails?.code
+          coupon_code: couponDetails?.code,
+          isInstallment: formData.isInstallment
         })
       });
 
-      const data = await res.json();
+      const orderData = await orderRes.json();
 
-      if (data.success) {
-        // Auto-login to get the token for payment API
-        await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: formData.email, password: formData.password })
-        });
+      if (orderData.success) {
+        // 2. Open Razorpay Checkout
+        let isPaymentFailed = false;
 
-        // Initialize Razorpay
-        let finalAmount = Number(selectedCourse.price);
-        if (couponDetails) {
-          if (couponDetails.discount_type === 'percentage') {
-            finalAmount = finalAmount * (1 - couponDetails.discount_value / 100);
-          } else {
-            finalAmount = finalAmount - couponDetails.discount_value;
-          }
-        }
-
-        const payAmount = formData.isInstallment 
-          ? Math.round(finalAmount / (selectedCourse.installments_count || 1))
-          : Math.round(finalAmount);
-
-        const orderRes = await fetch("/api/payments/create-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: payAmount,
-            enrollmentId: data.enrollmentId
-          })
-        });
-
-        const orderData = await orderRes.json();
-        
-        if (orderData.success) {
-          const options = {
-            key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-            amount: orderData.amount,
-            currency: orderData.currency,
-            name: "Prayog India",
-            description: `Enrollment: ${selectedCourse.title}`,
-            order_id: orderData.orderId,
-            handler: function (response) {
-              window.location.href = "/dashboard?payment=success";
-            },
-            prefill: {
-              name: formData.name,
-              email: formData.email,
-              contact: formData.phone
-            },
-            theme: {
-              color: "#0F172A"
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: "Prayog India",
+          description: `Enrollment: ${selectedCourse.title}`,
+          order_id: orderData.orderId,
+          handler: async function (response) {
+            // 3. Verify Payment and Create Database Records
+            try {
+              const verifyRes = await fetch("/api/register/verify-and-register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  // Payment details
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  // Registration details
+                  name: formData.name,
+                  email: formData.email,
+                  password: formData.password,
+                  phone: formData.phone,
+                  emergency_contact: formData.emergencyContact,
+                  course_id: formData.courseId,
+                  mode: formData.mode,
+                  batch: formData.batch,
+                  isInstallment: formData.isInstallment,
+                  coupon_code: couponDetails?.code,
+                  payment_method: 'online'
+                })
+              });
+              
+              const verifyData = await verifyRes.json();
+              
+              if (verifyData.success) {
+                // Auto login after successful registration
+                await fetch("/api/auth/login", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email: formData.email, password: formData.password })
+                });
+                window.location.href = "/dashboard?payment=success";
+              } else {
+                showAlert("Registration Failed", verifyData.message || "Payment was successful but registration failed. Please contact support.", "error");
+              }
+            } catch (err) {
+               showAlert("Registration Failed", "Payment was successful but registration failed. Please contact support.", "error");
             }
-          };
-          const rzp = new window.Razorpay(options);
-          rzp.open();
-        } else {
-          // If order creation fails, still go to dashboard but warn
-          window.location.href = "/dashboard?alert=payment_pending";
-        }
+          },
+          prefill: {
+            name: formData.name,
+            email: formData.email,
+            contact: formData.phone
+          },
+          theme: {
+            color: "#0F172A"
+          },
+          modal: {
+            ondismiss: function() {
+              if (!isPaymentFailed) {
+                showAlert("Payment Cancelled", "You closed the payment window. Please try again to complete your registration.", "warning", () => {}, "Retry");
+              }
+              setIsSubmitting(false);
+            }
+          }
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response){
+          isPaymentFailed = true;
+          rzp.close(); // Autoclose the Razorpay modal on failure
+          
+          const errorMsg = response.error ? (response.error.description || response.error.reason) : "Transaction failed. Please try again with a different payment method.";
+          
+          setTimeout(() => {
+            showAlert("Payment Failed", errorMsg, "error", () => {}, "Retry");
+          }, 100);
+          setIsSubmitting(false);
+        });
+        rzp.open();
       } else {
-        showAlert("Registration Failed", data.message || "We were unable to process your enrollment at this time.", "error");
+        showAlert("Error initializing payment", orderData.message || "Failed to create payment order.", "error", () => {}, "Retry");
+        setIsSubmitting(false);
       }
     } catch (error) {
-      showAlert("System Error", "An unexpected error occurred: " + error.message, "error");
-    } finally {
+      showAlert("System Error", "An unexpected error occurred: " + error.message, "error", () => {}, "Retry");
       setIsSubmitting(false);
     }
   };
@@ -483,26 +502,7 @@ function RegisterForm({ pageContent }) {
                 </div>
               </div>
             ))}
-            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-              <h3 className="font-bold text-navy mb-4 text-lg flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                {pageContent?.aboutTitle || "What happens next?"}
-              </h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3 text-sm text-slate-600">
-                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">1</span>
-                  {pageContent?.aboutDescription1 || "Submit your registration details securely."}
-                </li>
-                <li className="flex items-start gap-3 text-sm text-slate-600">
-                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">2</span>
-                  {pageContent?.aboutDescription2 || "Our academic counselor will contact you within 24 hours."}
-                </li>
-                <li className="flex items-start gap-3 text-sm text-slate-600">
-                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">3</span>
-                  {pageContent?.aboutDescription3 || "Complete the fee payment to confirm your batch allocation."}
-                </li>
-              </ul>
-            </div>
+
           </div>
         </div>
         <div className="pt-12 border-t border-white/5 flex items-center gap-3 text-white/30">
@@ -550,81 +550,84 @@ function RegisterForm({ pageContent }) {
                   </div>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Select Specific Program</label>
-                    <select 
-                      required
-                      name="courseId" 
-                      disabled={isLocked}
-                      value={formData.courseId} 
-                      onChange={handleInputChange} 
-                      className={`w-full px-4 py-3 bg-slate-50 border rounded-lg outline-none focus:border-navy text-sm font-semibold transition-all ${
-                        errors.courseId ? "border-rose-300 bg-rose-50/30" : "border-slate-200"
-                      } ${isLocked ? 'opacity-70 cursor-not-allowed shadow-inner' : ''}`}
-                    >
-                      <option value="">-- Choose Course --</option>
+                <div className="space-y-3">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Select Specific Program</label>
+                  {filteredCourses.length === 0 ? (
+                    <p className="text-sm text-amber-600 font-semibold p-4 bg-amber-50 rounded-lg border border-amber-100">No {formData.mode} courses available for this specialization.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {filteredCourses.map(c => (
-                        <option key={c.id} value={c.id}>{c.title}</option>
-                      ))}
-                    </select>
-                    {errors.courseId && (
-                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
-                        <AlertCircle size={10} /> {errors.courseId}
-                      </p>
-                    )}
-                    {filteredCourses.length === 0 && (
-                      <p className="text-[10px] text-amber-600 font-bold ml-1 italic">No {formData.mode} courses available for this specialization.</p>
-                    )}
-                  </div>
-
-                  {/* Price Preview Card */}
-                  <AnimatePresence>
-                    {selectedCourse && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }} 
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-navy/5 border border-navy/10 rounded-xl p-4 flex items-center justify-between"
-                      >
-                        <div>
-                          <p className="text-[9px] font-bold text-navy/40 uppercase tracking-widest mb-1">Tuition Investment</p>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-xl font-bold text-navy">₹{Number(selectedCourse.price).toLocaleString('en-IN')}</span>
-                            <span className="text-[10px] font-bold text-navy/40 uppercase tracking-tighter">Full Course</span>
+                        <button
+                          key={c.id}
+                          type="button"
+                          disabled={isLocked && formData.courseId != c.id}
+                          onClick={() => setFormData({...formData, courseId: c.id.toString(), mode: c.type})}
+                          className={`flex flex-col items-start p-5 rounded-2xl border-2 transition-all text-left relative overflow-hidden ${
+                            formData.courseId == c.id 
+                              ? "bg-navy/5 border-navy shadow-md" 
+                              : "bg-white border-slate-100 hover:border-navy/30 hover:bg-slate-50"
+                          } ${isLocked && formData.courseId != c.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          {formData.courseId == c.id && (
+                            <div className="absolute top-0 right-0 bg-navy text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl tracking-widest uppercase">
+                              Selected
+                            </div>
+                          )}
+                          <div className="flex gap-2 mb-2">
+                            {c.type && (
+                              <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${c.type.toLowerCase() === 'online' ? 'bg-sky-100 text-sky-700' : 'bg-amber-100 text-amber-700'}`}>
+                                {c.type}
+                              </span>
+                            )}
                           </div>
-                        </div>
-                        <div className="bg-navy rounded-lg p-2.5 text-white shadow-lg">
-                          <IndianRupee size={18} />
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                          <h3 className={`font-bold text-sm mb-4 pr-12 ${formData.courseId == c.id ? 'text-navy' : 'text-slate-800'}`}>{c.title}</h3>
+                          <div className="flex items-center justify-between w-full mt-auto pt-4 border-t border-slate-100">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2.5 py-1 rounded-md">Full Course</span>
+                            <span className="text-base font-black text-navy flex items-center"><IndianRupee size={14} className="mr-0.5" />{Number(c.price).toLocaleString('en-IN')}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {errors.courseId && (
+                    <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                      <AlertCircle size={10} /> {errors.courseId}
+                    </p>
+                  )}
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Learning environment</label>
-                    <select 
-                      name="mode" 
-                      disabled={isLocked}
-                      value={formData.mode} 
-                      onChange={handleInputChange} 
-                      className={`w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy text-sm font-semibold ${isLocked ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    >
-                      {availableModesForSpecialization.map(mode => (
-                        <option key={mode} value={mode}>
-                          {mode === 'Offline' ? 'Offline (Institutional)' : 'Online (Live Virtual)'}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Schedule batch</label>
-                    <select name="batch" value={formData.batch} onChange={handleInputChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy text-sm font-semibold">
-                      <option>Morning (9AM - 11AM)</option>
-                      <option>Evening (6PM - 8PM)</option>
-                    </select>
-                  </div>
+                <div className="space-y-3 pt-2">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Schedule batch</label>
+                  {!selectedCourse ? (
+                    <p className="text-xs text-slate-500 italic p-4 bg-slate-50 rounded-xl border border-slate-200 text-center font-medium">
+                      Select a program above to see available batches
+                    </p>
+                  ) : selectedCourse.timings && selectedCourse.timings.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {selectedCourse.timings.map(t => {
+                        const batchName = `${t.name} (${t.slot})`;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setFormData({...formData, batch: batchName})}
+                            className={`p-4 rounded-xl border-2 transition-all text-sm font-bold flex items-center justify-center gap-2 ${
+                              formData.batch === batchName 
+                                ? "bg-navy/5 border-navy text-navy shadow-sm" 
+                                : "bg-white border-slate-100 text-slate-600 hover:border-navy/30 hover:bg-slate-50"
+                            }`}
+                          >
+                            {t.name.toLowerCase().includes("morning") ? <Sun size={16} /> : <Moon size={16} />}
+                            {batchName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-amber-600 italic p-4 bg-amber-50 rounded-xl border border-amber-200 text-center font-bold">
+                      No batches scheduled for this course yet
+                    </p>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -733,12 +736,12 @@ function RegisterForm({ pageContent }) {
                       <input 
                         type="tel" 
                         name="phone" 
+                        maxLength={10}
                         value={formData.phone} 
                         onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, '');
-                          if (val.length <= 10) {
-                            setFormData({...formData, phone: val});
-                          }
+                          let val = e.target.value.replace(/[^0-9]/g, '');
+                          if (val.length > 10) val = val.slice(0, 10);
+                          setFormData({...formData, phone: val});
                         }}
                         placeholder="70330XXXXX (10-digits)" 
                         className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
@@ -759,12 +762,12 @@ function RegisterForm({ pageContent }) {
                       <input 
                         type="tel" 
                         name="emergencyContact" 
+                        maxLength={10}
                         value={formData.emergencyContact} 
                         onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, '');
-                          if (val.length <= 10) {
-                            setFormData({...formData, emergencyContact: val});
-                          }
+                          let val = e.target.value.replace(/[^0-9]/g, '');
+                          if (val.length > 10) val = val.slice(0, 10);
+                          setFormData({...formData, emergencyContact: val});
                         }}
                         placeholder="Guardian's 10-digit Number" 
                         className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${

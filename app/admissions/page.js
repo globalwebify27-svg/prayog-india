@@ -100,7 +100,7 @@ export default function AdmissionsPage() {
       {/* Fees & Scholarships */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-1 max-w-2xl mx-auto gap-16 items-center">
             <div className="relative">
               <div className="bg-navy rounded-3xl p-10 md:p-16 text-white relative overflow-hidden shadow-2xl">
                 <ShieldCheck className="absolute top-4 right-4 text-primary opacity-10" size={80} />
@@ -128,31 +128,7 @@ export default function AdmissionsPage() {
               </div>
             </div>
             
-            <div className="space-y-8">
-              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Merit-Based Scholarships</h2>
-              <p className="text-slate-500 leading-relaxed font-medium">
-                At Prayog India, technical talent is our primary currency. We offer up to **40% scholarship** for students demonstrating exceptional hardware projects or academic excellence in core electronics.
-              </p>
-              <div className="space-y-4">
-                {[
-                  "Early Innovation Grant (First 20 seats)",
-                  "Female Engineers in Robotics Initiative",
-                  "Institutional Partnership Waivers",
-                  "Excellence in Hardware Design Awards"
-                ].map(item => (
-                  <div key={item} className="flex items-center space-x-3 text-slate-700 text-sm font-semibold">
-                    <Zap size={16} className="text-primary" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="pt-6">
-                <Link href="/contact" className="inline-flex items-center space-x-2 text-navy font-bold text-xs uppercase tracking-widest group/btn">
-                  <span>Inquire about aid</span>
-                  <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </div>
+
           </div>
         </div>
       </section>

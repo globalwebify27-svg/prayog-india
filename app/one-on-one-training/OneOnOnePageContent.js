@@ -97,9 +97,9 @@ export default function OneOnOnePageContent() {
               {content.heroDescription}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
-              <button onClick={() => setIsModalOpen(true)} className="px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-yellow-400 transition-all shadow-lg hover:shadow-gold/20 hover:-translate-y-1">
+              <Link href="#openings" className="px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-yellow-400 transition-all shadow-lg hover:shadow-gold/20 hover:-translate-y-1">
                 Explore Programs
-              </button>
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -155,8 +155,73 @@ export default function OneOnOnePageContent() {
         </div>
       </section>
 
+      {/* Available Programs Section */}
+      <section className="py-20 bg-slate-50" id="openings">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">Available 1:1 Training Programs</h2>
+            <p className="text-slate-600 text-lg">Explore our currently active personalized training batches and enroll today.</p>
+          </div>
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="w-12 h-12 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : courses.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 bg-white rounded-3xl border border-slate-100 shadow-sm">
+              No training courses available at the moment. Please check back later.
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {courses.map(course => (
+                <div key={course.id} className="relative bg-navy border border-white/10 rounded-3xl overflow-hidden hover:shadow-[0_10px_40px_rgba(255,193,7,0.15)] hover:border-gold/30 transition-all duration-500 flex flex-col group">
+                  <Link href={`/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />
+                  <div className="h-56 bg-slate-800 relative overflow-hidden pointer-events-none">
+                    <div className="absolute inset-0 bg-navy/40 group-hover:bg-transparent transition-colors z-10 duration-500"></div>
+                    <img src={course.image || "/assets/logo.png"} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute top-4 left-4 z-20">
+                      <span className="text-xs font-black px-4 py-1.5 bg-gold text-navy rounded-full shadow-[0_0_15px_rgba(255,193,7,0.5)] tracking-wide uppercase">
+                        Premium 1:1 Focus
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-8 flex flex-col flex-grow relative pointer-events-none">
+                    <div className="absolute top-0 right-8 -translate-y-1/2 bg-blue-600 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)] border-4 border-navy z-20 group-hover:scale-110 transition-transform duration-500">
+                       <Zap className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-2xl text-white mb-3 line-clamp-2 group-hover:text-gold transition-colors relative z-10">{course.title}</h3>
+                    <p className="text-slate-400 text-sm mb-6 line-clamp-2 relative z-10">Exclusive one-to-one mentorship with customized learning speed and dedicated project development.</p>
+                    <div className="flex-grow"></div>
+                    
+                    <div className="flex gap-2 mb-8 text-[10px] font-bold text-slate-300 uppercase tracking-wider flex-wrap">
+                       <span className="bg-white/5 px-2.5 py-1.5 rounded flex items-center gap-1.5"><Users size={12} className="text-blue-400"/> Personal Mentor</span>
+                       <span className="bg-white/5 px-2.5 py-1.5 rounded flex items-center gap-1.5"><Rocket size={12} className="text-emerald-400"/> Custom Pace</span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Investment</span>
+                        <span className="text-2xl font-black text-gold drop-shadow-md">
+                          ₹{Number(course.price).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                      <Link 
+                        href={`/register?course=${course.id}`} 
+                        className="relative z-20 pointer-events-auto px-8 py-3 bg-white text-navy font-black rounded-xl text-sm hover:bg-gold hover:scale-105 transition-all shadow-md group-hover:shadow-[0_0_20px_rgba(255,193,7,0.4)]"
+                      >
+                        Enroll Now
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* What is Our 1:1 Training Program? & Technologies Covered */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white" id="how-it-works">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -244,70 +309,7 @@ export default function OneOnOnePageContent() {
         </div>
       </section>
 
-      {/* Available Programs Section */}
-      <section className="py-20 bg-slate-50" id="openings">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">Available 1:1 Training Programs</h2>
-            <p className="text-slate-600 text-lg">Explore our currently active personalized training batches and enroll today.</p>
-          </div>
-          
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="w-12 h-12 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : courses.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 bg-white rounded-3xl border border-slate-100 shadow-sm">
-              No training courses available at the moment. Please check back later.
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.map(course => (
-                <div key={course.id} className="relative bg-navy border border-white/10 rounded-3xl overflow-hidden hover:shadow-[0_10px_40px_rgba(255,193,7,0.15)] hover:border-gold/30 transition-all duration-500 flex flex-col group">
-                  <Link href={`/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />
-                  <div className="h-56 bg-slate-800 relative overflow-hidden pointer-events-none">
-                    <div className="absolute inset-0 bg-navy/40 group-hover:bg-transparent transition-colors z-10 duration-500"></div>
-                    <img src={course.image || "/assets/logo.png"} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute top-4 left-4 z-20">
-                      <span className="text-xs font-black px-4 py-1.5 bg-gold text-navy rounded-full shadow-[0_0_15px_rgba(255,193,7,0.5)] tracking-wide uppercase">
-                        Premium 1:1 Focus
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-8 flex flex-col flex-grow relative pointer-events-none">
-                    <div className="absolute top-0 right-8 -translate-y-1/2 bg-blue-600 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)] border-4 border-navy z-20 group-hover:scale-110 transition-transform duration-500">
-                       <Zap className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="font-bold text-2xl text-white mb-3 line-clamp-2 group-hover:text-gold transition-colors relative z-10">{course.title}</h3>
-                    <p className="text-slate-400 text-sm mb-6 line-clamp-2 relative z-10">Exclusive one-to-one mentorship with customized learning speed and dedicated project development.</p>
-                    <div className="flex-grow"></div>
-                    
-                    <div className="flex gap-2 mb-8 text-[10px] font-bold text-slate-300 uppercase tracking-wider flex-wrap">
-                       <span className="bg-white/5 px-2.5 py-1.5 rounded flex items-center gap-1.5"><Users size={12} className="text-blue-400"/> Personal Mentor</span>
-                       <span className="bg-white/5 px-2.5 py-1.5 rounded flex items-center gap-1.5"><Rocket size={12} className="text-emerald-400"/> Custom Pace</span>
-                    </div>
 
-                    <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                      <div>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Investment</span>
-                        <span className="text-2xl font-black text-gold drop-shadow-md">
-                          ₹{Number(course.price).toLocaleString('en-IN')}
-                        </span>
-                      </div>
-                      <Link 
-                        href={`/register?course=${course.id}`} 
-                        className="relative z-20 pointer-events-auto px-8 py-3 bg-white text-navy font-black rounded-xl text-sm hover:bg-gold hover:scale-105 transition-all shadow-md group-hover:shadow-[0_0_20px_rgba(255,193,7,0.4)]"
-                      >
-                        Enroll Now
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* 10 Major Benefits */}
       <section className="py-20 bg-navy text-white relative overflow-hidden">
@@ -483,10 +485,10 @@ export default function OneOnOnePageContent() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto inline-flex items-center justify-center px-12 py-5 bg-gold text-navy font-black text-lg hover:bg-yellow-400 transition-all shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none group uppercase">
+            <Link href="#openings" className="w-full sm:w-auto inline-flex items-center justify-center px-12 py-5 bg-gold text-navy font-black text-lg hover:bg-yellow-400 transition-all shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none group uppercase">
               Start Your Journey
               <ArrowRight className="ml-3 w-6 h-6" />
-            </button>
+            </Link>
             <Link href="/contact" className="w-full sm:w-auto inline-flex items-center justify-center px-12 py-5 bg-transparent text-white font-black text-lg border-2 border-white hover:bg-white hover:text-navy transition-all uppercase">
               Contact Academy
             </Link>

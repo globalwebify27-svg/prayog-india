@@ -288,8 +288,8 @@ function CoursesPageContent() {
                 <BookOpen className="text-primary w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-base mb-1">Career Support</h4>
-                <p className="text-blue-100/40 text-xs leading-relaxed">Exclusive access to our alumni network and placement portal.</p>
+                <h4 className="font-bold text-base mb-1">Resource Hub</h4>
+                <p className="text-blue-100/40 text-xs leading-relaxed">Exclusive access to our alumni network and resource portal.</p>
               </div>
             </div>
           </div>

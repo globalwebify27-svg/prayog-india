@@ -43,7 +43,7 @@ export default function ShortTermActivities() {
             <span>Current Highlights</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-heading font-black text-slate-900 mb-6">
-            Seasonal <span className="text-navy">Programs</span>
+            Special <span className="text-navy">Programs</span>
           </h2>
           <p className="text-slate-500 max-w-2xl mx-auto text-sm font-medium">
             Special short-term activities and workshops designed for school students. Join now before the sessions conclude!

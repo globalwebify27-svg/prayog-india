@@ -17,7 +17,7 @@ export default function SummerCampLanding() {
     { num: "15", suffix: "DAYS", label: "INTENSIVE TRAINING", sub: "Hands-on Practical Lab" },
     { num: "01", suffix: "KIT", label: "HUMANOID ROBOT", sub: "Take-Home Hardware" },
     { num: "60", suffix: "MAX", label: "STUDENTS / BATCH", sub: "Personalized Attention" },
-    { num: "100", suffix: "%", label: "PLACEMENT SUPPORT", sub: "For Senior Students" }
+    { num: "100", suffix: "%", label: "PRACTICAL APPROACH", sub: "Learn By Doing" }
   ];
 
   const curriculum = [

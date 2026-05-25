@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
   Trash2, 
+  Edit,
   Clock, 
   Calendar,
   AlertCircle
@@ -13,8 +14,10 @@ import {
 export default function TimingMasterPage() {
   const [timings, setTimings] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [timingToDelete, setTimingToDelete] = useState(null);
+  const [timingToEdit, setTimingToEdit] = useState(null);
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
   const [newTiming, setNewTiming] = useState({ name: "", slot: "" });
@@ -50,6 +53,23 @@ export default function TimingMasterPage() {
       setShowAddModal(false);
       setNewTiming({ name: "", slot: "" });
       fetchTimings();
+    }
+  };
+
+  const handleEditTiming = async (e) => {
+    e.preventDefault();
+    const res = await fetch("/api/admin/timings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(timingToEdit)
+    });
+    const result = await res.json();
+    if (result.success) {
+      setShowEditModal(false);
+      setTimingToEdit(null);
+      fetchTimings();
+    } else {
+      setError(result.message || "Failed to update timing");
     }
   };
 
@@ -96,15 +116,26 @@ export default function TimingMasterPage() {
                 <Clock size={24} />
               </div>
               {user?.role === 'admin' && (
-                <button 
-                  onClick={() => {
-                    setTimingToDelete(timing);
-                    setShowDeleteModal(true);
-                  }}
-                  className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                >
-                  <Trash2 size={18} />
-                </button>
+                <div className="flex gap-1">
+                  <button 
+                    onClick={() => {
+                      setTimingToEdit(timing);
+                      setShowEditModal(true);
+                    }}
+                    className="p-2 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setTimingToDelete(timing);
+                      setShowDeleteModal(true);
+                    }}
+                    className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               )}
             </div>
             <h3 className="text-xl font-bold text-slate-900 mb-1">{timing.name}</h3>
@@ -150,6 +181,56 @@ export default function TimingMasterPage() {
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setShowAddModal(false)} className="flex-grow py-3 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Cancel</button>
                 <button type="submit" className="flex-grow py-3 bg-navy text-white rounded-xl text-xs font-bold transition-all shadow-md hover:bg-black">Save Slot</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && timingToEdit && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden"
+          >
+            <div className="p-6 border-b border-slate-100 bg-slate-50">
+              <h3 className="text-lg font-bold text-slate-900">Update Time Slot</h3>
+            </div>
+            <form onSubmit={handleEditTiming} className="p-6 space-y-4">
+              <div className="bg-amber-50 text-amber-700 p-3 rounded-lg flex items-start gap-2 border border-amber-100 mb-4">
+                <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                <p className="text-xs font-medium">Updating this will automatically reflect across <strong>{timingToEdit.course_count} active {timingToEdit.course_count === 1 ? 'course' : 'courses'}</strong>.</p>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Slot Name</label>
+                <input 
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all"
+                  placeholder="e.g. Morning Batch"
+                  value={timingToEdit.name}
+                  onChange={e => setTimingToEdit({...timingToEdit, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Time Range</label>
+                <input 
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all"
+                  placeholder="e.g. 09:00 AM - 11:00 AM"
+                  value={timingToEdit.slot}
+                  onChange={e => setTimingToEdit({...timingToEdit, slot: e.target.value})}
+                />
+              </div>
+              {error && (
+                <p className="text-[10px] font-bold text-rose-500 flex items-center gap-1">
+                  <AlertCircle size={10} /> {error}
+                </p>
+              )}
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => { setShowEditModal(false); setError(""); }} className="flex-grow py-3 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Cancel</button>
+                <button type="submit" className="flex-grow py-3 bg-navy text-white rounded-xl text-xs font-bold transition-all shadow-md hover:bg-black">Update Slot</button>
               </div>
             </form>
           </motion.div>

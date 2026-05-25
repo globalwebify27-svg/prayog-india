@@ -7,8 +7,8 @@ import Link from "next/link";
 const categories = [
   {
     icon: <Cpu size={32} />,
-    title: "Industrial Robotics",
-    desc: "Master the art of industrial automation with hands-on training on actual robotic arms."
+    title: "Robotics Training & IoT",
+    desc: "Master the art of robotics and connect the world through smart IoT devices with hands-on training."
   },
   {
     icon: <Rocket size={32} />,
@@ -16,24 +16,9 @@ const categories = [
     desc: "Explore the world of UAVs and aerospace engineering with our specialized flight modules."
   },
   {
-    icon: <Lightbulb size={32} />,
-    title: "AI & Machine Learning",
-    desc: "Integrate intelligence into your machines using advanced AI algorithms and computer vision."
-  },
-  {
-    icon: <ShieldCheck size={32} />,
-    title: "Cyber Security",
-    desc: "Learn to protect robotic networks and industrial systems from modern digital threats."
-  },
-  {
     icon: <Microscope size={32} />,
-    title: "STEM Research",
-    desc: "Academic excellence combined with practical research methodologies for school students."
-  },
-  {
-    icon: <Globe size={32} />,
-    title: "IoT Solutions",
-    desc: "Connect the world through smart devices and industrial Internet of Things architecture."
+    title: "STEM Education",
+    desc: "Academic excellence combined with practical learning methodologies for school students."
   }
 ];
 

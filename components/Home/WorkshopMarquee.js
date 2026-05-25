@@ -1,7 +1,22 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 export default function WorkshopMarquee() {
-  const images = [
+  const [images, setImages] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/gallery?category=Workshop Gallery')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setImages(data.map(img => img.image_url));
+        }
+      })
+      .catch(err => console.error("Failed to fetch gallery for marquee:", err));
+  }, []);
+
+  const displayImages = images.length > 0 ? images : [
     "/assets/m1.png", "/assets/m2.png", "/assets/m3.png", "/assets/m4.png", "/assets/m5.png",
     "/assets/indian-hero.png", "/assets/hero-indian-2.png", "/assets/course1.png"
   ];
@@ -20,7 +35,7 @@ export default function WorkshopMarquee() {
         {/* First Strip - Moves Left */}
         <div className="marquee-container relative flex overflow-hidden">
           <div className="marquee-content flex animate-marquee-left">
-            {[...images, ...images].map((src, i) => (
+            {[...displayImages, ...displayImages].map((src, i) => (
               <div key={i} className="flex-shrink-0 w-64 h-40 md:w-96 md:h-60 overflow-hidden pr-[5px]">
                 <img src={src} alt="Workshop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
               </div>
@@ -32,7 +47,7 @@ export default function WorkshopMarquee() {
         {/* Second Strip - Moves Right */}
         <div className="marquee-container relative flex overflow-hidden">
           <div className="marquee-content flex animate-marquee-right">
-            {[...images.reverse(), ...images].map((src, i) => (
+            {[...[...displayImages].reverse(), ...displayImages].map((src, i) => (
               <div key={i} className="flex-shrink-0 w-64 h-40 md:w-96 md:h-60 overflow-hidden pr-[5px]">
                 <img src={src} alt="Workshop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
               </div>

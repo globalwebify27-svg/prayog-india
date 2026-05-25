@@ -97,11 +97,17 @@ export default function FeaturedCourses() {
                 <Link href={course.id === 6 ? "/summer-camp" : `/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />
                 {/* Image Area */}
                 <div className="relative h-44 overflow-hidden shrink-0 pointer-events-none">
-                  <img 
-                    src={course.image} 
-                    alt={course.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                  />
+                  {course.image ? (
+                    <img 
+                      src={course.image} 
+                      alt={course.title} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-slate-100 group-hover:scale-110 transition-transform duration-700 flex items-center justify-center">
+                      <BookOpen className="text-slate-300 opacity-50" size={48} />
+                    </div>
+                  )}
                   <div className="absolute top-3 left-3 bg-navy text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg">
                     {course.category}
                   </div>

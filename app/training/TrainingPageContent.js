@@ -157,42 +157,6 @@ export default function TrainingPageContent() {
         </div>
       </section>
 
-      {/* Programs List */}
-      <section id="programs" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-block px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-medium text-sm mb-4">
-            Designed Specially for School Students (Class 1–12)
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">Our Training Programs</h2>
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto mb-16">
-            Our courses are carefully structured according to age groups and learning levels so that every student can understand technology comfortably and confidently.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Microscope, title: "STEM Education", color: "text-blue-500", bg: "bg-blue-50" },
-              { icon: Bot, title: "Basic Robotics", color: "text-emerald-500", bg: "bg-emerald-50" },
-              { icon: Cpu, title: "Advanced Robotics", color: "text-red-500", bg: "bg-red-50" },
-              { icon: Brain, title: "Artificial Intelligence", color: "text-purple-500", bg: "bg-purple-50" },
-              { icon: Wifi, title: "Internet of Things", color: "text-amber-500", bg: "bg-amber-50" },
-              { icon: Rocket, title: "Drone Technology", color: "text-sky-500", bg: "bg-sky-50" },
-              { icon: Code, title: "Coding & Programming", color: "text-indigo-500", bg: "bg-indigo-50" },
-              { icon: Zap, title: "Electronics Learning", color: "text-yellow-500", bg: "bg-yellow-50" },
-              { icon: MonitorPlay, title: "Sensors & Automation", color: "text-teal-500", bg: "bg-teal-50" },
-              { icon: Box, title: "3D Designing & Slicing", color: "text-orange-500", bg: "bg-orange-50" },
-              { icon: Lightbulb, title: "Innovation Projects", color: "text-pink-500", bg: "bg-pink-50" },
-            ].map((prog, idx) => (
-              <button key={idx} onClick={() => setIsModalOpen(true)} className="group p-6 rounded-2xl border border-slate-100 hover:border-gold/30 hover:shadow-xl transition-all duration-300 bg-white hover:-translate-y-1 text-left w-full flex flex-col items-center">
-                <div className={`w-16 h-16 mx-auto rounded-full ${prog.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <prog.icon className={`w-8 h-8 ${prog.color}`} />
-                </div>
-                <h3 className="font-bold text-navy">{prog.title}</h3>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Available Programs Section */}
       <section className="py-20 bg-slate-50" id="openings">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -241,6 +205,42 @@ export default function TrainingPageContent() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Programs List (Moved after available courses) */}
+      <section id="programs" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-block px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-medium text-sm mb-4">
+            Designed Specially for School Students (Class 1–12)
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">Technologies We Teach</h2>
+          <p className="text-lg text-slate-600 max-w-3xl mx-auto mb-16">
+            We offer specialized courses across these cutting-edge domains, carefully structured according to age groups and learning levels so that every student can understand technology comfortably and confidently.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Microscope, title: "STEM Education", color: "text-blue-500", bg: "bg-blue-50" },
+              { icon: Bot, title: "Basic Robotics", color: "text-emerald-500", bg: "bg-emerald-50" },
+              { icon: Cpu, title: "Advanced Robotics", color: "text-red-500", bg: "bg-red-50" },
+              { icon: Brain, title: "Artificial Intelligence", color: "text-purple-500", bg: "bg-purple-50" },
+              { icon: Wifi, title: "Internet of Things", color: "text-amber-500", bg: "bg-amber-50" },
+              { icon: Rocket, title: "Drone Technology", color: "text-sky-500", bg: "bg-sky-50" },
+              { icon: Code, title: "Coding & Programming", color: "text-indigo-500", bg: "bg-indigo-50" },
+              { icon: Zap, title: "Electronics Learning", color: "text-yellow-500", bg: "bg-yellow-50" },
+              { icon: MonitorPlay, title: "Sensors & Automation", color: "text-teal-500", bg: "bg-teal-50" },
+              { icon: Box, title: "3D Designing & Slicing", color: "text-orange-500", bg: "bg-orange-50" },
+              { icon: Lightbulb, title: "Innovation Projects", color: "text-pink-500", bg: "bg-pink-50" },
+            ].map((prog, idx) => (
+              <div key={idx} className="group p-6 rounded-2xl border border-slate-100 hover:border-gold/30 hover:shadow-xl transition-all duration-300 bg-white hover:-translate-y-1 text-center flex flex-col items-center">
+                <div className={`w-16 h-16 mx-auto rounded-full ${prog.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <prog.icon className={`w-8 h-8 ${prog.color}`} />
+                </div>
+                <h3 className="font-bold text-navy">{prog.title}</h3>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
