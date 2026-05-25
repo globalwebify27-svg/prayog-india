@@ -139,11 +139,7 @@ export default function AdminGallery() {
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Category</label>
                   <select className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none cursor-pointer" value={newImage.category} onChange={e => setNewImage({...newImage, category: e.target.value})}>
                     <option>Media Coverage</option>
-                    <option>Robotics</option>
-                    <option>AI Workshops</option>
-                    <option>Drone Labs</option>
-                    <option>IoT Projects</option>
-                    <option>Institution</option>
+                    <option>Workshop Gallery</option>
                   </select>
                </div>
                <div>
