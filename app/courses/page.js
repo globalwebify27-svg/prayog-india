@@ -188,7 +188,7 @@ function CoursesPageContent() {
                 <div className={`relative overflow-hidden shrink-0 bg-slate-100 ${
                   viewMode === 'grid' ? 'h-52 w-full' : 'h-24 w-36 rounded-lg'
                 }`}>
-                  <img src={course.image} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={course.image || null} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                     {course.is_internship === 1 && (
                       <span className="px-2.5 py-0.5 bg-primary text-navy rounded font-bold text-[9px] uppercase shadow-sm">

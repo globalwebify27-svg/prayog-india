@@ -556,37 +556,82 @@ function RegisterForm({ pageContent }) {
                     <p className="text-sm text-amber-600 font-semibold p-4 bg-amber-50 rounded-lg border border-amber-100">No {formData.mode} courses available for this specialization.</p>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {filteredCourses.map(c => (
-                        <button
-                          key={c.id}
-                          type="button"
-                          disabled={isLocked && formData.courseId != c.id}
-                          onClick={() => setFormData({...formData, courseId: c.id.toString(), mode: c.type})}
-                          className={`flex flex-col items-start p-5 rounded-2xl border-2 transition-all text-left relative overflow-hidden ${
-                            formData.courseId == c.id 
-                              ? "bg-navy/5 border-navy shadow-md" 
-                              : "bg-white border-slate-100 hover:border-navy/30 hover:bg-slate-50"
-                          } ${isLocked && formData.courseId != c.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                          {formData.courseId == c.id && (
-                            <div className="absolute top-0 right-0 bg-navy text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl tracking-widest uppercase">
-                              Selected
-                            </div>
-                          )}
-                          <div className="flex gap-2 mb-2">
-                            {c.type && (
-                              <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${c.type.toLowerCase() === 'online' ? 'bg-sky-100 text-sky-700' : 'bg-amber-100 text-amber-700'}`}>
-                                {c.type}
-                              </span>
+                      {filteredCourses.map(c => {
+                        const isSelected = formData.courseId == c.id;
+                        return (
+                          <button
+                            key={c.id}
+                            type="button"
+                            disabled={isLocked && !isSelected}
+                            onClick={() => setFormData({...formData, courseId: c.id.toString(), mode: c.type})}
+                            className={`group flex flex-col items-start p-6 rounded-2xl border-2 transition-all duration-300 text-left relative overflow-hidden ${
+                              isSelected 
+                                ? "bg-gradient-to-br from-navy/5 to-primary/5 border-navy shadow-lg shadow-navy/10 scale-[1.02]" 
+                                : "bg-white border-slate-200 hover:border-primary/50 hover:shadow-xl hover:-translate-y-1"
+                            } ${isLocked && !isSelected ? 'opacity-40 cursor-not-allowed grayscale' : ''}`}
+                          >
+                            {/* Decorative background elements */}
+                            {isSelected && (
+                              <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl transition-all" />
                             )}
-                          </div>
-                          <h3 className={`font-bold text-sm mb-4 pr-12 ${formData.courseId == c.id ? 'text-navy' : 'text-slate-800'}`}>{c.title}</h3>
-                          <div className="flex items-center justify-between w-full mt-auto pt-4 border-t border-slate-100">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2.5 py-1 rounded-md">Full Course</span>
-                            <span className="text-base font-black text-navy flex items-center"><IndianRupee size={14} className="mr-0.5" />{Number(c.price).toLocaleString('en-IN')}</span>
-                          </div>
-                        </button>
-                      ))}
+
+                            {/* Status Badge */}
+                            <div className="absolute top-0 right-0 flex items-center">
+                              {isSelected ? (
+                                <div className="bg-navy text-white flex items-center gap-1.5 text-[10px] font-bold px-4 py-1.5 rounded-bl-2xl tracking-widest uppercase shadow-sm">
+                                  <CheckCircle2 size={12} className="text-primary" />
+                                  Selected
+                                </div>
+                              ) : (
+                                <div className="bg-slate-100 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary text-[10px] font-bold px-4 py-1.5 rounded-bl-2xl tracking-widest uppercase transition-colors">
+                                  Select
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Course Image */}
+                            <div className="w-full h-32 mb-4 rounded-xl overflow-hidden shrink-0 bg-slate-100 relative z-10 border border-slate-200/50">
+                              <img src={c.image || null} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                              
+                              <div className="absolute top-2 left-2 flex gap-2">
+                                {c.type && (
+                                  <span className={`flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-md shadow-sm ${
+                                    c.type.toLowerCase() === 'online' 
+                                      ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white' 
+                                      : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                                  }`}>
+                                    {c.type.toLowerCase() === 'online' ? <Globe size={10} /> : <MapPin size={10} />}
+                                    {c.type}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <h3 className={`font-black text-sm mb-4 pr-10 z-10 leading-snug transition-colors ${
+                              isSelected ? 'text-navy' : 'text-slate-800 group-hover:text-navy'
+                            }`}>
+                              {c.title}
+                            </h3>
+                            
+                            <div className={`flex items-center justify-between w-full mt-auto pt-5 border-t z-10 transition-colors ${
+                              isSelected ? 'border-navy/10' : 'border-slate-100 group-hover:border-primary/20'
+                            }`}>
+                              <div className="flex items-center gap-1.5">
+                                <BookOpen size={14} className={isSelected ? 'text-primary' : 'text-slate-400'} />
+                                <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
+                                  Full Course
+                                </span>
+                              </div>
+                              <span className={`text-xl font-black flex items-center ${
+                                isSelected ? 'text-navy' : 'text-slate-700'
+                              }`}>
+                                <IndianRupee size={16} className={isSelected ? 'text-primary mr-0.5' : 'text-slate-400 mr-0.5'} />
+                                {Number(c.price).toLocaleString('en-IN')}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                   {errors.courseId && (
