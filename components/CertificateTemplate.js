@@ -9,6 +9,8 @@ const CertificateTemplate = ({
   date = "April 29, 2026",
   certificateNumber = "PR-2026-0000",
   qrCodeData = "https://prayogindiarobotics.com/verify/PR-2026-0000",
+  signatoryName = "Authorized Signature",
+  signatorySignature = "/assets/signature.png"
 }) => {
   return (
     <div
@@ -122,10 +124,10 @@ const CertificateTemplate = ({
             </div>
             <div style={{ width: "150px", textAlign: "center" }}>
               <div style={{ height: "60px", display: "flex", alignItems: "flex-end", justifyContent: "center", marginBottom: "8px" }}>
-                <img src="/assets/signature.png" alt="Signature" style={{ maxHeight: "60px", maxWidth: "140px", objectFit: "contain", filter: "brightness(1.5)" }} />
+                <img src={signatorySignature || "/assets/signature.png"} alt="Signature" style={{ maxHeight: "60px", maxWidth: "140px", objectFit: "contain", filter: signatorySignature && signatorySignature !== "/assets/signature.png" ? "none" : "brightness(1.5)" }} />
               </div>
               <div style={{ width: "100%", height: "1px", background: "#C9A24A", marginBottom: "8px" }} />
-              <p style={{ fontSize: "10px", color: "#A0B2C6", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "'Arial', sans-serif" }}>Authorized Signature</p>
+              <p style={{ fontSize: "10px", color: "#A0B2C6", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "'Arial', sans-serif" }}>{signatoryName}</p>
             </div>
           </div>
 

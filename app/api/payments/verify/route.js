@@ -42,22 +42,49 @@ export async function POST(req) {
       );
 
       // 3. Generate PDF Receipt
-      // Fetch student name and email for receipt
       const [studentRows] = await pool.query(`
-        SELECT u.name, u.email FROM users u 
+        SELECT u.name, u.email, u.phone, c.title as course_name, c.price as course_price,
+               b.name as batch_name, b.type as mode, e.payment_method, e.total_amount, e.coupon_code
+        FROM users u 
         JOIN enrollments e ON e.user_id = u.id 
+        JOIN courses c ON e.course_id = c.id
+        LEFT JOIN batches b ON e.batch_id = b.id
         WHERE e.id = ?
       `, [enrollmentId]);
       
-      const studentName = studentRows[0]?.name || "Student";
-      const studentEmail = studentRows[0]?.email;
-      const receiptUrl = await generateReceipt(
-        studentName, 
-        amount, 
-        installmentId || "Full", 
-        new Date().toDateString(), 
-        razorpay_payment_id
+      const student = studentRows[0] || {};
+      const studentName = student.name || "Student";
+      const studentEmail = student.email;
+
+      // Find installment number
+      const [instRows] = await pool.query(
+        "SELECT COUNT(*) as cnt FROM installments WHERE enrollment_id = ? AND status = 'paid'",
+        [enrollmentId]
       );
+      const [totalRows] = await pool.query(
+        "SELECT COUNT(*) as cnt FROM installments WHERE enrollment_id = ?",
+        [enrollmentId]
+      );
+      const installmentNo = instRows[0]?.cnt || 1;
+      const totalInstallments = totalRows[0]?.cnt || null;
+
+      const receiptUrl = await generateReceipt({
+        studentName,
+        studentEmail,
+        studentPhone: student.phone,
+        courseName: student.course_name,
+        batchName: student.batch_name,
+        mode: student.mode,
+        amount,
+        originalAmount: Number(student.course_price),
+        discountAmount: Number(student.course_price) - Number(student.total_amount),
+        couponCode: student.coupon_code || null,
+        installmentNo: installmentId ? installmentNo : "Full",
+        totalInstallments: installmentId ? totalInstallments : null,
+        date: new Date().toDateString(),
+        receiptId: razorpay_payment_id,
+        paymentMethod: student.payment_method || "online",
+      });
 
       // 4. Save receipt URL
       if (installmentId) {

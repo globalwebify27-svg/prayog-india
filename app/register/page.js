@@ -127,7 +127,7 @@ function RegisterForm({ pageContent }) {
     isInstallment: true
   });
 
-  const [dynamicCategories, setDynamicCategories] = useState(["Internships", "1:1 Training"]);
+  const [dynamicCategories, setDynamicCategories] = useState(["All", "Internships", "1:1 Training"]);
 
   const [errors, setErrors] = useState({});
 
@@ -209,7 +209,7 @@ function RegisterForm({ pageContent }) {
             course.specializations.forEach(s => specs.add(s.name));
           }
         });
-        const allSpecs = ["Internships", "1:1 Training", ...Array.from(specs)];
+        const allSpecs = ["All", "Internships", "1:1 Training", ...Array.from(specs)];
         setDynamicCategories(allSpecs);
 
         if (preSelectedCourseId) {
@@ -243,6 +243,7 @@ function RegisterForm({ pageContent }) {
   const availableModesForSpecialization = [
     ...new Set(courses
       .filter(c => {
+        if (formData.specialization === "All") return true;
         if (formData.specialization === "Internships") return c.is_internship === 1;
         if (formData.specialization === "1:1 Training") return c.is_one_to_one === 1;
         return c.specializations && c.specializations.some(s => s.name === formData.specialization);
@@ -258,6 +259,7 @@ function RegisterForm({ pageContent }) {
   }, [formData.specialization, availableModesForSpecialization, formData.mode, isLocked]);
 
   const filteredCourses = courses.filter(c => {
+    if (formData.specialization === "All") return true;
     return formData.specialization === "Internships" ? c.is_internship === 1 :
            formData.specialization === "1:1 Training" ? c.is_one_to_one === 1 :
            (c.specializations && c.specializations.some(s => s.name === formData.specialization));

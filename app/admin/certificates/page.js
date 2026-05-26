@@ -48,6 +48,10 @@ export default function CertificateManagement() {
   const [newCert, setNewCert] = useState({ userId: "", courseId: "", studentName: "", courseName: "" });
   const [studentsList, setStudentsList] = useState([]);
   const [coursesList, setCoursesList] = useState([]);
+  const [settings, setSettings] = useState({
+    signatory_name: "Authorized Signatory",
+    signatory_signature: "/assets/signature.png"
+  });
 
   const certificateRef = useRef(null);
   const modalCertificateRef = useRef(null);
@@ -107,14 +111,22 @@ export default function CertificateManagement() {
 
   const fetchInitialData = async () => {
     try {
-      const [stdRes, crsRes] = await Promise.all([
+      const [stdRes, crsRes, settingsRes] = await Promise.all([
         fetch("/api/admin/students"),
-        fetch("/api/admin/courses")
+        fetch("/api/admin/courses"),
+        fetch("/api/admin/settings")
       ]);
       const stdData = await stdRes.json();
       const crsData = await crsRes.json();
+      const settingsData = await settingsRes.json();
       if (stdData.success) setStudentsList(stdData.students);
       if (crsData.success) setCoursesList(crsData.courses);
+      if (settingsData.success) {
+        setSettings({
+          signatory_name: settingsData.settings.signatory_name || "Authorized Signatory",
+          signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png"
+        });
+      }
     } catch (error) {
       console.error("Failed to fetch initial data:", error);
     }
@@ -504,7 +516,7 @@ export default function CertificateManagement() {
             <div id="sidebar-preview-container" className="w-full relative group overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-inner" style={{ height: selectedCert ? `${794 * previewScale}px` : 'auto' }}>
               {selectedCert ? (
                  <div className="origin-top-left absolute top-0 left-0" style={{ width: '1123px', height: '794px', transform: `scale(${previewScale})` }}>
-                    <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} />
+                    <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} />
                  </div>
               ) : (
                 <div className="w-full aspect-[1.41/1] flex flex-col items-center justify-center text-slate-400 italic text-xs p-10 text-center"><Award size={32} className="mb-2 opacity-20" />Select a record to preview</div>
@@ -533,7 +545,7 @@ export default function CertificateManagement() {
               {/* Left Side: Preview */}
               <div className="flex-grow bg-slate-100 p-6 flex items-center justify-center overflow-auto" id="modal-preview-container">
                 <div style={{ width: '1123px', height: '794px', transform: `scale(${previewScale})`, transformOrigin: 'center center', flexShrink: 0 }} ref={modalCertificateRef} className="shadow-2xl">
-                  <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} />
+                  <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} />
                 </div>
               </div>
               {/* Right Side: Actions */}
@@ -587,7 +599,7 @@ export default function CertificateManagement() {
       <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
         {selectedCert && (
           <div ref={certificateRef}>
-             <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} />
+             <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} />
           </div>
         )}
       </div>

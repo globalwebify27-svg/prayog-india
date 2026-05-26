@@ -85,8 +85,8 @@ export default function PaymentManagement() {
   
   const totalCollectionsThisMonth = installments
     .filter(i => {
-      const date = new Date(i.due_date);
-      return i.status.toLowerCase() === 'paid' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+      const paidDate = i.paid_at ? new Date(i.paid_at) : null;
+      return i.status.toLowerCase() === 'paid' && paidDate && paidDate.getMonth() === currentMonth && paidDate.getFullYear() === currentYear;
     })
     .reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
 

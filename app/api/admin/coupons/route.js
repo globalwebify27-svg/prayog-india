@@ -29,12 +29,20 @@ export async function GET() {
         discount_type ENUM('percentage', 'fixed') DEFAULT 'percentage',
         discount_value DECIMAL(10, 2) NOT NULL,
         course_id INT NULL,
+        course_ids JSON DEFAULT NULL,
         is_active BOOLEAN DEFAULT TRUE,
         expiry_date DATE NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL
       )
     `);
+
+    // Safely add course_ids column if it doesn't exist for older tables
+    try {
+      await pool.query('ALTER TABLE promo_codes ADD COLUMN course_ids JSON DEFAULT NULL');
+    } catch (err) {
+      // Ignore if it already exists
+    }
 
     const [rows] = await pool.query(`
       SELECT p.*, c.title as course_title 
@@ -54,7 +62,7 @@ export async function POST(req) {
   }
   try {
     const body = await req.json();
-    const { code, discount_type, discount_value, course_id, is_active, expiry_date } = body;
+    const { code, discount_type, discount_value, course_ids, is_active, expiry_date } = body;
 
     let formattedExpiry = null;
     if (expiry_date) {
@@ -64,14 +72,16 @@ export async function POST(req) {
       }
     }
 
+    const jsonCourseIds = Array.isArray(course_ids) && course_ids.length > 0 ? JSON.stringify(course_ids) : null;
+
     const [result] = await pool.query(
-      `INSERT INTO promo_codes (code, discount_type, discount_value, course_id, is_active, expiry_date) 
+      `INSERT INTO promo_codes (code, discount_type, discount_value, course_ids, is_active, expiry_date) 
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
         code,
         discount_type || 'percentage',
         discount_value,
-        course_id || null,
+        jsonCourseIds,
         is_active === undefined ? true : is_active,
         formattedExpiry
       ]
@@ -90,7 +100,7 @@ export async function PUT(req) {
   }
   try {
     const body = await req.json();
-    const { id, code, discount_type, discount_value, course_id, is_active, expiry_date } = body;
+    const { id, code, discount_type, discount_value, course_ids, is_active, expiry_date } = body;
 
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -104,16 +114,18 @@ export async function PUT(req) {
       }
     }
 
+    const jsonCourseIds = Array.isArray(course_ids) && course_ids.length > 0 ? JSON.stringify(course_ids) : null;
+
     await pool.query(
       `UPDATE promo_codes SET 
         code = ?, discount_type = ?, discount_value = ?, 
-        course_id = ?, is_active = ?, expiry_date = ?
+        course_ids = ?, is_active = ?, expiry_date = ?
        WHERE id = ?`,
       [
         code,
         discount_type || 'percentage',
         discount_value,
-        course_id || null,
+        jsonCourseIds,
         is_active === undefined ? true : is_active,
         formattedExpiry,
         id

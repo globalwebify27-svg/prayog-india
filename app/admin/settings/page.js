@@ -5,7 +5,6 @@ import {
   Settings as SettingsIcon, 
   Shield, 
   Bell, 
-  Server, 
   Save, 
   Globe, 
   Mail, 
@@ -16,7 +15,9 @@ import {
   Phone,
   MapPin,
   Loader2,
-  Upload
+  Upload,
+  PenLine,
+  CheckCircle
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -25,7 +26,10 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [sigUploading, setSigUploading] = useState({ signatory: false });
+  const [sigSaved, setSigSaved] = useState({ signatory: false });
   const logoInputRef = useRef(null);
+  const signatorySigRef = useRef(null);
   const [settings, setSettings] = useState({
     logo_url: "",
     footer_address: "",
@@ -34,7 +38,9 @@ export default function AdminSettings() {
     facebook_url: "",
     youtube_url: "",
     linkedin_url: "",
-    instagram_url: ""
+    instagram_url: "",
+    signatory_name: "Authorized Signatory",
+    signatory_signature: "",
   });
 
   useEffect(() => {
@@ -84,6 +90,30 @@ export default function AdminSettings() {
     }
   }
 
+  async function handleSignatureUpload(key, file) {
+    if (!file) return;
+    try {
+      setSigUploading(s => ({ ...s, signatory: true }));
+      setSigSaved(s => ({ ...s, signatory: false }));
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("key", key);
+      const res = await fetch("/api/admin/settings/upload-signature", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        setSettings(s => ({ ...s, [key]: data.url }));
+        setSigSaved(s => ({ ...s, signatory: true }));
+        setTimeout(() => setSigSaved(s => ({ ...s, signatory: false })), 3000);
+      } else {
+        alert("Upload failed: " + data.message);
+      }
+    } catch (e) {
+      alert("Upload error");
+    } finally {
+      setSigUploading(s => ({ ...s, signatory: false }));
+    }
+  }
+
   async function handleSave() {
     try {
       setSaving(true);
@@ -109,6 +139,7 @@ export default function AdminSettings() {
 
   const tabs = [
     { id: "branding", label: "Branding & Contact", icon: <Globe size={16} /> },
+    { id: "certificates", label: "Certificates & Signatures", icon: <PenLine size={16} /> },
     { id: "general", label: "Platform General", icon: <SettingsIcon size={16} /> },
     { id: "security", label: "Security Policy", icon: <Shield size={16} /> },
     { id: "notifications", label: "Messaging", icon: <Bell size={16} /> },
@@ -293,6 +324,78 @@ export default function AdminSettings() {
                         />
                       </div>
                     </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === "certificates" && (
+                <motion.div key="certificates" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-10">
+                  <div className="flex items-center space-x-4 mb-2">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                      <PenLine size={22} />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900">Certificate Signatories</h3>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">Upload signatures that appear on all issued certificates.</p>
+                    </div>
+                  </div>
+
+                  {/* Signatory */}
+                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-5">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Authorized Signatory</h4>
+                    <div className="grid md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-600">Display Name</label>
+                        <input
+                          type="text"
+                          value={settings.signatory_name || ""}
+                          onChange={e => setSettings(s => ({ ...s, signatory_name: e.target.value }))}
+                          placeholder="e.g. Ms. Priya Singh"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:border-navy text-sm font-medium transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-600">Signature Image</label>
+                        <div className="flex items-center gap-3">
+                          <input type="file" ref={signatorySigRef} accept="image/*" className="hidden"
+                            onChange={e => handleSignatureUpload('signatory_signature', e.target.files[0])} />
+                          <button
+                            type="button"
+                            onClick={() => signatorySigRef.current.click()}
+                            disabled={sigUploading.signatory}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-navy text-white rounded-lg text-xs font-bold hover:bg-black transition-all disabled:opacity-50"
+                          >
+                            {sigUploading.signatory ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                            {sigUploading.signatory ? "Uploading..." : "Upload Signature"}
+                          </button>
+                          {sigSaved.signatory && (
+                            <span className="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
+                              <CheckCircle size={14} /> Saved!
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    {settings.signatory_signature && (
+                      <div className="mt-2">
+                        <label className="text-xs text-slate-500 font-medium mb-2 block">Preview</label>
+                        <div className="inline-block bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                          <img src={settings.signatory_signature} alt="Signatory Signature" className="h-16 object-contain" />
+                          <p className="text-center text-xs text-slate-500 mt-2 font-medium">{settings.signatory_name}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex items-center gap-2 bg-navy text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm disabled:opacity-50"
+                    >
+                      {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                      {saving ? "Saving..." : "Save Names"}
+                    </button>
                   </div>
                 </motion.div>
               )}

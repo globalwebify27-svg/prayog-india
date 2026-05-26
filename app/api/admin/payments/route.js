@@ -9,8 +9,9 @@ export async function GET() {
       JOIN enrollments e ON i.enrollment_id = e.id
       JOIN users u ON e.user_id = u.id
       JOIN courses c ON e.course_id = c.id
-      ORDER BY i.due_date ASC
+      ORDER BY i.due_date DESC
     `;
+
 
     const [rows] = await pool.query(query);
 

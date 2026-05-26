@@ -21,7 +21,7 @@ export default function CouponsManagement() {
     code: "",
     discount_type: "percentage",
     discount_value: "",
-    course_id: "",
+    course_ids: [],
     expiry_date: "",
     is_active: true,
   });
@@ -90,7 +90,7 @@ export default function CouponsManagement() {
         setShowModal(false);
         setCouponToEdit(null);
         setNewCoupon({
-          code: "", discount_type: "percentage", discount_value: "", course_id: "", expiry_date: "", is_active: true
+          code: "", discount_type: "percentage", discount_value: "", course_ids: [], expiry_date: "", is_active: true
         });
         showAlert("Success", "Coupon saved successfully.", "success");
       } else {
@@ -198,7 +198,9 @@ export default function CouponsManagement() {
                     </div>
                     <h3 className="text-2xl font-heading font-black text-navy tracking-widest uppercase mb-1">{coupon.code}</h3>
                     <p className="text-slate-500 text-xs font-medium">
-                      {coupon.course_title ? `Valid for: ${coupon.course_title}` : 'Valid for all courses'}
+                      {(coupon.course_ids && coupon.course_ids.length > 0) 
+                        ? `Valid for ${coupon.course_ids.length} course(s)` 
+                        : (coupon.course_title ? `Valid for: ${coupon.course_title}` : 'Valid for all courses')}
                       {coupon.expiry_date && ` | Expires: ${new Date(coupon.expiry_date).toLocaleDateString()}`}
                     </p>
                   </div>
@@ -301,21 +303,52 @@ export default function CouponsManagement() {
                       </div>
 
                       <div className="space-y-2">
-                         <label className="text-[10px] font-black text-navy uppercase tracking-widest">Applicable Course (Optional)</label>
-                         <select 
-                            value={couponToEdit ? (couponToEdit.course_id || "") : newCoupon.course_id}
-                            onChange={(e) => {
-                               const val = e.target.value === "" ? null : parseInt(e.target.value);
-                               if (couponToEdit) setCouponToEdit({...couponToEdit, course_id: val});
-                               else setNewCoupon({...newCoupon, course_id: val});
-                            }}
-                            className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                         >
-                            <option value="">All Courses</option>
-                            {courses.map(course => (
-                               <option key={course.id} value={course.id}>{course.title}</option>
-                            ))}
-                         </select>
+                         <div className="flex justify-between items-center">
+                           <label className="text-[10px] font-black text-navy uppercase tracking-widest">Applicable Courses (Optional)</label>
+                           <button 
+                             type="button" 
+                             onClick={() => {
+                               const allIds = courses.map(c => c.id);
+                               const currentIds = couponToEdit ? (couponToEdit.course_ids || []) : newCoupon.course_ids;
+                               if (currentIds.length === allIds.length) {
+                                 if (couponToEdit) setCouponToEdit({...couponToEdit, course_ids: []});
+                                 else setNewCoupon({...newCoupon, course_ids: []});
+                               } else {
+                                 if (couponToEdit) setCouponToEdit({...couponToEdit, course_ids: allIds});
+                                 else setNewCoupon({...newCoupon, course_ids: allIds});
+                               }
+                             }}
+                             className="text-[10px] font-bold text-primary hover:underline"
+                           >
+                             Select / Deselect All
+                           </button>
+                         </div>
+                         <div className="max-h-48 overflow-y-auto bg-slate-50 border border-navy/5 rounded-xl p-3 space-y-2">
+                            {courses.length === 0 && <p className="text-xs text-slate-400">No courses available.</p>}
+                            {courses.map(course => {
+                               const currentIds = couponToEdit ? (couponToEdit.course_ids || []) : newCoupon.course_ids;
+                               const isChecked = currentIds.includes(course.id);
+                               return (
+                                 <label key={course.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white cursor-pointer transition-colors">
+                                   <input 
+                                     type="checkbox"
+                                     checked={isChecked}
+                                     onChange={(e) => {
+                                        let nextIds;
+                                        if (e.target.checked) nextIds = [...currentIds, course.id];
+                                        else nextIds = currentIds.filter(id => id !== course.id);
+                                        
+                                        if (couponToEdit) setCouponToEdit({...couponToEdit, course_ids: nextIds});
+                                        else setNewCoupon({...newCoupon, course_ids: nextIds});
+                                     }}
+                                     className="w-4 h-4 rounded border-navy/20 text-primary focus:ring-primary"
+                                   />
+                                   <span className="text-xs font-bold text-navy">{course.title}</span>
+                                 </label>
+                               );
+                            })}
+                         </div>
+                         <p className="text-[10px] text-slate-400 italic">Leave all unchecked to apply the coupon to <strong>all courses</strong>.</p>
                       </div>
 
                       <div className="space-y-2">

@@ -94,8 +94,8 @@ export async function POST(req) {
 
     // 6. Create Enrollment
     const [enrollResult] = await pool.execute(
-      "INSERT INTO enrollments (user_id, course_id, batch_id, total_amount, payment_status, payment_method, amount_paid) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [userId, course_id, batchId, amount, isInstallment ? 'partial' : 'paid', payment_method || 'online', initialPaymentAmount]
+      "INSERT INTO enrollments (user_id, course_id, batch_id, total_amount, payment_status, payment_method, amount_paid, coupon_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [userId, course_id, batchId, amount, isInstallment ? 'partial' : 'paid', payment_method || 'online', initialPaymentAmount, coupon_code || null]
     );
     const enrollmentId = enrollResult.insertId;
 
@@ -117,18 +117,36 @@ export async function POST(req) {
           [enrollmentId, installmentAmount, dueDate, i === 0 ? 'paid' : 'pending', i === 0 ? (payment_method || 'online') : 'online', i === 0 ? new Date() : null]
         );
       }
+    } else {
+      // Full Payment (Single Installment)
+      const dueDate = new Date();
+      installmentData.push({ amount, dueDate });
+      await pool.execute(
+        "INSERT INTO installments (enrollment_id, amount, due_date, status, payment_method, paid_at) VALUES (?, ?, ?, ?, ?, ?)",
+        [enrollmentId, amount, dueDate, 'paid', payment_method || 'online', new Date()]
+      );
     }
 
     // 8. Generate Receipt PDF
     let receiptUrl = null;
     try {
-      receiptUrl = await generateReceipt(
-        name, 
-        initialPaymentAmount, 
-        isInstallment ? 1 : "Full", 
-        new Date().toDateString(), 
-        razorpay_payment_id
-      );
+      receiptUrl = await generateReceipt({
+        studentName: name,
+        studentEmail: email,
+        studentPhone: phone,
+        courseName: course.title,
+        batchName: batch,
+        mode: mode,
+        amount: initialPaymentAmount,
+        originalAmount: Number(course.price),
+        discountAmount: Number(course.price) - amount,
+        couponCode: coupon_code || null,
+        installmentNo: isInstallment ? 1 : "Full",
+        totalInstallments: isInstallment ? (course.installments_count || 1) : null,
+        date: new Date().toDateString(),
+        receiptId: razorpay_payment_id,
+        paymentMethod: payment_method || "online",
+      });
       
       // Update receipt URL on enrollment
       await pool.query("UPDATE enrollments SET receipt_url = ? WHERE id = ?", [receiptUrl, enrollmentId]);
