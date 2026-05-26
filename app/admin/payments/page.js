@@ -79,6 +79,21 @@ export default function PaymentManagement() {
 
   const isFiltered = searchTerm || courseFilter !== "all" || fromDate || toDate || statusFilter !== "All";
 
+  // Dynamic calculations for stats cards
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  
+  const totalCollectionsThisMonth = installments
+    .filter(i => {
+      const date = new Date(i.due_date);
+      return i.status.toLowerCase() === 'paid' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    })
+    .reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+
+  const outstandingDues = installments
+    .filter(i => i.status.toLowerCase() === 'pending' || i.status.toLowerCase() === 'overdue')
+    .reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+
   return (
     <div className="space-y-8 font-body">
       {/* Header */}
@@ -112,7 +127,7 @@ export default function PaymentManagement() {
               <ArrowIcon size={10} className="mr-0.5" /> 12.4%
             </span>
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 mb-1">₹4,25,000</h3>
+          <h3 className="text-2xl font-bold text-slate-900 mb-1">₹{totalCollectionsThisMonth.toLocaleString('en-IN')}</h3>
           <p className="text-slate-500 text-xs font-medium">Total collections this month</p>
         </div>
 
@@ -122,7 +137,7 @@ export default function PaymentManagement() {
               <ClockIcon size={20} />
             </div>
           </div>
-          <h3 className="text-2xl font-bold text-amber-600 mb-1">₹85,400</h3>
+          <h3 className="text-2xl font-bold text-amber-600 mb-1">₹{outstandingDues.toLocaleString('en-IN')}</h3>
           <p className="text-slate-500 text-xs font-medium">Outstanding dues pending</p>
         </div>
 
