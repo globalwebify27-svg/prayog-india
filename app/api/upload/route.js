@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 export async function POST(request) {
@@ -16,7 +16,9 @@ export async function POST(request) {
 
     // Create unique filename
     const filename = Date.now() + "_" + file.name.replaceAll(" ", "_");
-    const uploadPath = path.join(process.cwd(), "public/uploads", filename);
+    const uploadDir = path.join(process.cwd(), "public/uploads");
+    await mkdir(uploadDir, { recursive: true });
+    const uploadPath = path.join(uploadDir, filename);
 
     await writeFile(uploadPath, buffer);
     const fileUrl = `/uploads/${filename}`;
