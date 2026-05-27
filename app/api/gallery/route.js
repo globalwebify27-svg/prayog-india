@@ -46,3 +46,16 @@ export async function DELETE(request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function PUT(request) {
+  try {
+    const { id, title, category, image_url, location } = await request.json();
+    await pool.query(
+      "UPDATE gallery SET title = ?, category = ?, image_url = ?, location = ? WHERE id = ?",
+      [title, category, image_url, location, id]
+    );
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}

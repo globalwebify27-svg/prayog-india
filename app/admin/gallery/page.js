@@ -14,6 +14,8 @@ export default function AdminGallery() {
     image_url: "",
     location: ""
   });
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingImage, setEditingImage] = useState(null);
 
   useEffect(() => {
     fetchImages();
@@ -72,6 +74,48 @@ export default function AdminGallery() {
     }
   };
 
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    setIsUploading(true);
+    
+    try {
+      let finalUrl = editingImage.image_url;
+
+      const fileInput = document.getElementById('gallery-edit-file-input');
+      if (fileInput && fileInput.files[0]) {
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success) {
+          finalUrl = uploadData.url;
+        } else {
+          throw new Error(uploadData.error || "Upload failed");
+        }
+      }
+
+      const res = await fetch("/api/gallery", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...editingImage, image_url: finalUrl })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShowEditModal(false);
+        setEditingImage(null);
+        fetchImages();
+      }
+    } catch (error) {
+      alert("Error: " + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleDelete = async (id) => {
     if (confirm("Delete this image from gallery?")) {
       const res = await fetch(`/api/gallery?id=${id}`, { method: "DELETE" });
@@ -105,7 +149,16 @@ export default function AdminGallery() {
           >
             <img src={img.image_url} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-2">
+                <button 
+                  onClick={() => {
+                    setEditingImage({ ...img });
+                    setShowEditModal(true);
+                  }} 
+                  className="p-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  <Tag size={14} />
+                </button>
                 <button onClick={() => handleDelete(img.id)} className="p-1.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors">
                   <Trash2 size={14} />
                 </button>
@@ -167,6 +220,58 @@ export default function AdminGallery() {
                   >
                     {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
                     <span>{isUploading ? "Uploading..." : "Add to Archive"}</span>
+                  </button>
+               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && editingImage && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-slate-900">Edit Image Details</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-navy transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleEdit} className="p-6 space-y-4">
+               <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Image Title</label>
+                  <input required className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none" value={editingImage.title} onChange={e => setEditingImage({...editingImage, title: e.target.value})} />
+               </div>
+               <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Category</label>
+                  <select className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none cursor-pointer" value={editingImage.category} onChange={e => setEditingImage({...editingImage, category: e.target.value})}>
+                    <option>Media Coverage</option>
+                    <option>Workshop Gallery</option>
+                  </select>
+               </div>
+               <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Update Image (Optional)</label>
+                  <div className="relative group">
+                    <input 
+                      id="gallery-edit-file-input"
+                      type="file" 
+                      accept="image/*"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs outline-none file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-black file:bg-navy file:text-white hover:file:bg-black cursor-pointer"
+                    />
+                  </div>
+               </div>
+               <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">News Source / Location</label>
+                  <input className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none" placeholder="e.g. National News, Delhi" value={editingImage.location} onChange={e => setEditingImage({...editingImage, location: e.target.value})} />
+               </div>
+               <div className="flex justify-end gap-3 pt-4">
+                  <button type="button" onClick={() => setShowEditModal(false)} className="px-5 py-2 text-xs font-bold text-slate-500">Cancel</button>
+                  <button 
+                    type="submit" 
+                    disabled={isUploading}
+                    className="px-5 py-2 bg-navy text-white rounded-lg text-xs font-bold disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Tag size={14} />}
+                    <span>{isUploading ? "Saving..." : "Save Changes"}</span>
                   </button>
                </div>
             </form>
