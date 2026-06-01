@@ -104,14 +104,15 @@ export async function POST(req) {
       }
     } else {
       // Fallback for older payloads or missing batch_id
-      let [batchRows] = await pool.execute("SELECT id FROM batches WHERE name = ? AND course_id = ?", [batch, course_id]);
+      let fallbackBatch = batch || 'Default Batch';
+      let [batchRows] = await pool.execute("SELECT id FROM batches WHERE name = ? AND course_id = ?", [fallbackBatch, course_id]);
       if (batchRows.length === 0) {
-          const [batchInsert] = await pool.execute("INSERT INTO batches (course_id, name, type) VALUES (?, ?, ?)", [course_id, batch || 'Default Batch', mode.toLowerCase()]);
+          const [batchInsert] = await pool.execute("INSERT INTO batches (course_id, name, type) VALUES (?, ?, ?)", [course_id, fallbackBatch, mode ? mode.toLowerCase() : 'offline']);
           finalBatchId = batchInsert.insertId;
       } else {
           finalBatchId = batchRows[0].id;
       }
-      finalBatchName = batch || 'Default Batch';
+      finalBatchName = fallbackBatch;
     }
 
     // 6. Create Enrollment

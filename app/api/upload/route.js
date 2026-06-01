@@ -14,15 +14,21 @@ export async function POST(request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename
-    const filename = Date.now() + "_" + file.name.replaceAll(" ", "_");
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-    await mkdir(uploadDir, { recursive: true });
-    const uploadPath = path.join(uploadDir, filename);
+    const mimeType = file.type || 'application/octet-stream';
+    const filename = file.name.replaceAll(" ", "_");
 
-    await writeFile(uploadPath, buffer);
-    const fileUrl = `/uploads/${filename}`;
-    //s
+    // Connect to database
+    const pool = require('@/lib/db').default;
+    
+    // Insert into images table
+    const [result] = await pool.execute(
+      "INSERT INTO images (filename, mime_type, data) VALUES (?, ?, ?)",
+      [filename, mimeType, buffer]
+    );
+
+    const imageId = result.insertId;
+    const fileUrl = `/api/images/${imageId}`;
+    
     return NextResponse.json({ success: true, url: fileUrl });
   } catch (error) {
     console.error("Upload error:", error);

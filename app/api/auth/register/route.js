@@ -22,7 +22,7 @@ export async function POST(req) {
     // Insert user
     const [result] = await pool.query(
       "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, 'student')",
-      [name, email, hashedPassword, phone]
+      [name, email, hashedPassword, phone || null]
     );
 
     return NextResponse.json({ 

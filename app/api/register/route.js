@@ -62,10 +62,11 @@ export async function POST(req) {
     }
 
     // 4. Resolve/Create Batch
-    let [batchRows] = await pool.execute("SELECT id FROM batches WHERE name = ? AND course_id = ?", [batch, course_id]);
+    let fallbackBatch = batch || 'Default Batch';
+    let [batchRows] = await pool.execute("SELECT id FROM batches WHERE name = ? AND course_id = ?", [fallbackBatch, course_id]);
     let batchId;
     if (batchRows.length === 0) {
-        const [batchInsert] = await pool.execute("INSERT INTO batches (course_id, name, type) VALUES (?, ?, ?)", [course_id, batch, mode.toLowerCase()]);
+        const [batchInsert] = await pool.execute("INSERT INTO batches (course_id, name, type) VALUES (?, ?, ?)", [course_id, fallbackBatch, mode ? mode.toLowerCase() : 'offline']);
         batchId = batchInsert.insertId;
     } else {
         batchId = batchRows[0].id;
