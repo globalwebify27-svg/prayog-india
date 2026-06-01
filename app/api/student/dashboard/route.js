@@ -30,7 +30,7 @@ export async function GET() {
     
     // 2. Get Enrollments with Meeting Links
     const [enrollments] = await pool.query(`
-      SELECT e.*, c.title, c.duration, c.type as mode, b.meeting_link 
+      SELECT e.*, c.title, c.duration, c.type as mode, b.meeting_link, b.start_time, b.end_time, b.schedule 
       FROM enrollments e 
       JOIN courses c ON e.course_id = c.id 
       LEFT JOIN batches b ON e.batch_id = b.id
@@ -49,6 +49,12 @@ export async function GET() {
     // 4. Get Attendance Stats
     const [attendancePresent] = await pool.query("SELECT COUNT(*) as count FROM attendance WHERE user_id = ? AND status = 'present'", [userId]);
     const [attendanceTotal] = await pool.query("SELECT COUNT(*) as count FROM attendance WHERE user_id = ?", [userId]);
+    const [todaysAttendance] = await pool.query("SELECT course_id FROM attendance WHERE user_id = ? AND date = CURDATE()", [userId]);
+    
+    const attendedCourseIds = todaysAttendance.map(a => a.course_id);
+    enrollments.forEach(e => {
+       e.hasMarkedAttendanceToday = attendedCourseIds.includes(e.course_id);
+    });
 
     // 5. Get Certificate Count
     const [certificates] = await pool.query("SELECT COUNT(*) as count FROM certificates WHERE user_id = ?", [userId]);

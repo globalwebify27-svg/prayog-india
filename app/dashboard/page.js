@@ -14,11 +14,13 @@ import {
   Award,
   IdCard,
   Zap,
+  Camera,
   TrendingUp,
   Settings,
   ChevronRight,
   UserPlus,
-  X
+  X,
+  Bell
 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 
@@ -28,6 +30,7 @@ export default function StudentDashboard() {
   const [notices, setNotices] = useState([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [showAttendancePopup, setShowAttendancePopup] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -138,16 +141,26 @@ export default function StudentDashboard() {
           <p className="text-slate-500 text-sm mt-1">Student ID: PR-{10000 + (user.id || 0)} | {user.email}</p>
         </div>
         <div className="flex items-center gap-3">
-          {activeMeetingLink && (
-            <a 
-              href={activeMeetingLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="flex items-center space-x-2 bg-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm animate-pulse"
-            >
-              <Zap size={16} className="text-primary" />
-              <span>Join live session</span>
-            </a>
+          {activeLiveBatch && (
+            activeLiveBatch.hasMarkedAttendanceToday ? (
+              <a 
+                href={activeLiveBatch.meeting_link} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center space-x-2 bg-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm animate-pulse cursor-pointer"
+              >
+                <Zap size={16} className="text-primary" />
+                <span>Join live session</span>
+              </a>
+            ) : (
+              <button 
+                onClick={() => setShowAttendancePopup(true)}
+                className="flex items-center space-x-2 bg-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm animate-pulse cursor-pointer"
+              >
+                <Zap size={16} className="text-primary" />
+                <span>Join live session</span>
+              </button>
+            )
           )}
           <div className="hidden lg:flex flex-col items-end border-l pl-4 border-slate-200">
              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Session</p>
@@ -249,14 +262,23 @@ export default function StudentDashboard() {
                     </div>
                     <div className="flex items-center gap-4">
                       {live && course.meeting_link && (
-                        <a 
-                          href={course.meeting_link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="px-4 py-2 bg-navy text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2 shadow-md"
-                        >
-                          <Play size={10} fill="white" /> Join Live
-                        </a>
+                        course.hasMarkedAttendanceToday ? (
+                          <a 
+                            href={course.meeting_link} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 bg-navy text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2 shadow-md cursor-pointer"
+                          >
+                            <Play size={10} fill="white" /> Join Live
+                          </a>
+                        ) : (
+                          <button 
+                            onClick={() => setShowAttendancePopup(true)}
+                            className="px-4 py-2 bg-navy text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2 shadow-md cursor-pointer"
+                          >
+                            <Play size={10} fill="white" /> Join Live
+                          </button>
+                        )
                       )}
                       <div className="text-right hidden sm:block">
                         <p className="text-[10px] font-bold text-slate-400 uppercase">Progress</p>
@@ -413,6 +435,49 @@ export default function StudentDashboard() {
                   </Link>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Verification is mandatory for hub access</p>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Attendance Warning Popup */}
+      <AnimatePresence>
+        {showAttendancePopup && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-navy/60 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden text-center"
+            >
+              <div className="absolute top-0 left-0 w-32 h-32 bg-rose-500/10 rounded-full -ml-16 -mt-16 blur-2xl" />
+              
+              <button 
+                onClick={() => setShowAttendancePopup(false)}
+                className="absolute top-6 right-6 text-slate-400 hover:text-navy transition-colors p-1"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="w-20 h-20 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mx-auto mb-6 shadow-inner border border-rose-100">
+                <Camera size={36} strokeWidth={1.5} />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Attendance Required</h2>
+              
+              <p className="text-slate-500 text-sm leading-relaxed mb-8">
+                You must verify your physical presence via our biometric system before you can join the live virtual session.
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <Link 
+                  href="/dashboard/attendance"
+                  onClick={() => setShowAttendancePopup(false)}
+                  className="w-full px-6 py-4 bg-navy text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black shadow-lg shadow-navy/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <span>Mark Attendance Now</span>
+                  <ChevronRight size={14} />
+                </Link>
               </div>
             </motion.div>
           </div>

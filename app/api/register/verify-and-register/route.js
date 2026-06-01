@@ -13,22 +13,28 @@ export async function POST(req) {
       razorpay_payment_id, 
       razorpay_signature,
       // User/Registration details
-      name, email, phone, emergency_contact, password, course_id, mode, batch, isInstallment, payment_method, coupon_code 
+      name, email, phone, emergency_contact, password, course_id, mode, batch, batch_id, isInstallment, payment_method, coupon_code 
     } = await req.json();
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return NextResponse.json({ success: false, message: "Missing payment signature" }, { status: 400 });
     }
 
-    // 1. Verify Razorpay Signature
-    const bodyText = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "mock_secret")
-      .update(bodyText.toString())
-      .digest("hex");
+    let isFreeEnrollment = false;
 
-    if (expectedSignature !== razorpay_signature) {
-      return NextResponse.json({ success: false, message: "Invalid payment signature" }, { status: 400 });
+    // 1. Verify Razorpay Signature (or check for free enrollment)
+    if (razorpay_order_id === "FREE_ENROLLMENT") {
+      isFreeEnrollment = true;
+    } else {
+      const bodyText = razorpay_order_id + "|" + razorpay_payment_id;
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "mock_secret")
+        .update(bodyText.toString())
+        .digest("hex");
+
+      if (expectedSignature !== razorpay_signature) {
+        return NextResponse.json({ success: false, message: "Invalid payment signature" }, { status: 400 });
+      }
     }
 
     // 2. Fetch Course Details (Price, Installments)
@@ -62,6 +68,11 @@ export async function POST(req) {
     }
     initialPaymentAmount = Math.round(initialPaymentAmount);
 
+    // Security Check: If it claims to be free, ensure the calculated amount is actually 0 or less
+    if (isFreeEnrollment && initialPaymentAmount >= 1) {
+       return NextResponse.json({ success: false, message: "Security Error: Course is not free." }, { status: 403 });
+    }
+
     // 4. Create User
     const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
     let userId;
@@ -82,20 +93,31 @@ export async function POST(req) {
       userId = userResult.insertId;
     }
 
-    // 5. Resolve/Create Batch
-    let [batchRows] = await pool.execute("SELECT id FROM batches WHERE name = ? AND course_id = ?", [batch, course_id]);
-    let batchId;
-    if (batchRows.length === 0) {
-        const [batchInsert] = await pool.execute("INSERT INTO batches (course_id, name, type) VALUES (?, ?, ?)", [course_id, batch, mode.toLowerCase()]);
-        batchId = batchInsert.insertId;
+    // 5. Resolve Batch
+    let finalBatchId = batch_id;
+    let finalBatchName = "Online Session";
+    
+    if (finalBatchId) {
+      const [batchRows] = await pool.execute("SELECT name FROM batches WHERE id = ?", [finalBatchId]);
+      if (batchRows.length > 0) {
+        finalBatchName = batchRows[0].name;
+      }
     } else {
-        batchId = batchRows[0].id;
+      // Fallback for older payloads or missing batch_id
+      let [batchRows] = await pool.execute("SELECT id FROM batches WHERE name = ? AND course_id = ?", [batch, course_id]);
+      if (batchRows.length === 0) {
+          const [batchInsert] = await pool.execute("INSERT INTO batches (course_id, name, type) VALUES (?, ?, ?)", [course_id, batch || 'Default Batch', mode.toLowerCase()]);
+          finalBatchId = batchInsert.insertId;
+      } else {
+          finalBatchId = batchRows[0].id;
+      }
+      finalBatchName = batch || 'Default Batch';
     }
 
     // 6. Create Enrollment
     const [enrollResult] = await pool.execute(
       "INSERT INTO enrollments (user_id, course_id, batch_id, total_amount, payment_status, payment_method, amount_paid, coupon_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [userId, course_id, batchId, amount, isInstallment ? 'partial' : 'paid', payment_method || 'online', initialPaymentAmount, coupon_code || null]
+      [userId, course_id, finalBatchId, amount, isInstallment ? 'partial' : 'paid', payment_method || 'online', initialPaymentAmount, coupon_code || null]
     );
     const enrollmentId = enrollResult.insertId;
 
@@ -135,7 +157,7 @@ export async function POST(req) {
         studentEmail: email,
         studentPhone: phone,
         courseName: course.title,
-        batchName: batch,
+        batchName: finalBatchName,
         mode: mode,
         amount: initialPaymentAmount,
         originalAmount: Number(course.price),

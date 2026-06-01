@@ -22,10 +22,18 @@ export async function GET() {
       JOIN specializations s ON cs.specialization_id = s.id
     `);
 
+    // Fetch batches (live sessions) for each course
+    const [courseBatches] = await pool.query(`
+      SELECT id, course_id, name, schedule, type, meeting_link, start_time, end_time, start_date, end_date
+      FROM batches
+      ORDER BY id DESC
+    `);
+
     const coursesWithDetails = courses.map(course => ({
       ...course,
       timings: courseTimings.filter(ct => ct.course_id === course.id),
-      specializations: courseSpecs.filter(cs => cs.course_id === course.id)
+      specializations: courseSpecs.filter(cs => cs.course_id === course.id),
+      batches: courseBatches.filter(b => b.course_id === course.id)
     }));
 
     console.log("Fetched courses rows count:", coursesWithDetails.length);

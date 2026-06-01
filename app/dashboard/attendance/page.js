@@ -201,10 +201,20 @@ export default function AttendancePage() {
                 </div>
               )}
 
-              <button onClick={getLocation} className="bg-navy text-white px-8 py-3 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm flex items-center justify-center mx-auto space-x-2">
-                <span>Enable location services</span>
-                <Zap size={16} className="text-primary" />
-              </button>
+              {selectedEnrollment?.hasMarkedAttendanceToday ? (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-6 max-w-sm mx-auto text-center">
+                   <div className="flex items-center justify-center space-x-2 text-emerald-600 mb-2">
+                     <CheckCircle2 size={24} />
+                   </div>
+                   <h4 className="text-emerald-800 font-bold text-sm">Attendance Already Marked</h4>
+                   <p className="text-emerald-600 text-xs mt-1 leading-relaxed">You have successfully verified your attendance for this session today. You may join the live session from your dashboard.</p>
+                </div>
+              ) : (
+                <button onClick={getLocation} className="bg-navy text-white px-8 py-3 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm flex items-center justify-center mx-auto space-x-2">
+                  <span>Enable location services</span>
+                  <Zap size={16} className="text-primary" />
+                </button>
+              )}
             </motion.div>
           )}
 

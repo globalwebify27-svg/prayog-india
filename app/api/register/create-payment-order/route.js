@@ -49,7 +49,12 @@ export async function POST(req) {
     payAmount = Math.round(payAmount); // Ensure it's an integer for safety
 
     if (payAmount < 1) {
-      return NextResponse.json({ success: false, message: "Invalid final amount. Minimum is 1 INR." }, { status: 400 });
+      return NextResponse.json({
+        success: true,
+        isFree: true,
+        amount: 0,
+        currency: "INR"
+      });
     }
 
     // 4. Create Razorpay Order

@@ -123,7 +123,7 @@ function RegisterForm({ pageContent }) {
     specialization: "Internships",
     courseId: "",
     mode: "Offline",
-    batch: "Morning (9AM - 11AM)",
+    batch_id: "",
     isInstallment: true
   });
 
@@ -134,7 +134,15 @@ function RegisterForm({ pageContent }) {
   const validateStep = () => {
     let newErrors = {};
     if (step === 1) {
-      if (!formData.courseId) newErrors.courseId = "Please select a specific program to continue.";
+      if (!formData.courseId) {
+        newErrors.courseId = "Please select a specific program to continue.";
+      } else {
+        const selectedCourse = courses.find(c => c.id === formData.courseId);
+        const availableBatches = selectedCourse?.batches?.filter(b => b.type === formData.mode.toLowerCase()) || [];
+        if (availableBatches.length > 0 && !formData.batch_id) {
+          newErrors.batch_id = "Please select a batch schedule to continue.";
+        }
+      }
     } else if (step === 2) {
       if (!formData.name.trim()) newErrors.name = "Legal name is required for institutional records.";
       
@@ -382,6 +390,47 @@ function RegisterForm({ pageContent }) {
       const orderData = await orderRes.json();
 
       if (orderData.success) {
+        if (orderData.isFree) {
+          // Bypass Razorpay for 100% Free Registrations
+          try {
+            const verifyRes = await fetch("/api/register/verify-and-register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: "FREE_ENROLLMENT",
+                razorpay_payment_id: "FREE_" + Date.now(),
+                razorpay_signature: "FREE",
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                phone: formData.phone,
+                emergency_contact: formData.emergencyContact,
+                course_id: formData.courseId,
+                mode: formData.mode,
+                batch_id: formData.batch_id,
+                isInstallment: formData.isInstallment,
+                coupon_code: couponDetails?.code,
+                payment_method: 'free'
+              })
+            });
+            
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: formData.email, password: formData.password })
+              });
+              window.location.href = "/dashboard?payment=success";
+            } else {
+              showAlert("Registration Failed", verifyData.message || "Failed to process free enrollment.", "error");
+            }
+          } catch (err) {
+            showAlert("Registration Failed", "Failed to process free enrollment. Please contact support.", "error");
+          }
+          return;
+        }
+
         // 2. Open Razorpay Checkout
         let isPaymentFailed = false;
 
@@ -411,7 +460,7 @@ function RegisterForm({ pageContent }) {
                   emergency_contact: formData.emergencyContact,
                   course_id: formData.courseId,
                   mode: formData.mode,
-                  batch: formData.batch,
+                  batch_id: formData.batch_id,
                   isInstallment: formData.isInstallment,
                   coupon_code: couponDetails?.code,
                   payment_method: 'online'
@@ -649,30 +698,37 @@ function RegisterForm({ pageContent }) {
                     <p className="text-xs text-slate-500 italic p-4 bg-slate-50 rounded-xl border border-slate-200 text-center font-medium">
                       Select a program above to see available batches
                     </p>
-                  ) : selectedCourse.timings && selectedCourse.timings.length > 0 ? (
+                  ) : selectedCourse.batches && selectedCourse.batches.filter(b => b.type === formData.mode.toLowerCase()).length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {selectedCourse.timings.map(t => {
-                        const batchName = `${t.name} (${t.slot})`;
-                        return (
+                      {selectedCourse.batches.filter(b => b.type === formData.mode.toLowerCase()).map(b => (
                           <button
-                            key={t.id}
+                            key={b.id}
                             type="button"
-                            onClick={() => setFormData({...formData, batch: batchName})}
-                            className={`p-4 rounded-xl border-2 transition-all text-sm font-bold flex items-center justify-center gap-2 ${
-                              formData.batch === batchName 
+                            onClick={() => setFormData({...formData, batch_id: b.id})}
+                            className={`p-4 rounded-xl border-2 transition-all text-sm font-bold flex flex-col items-center justify-center gap-1 ${
+                              formData.batch_id === b.id 
                                 ? "bg-navy/5 border-navy text-navy shadow-sm" 
                                 : "bg-white border-slate-100 text-slate-600 hover:border-navy/30 hover:bg-slate-50"
                             }`}
                           >
-                            {t.name.toLowerCase().includes("morning") ? <Sun size={16} /> : <Moon size={16} />}
-                            {batchName}
+                            <div className="flex items-center gap-2">
+                              {b.name.toLowerCase().includes("morning") ? <Sun size={16} /> : <Moon size={16} />}
+                              <span>{b.name}</span>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                              {b.start_time ? `${b.start_time.substring(0, 5)} - ${b.end_time?.substring(0, 5)}` : 'Flexible Timing'}
+                            </span>
                           </button>
-                        );
-                      })}
+                      ))}
                     </div>
                   ) : (
                     <p className="text-xs text-amber-600 italic p-4 bg-amber-50 rounded-xl border border-amber-200 text-center font-bold">
-                      No batches scheduled for this course yet
+                      No batches scheduled for {formData.mode} mode yet.
+                    </p>
+                  )}
+                  {errors.batch_id && (
+                    <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                      <AlertCircle size={10} /> {errors.batch_id}
                     </p>
                   )}
                 </div>
@@ -928,64 +984,68 @@ function RegisterForm({ pageContent }) {
                   </div>
                 </div>
 
-                {/* Coupon Code Section */}
-                <div className="space-y-3">
-                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Promotional Coupon</label>
-                  <div className="flex gap-3">
-                    <div className="relative flex-grow">
-                      <Tag size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${couponDetails ? 'text-emerald-500' : 'text-slate-400'}`} />
-                      <input 
-                        type="text" 
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                        placeholder="ENTER CODE"
-                        className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none transition-all text-sm font-bold uppercase tracking-widest ${couponDetails ? 'border-emerald-500 focus:border-emerald-500' : 'border-slate-200 focus:border-navy'}`}
-                      />
+                {Number(selectedCourse?.price || 0) > 0 && (
+                  <>
+                    {/* Coupon Code Section */}
+                    <div className="space-y-3">
+                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Promotional Coupon</label>
+                      <div className="flex gap-3">
+                        <div className="relative flex-grow">
+                          <Tag size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${couponDetails ? 'text-emerald-500' : 'text-slate-400'}`} />
+                          <input 
+                            type="text" 
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                            placeholder="ENTER CODE"
+                            className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none transition-all text-sm font-bold uppercase tracking-widest ${couponDetails ? 'border-emerald-500 focus:border-emerald-500' : 'border-slate-200 focus:border-navy'}`}
+                          />
+                          {couponDetails && (
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                              <CheckCircle2 size={16} className="text-emerald-500" />
+                            </div>
+                          )}
+                        </div>
+                        <button 
+                          onClick={handleApplyCoupon}
+                          disabled={isValidatingCoupon || !couponCode}
+                          className="px-6 py-3 bg-white border border-slate-200 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-all disabled:opacity-50"
+                        >
+                          {isValidatingCoupon ? "..." : couponDetails ? "Applied" : "Apply"}
+                        </button>
+                      </div>
                       {couponDetails && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                          <CheckCircle2 size={16} className="text-emerald-500" />
+                        <p className="text-[10px] text-emerald-600 font-bold ml-1">
+                          Success! {couponDetails.discount_type === 'percentage' ? `${couponDetails.discount_value}%` : `₹${couponDetails.discount_value}`} discount applied.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-3">
+                      <div onClick={() => setFormData({...formData, isInstallment: false})} className={`p-5 border rounded-xl cursor-pointer transition-all ${!formData.isInstallment ? 'border-navy bg-navy/5' : 'border-slate-200 hover:border-navy shadow-sm'}`}>
+                        <h4 className="font-bold text-slate-900 text-sm mb-1">Full Payment</h4>
+                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Complete tuition fee</p>
+                      </div>
+                      {selectedCourse?.allow_partial_payment ? (
+                        <div onClick={() => setFormData({...formData, isInstallment: true})} className={`p-5 border rounded-xl cursor-pointer transition-all ${formData.isInstallment ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-navy shadow-sm'}`}>
+                          <h4 className={`text-sm font-bold mb-1 ${formData.isInstallment ? 'text-navy' : 'text-slate-900'}`}>Installment plan</h4>
+                          <p className={`text-[9px] font-bold uppercase tracking-tight ${formData.isInstallment ? 'text-navy' : 'text-slate-500'}`}>
+                            {selectedCourse?.installments_count} Interest-free cycles (₹{Math.round(
+                              (couponDetails 
+                                ? (couponDetails.discount_type === 'percentage' ? Number(selectedCourse?.price) * (1 - couponDetails.discount_value / 100) : Number(selectedCourse?.price) - couponDetails.discount_value)
+                                : Number(selectedCourse.price)
+                              ) / selectedCourse.installments_count
+                            ).toLocaleString('en-IN')}/mo)
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="p-5 border border-slate-100 bg-slate-50/50 rounded-xl opacity-60 flex flex-col justify-center">
+                          <h4 className="font-bold text-slate-400 text-sm mb-1 italic">No Installments</h4>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">Partial payment not enabled for this program</p>
                         </div>
                       )}
                     </div>
-                    <button 
-                      onClick={handleApplyCoupon}
-                      disabled={isValidatingCoupon || !couponCode}
-                      className="px-6 py-3 bg-white border border-slate-200 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-all disabled:opacity-50"
-                    >
-                      {isValidatingCoupon ? "..." : couponDetails ? "Applied" : "Apply"}
-                    </button>
-                  </div>
-                  {couponDetails && (
-                    <p className="text-[10px] text-emerald-600 font-bold ml-1">
-                      Success! {couponDetails.discount_type === 'percentage' ? `${couponDetails.discount_value}%` : `₹${couponDetails.discount_value}`} discount applied.
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div onClick={() => setFormData({...formData, isInstallment: false})} className={`p-5 border rounded-xl cursor-pointer transition-all ${!formData.isInstallment ? 'border-navy bg-navy/5' : 'border-slate-200 hover:border-navy shadow-sm'}`}>
-                    <h4 className="font-bold text-slate-900 text-sm mb-1">Full Payment</h4>
-                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Complete tuition fee</p>
-                  </div>
-                  {selectedCourse?.allow_partial_payment ? (
-                    <div onClick={() => setFormData({...formData, isInstallment: true})} className={`p-5 border rounded-xl cursor-pointer transition-all ${formData.isInstallment ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-navy shadow-sm'}`}>
-                      <h4 className={`text-sm font-bold mb-1 ${formData.isInstallment ? 'text-navy' : 'text-slate-900'}`}>Installment plan</h4>
-                      <p className={`text-[9px] font-bold uppercase tracking-tight ${formData.isInstallment ? 'text-navy' : 'text-slate-500'}`}>
-                        {selectedCourse?.installments_count} Interest-free cycles (₹{Math.round(
-                          (couponDetails 
-                            ? (couponDetails.discount_type === 'percentage' ? Number(selectedCourse?.price) * (1 - couponDetails.discount_value / 100) : Number(selectedCourse?.price) - couponDetails.discount_value)
-                            : Number(selectedCourse.price)
-                          ) / selectedCourse.installments_count
-                        ).toLocaleString('en-IN')}/mo)
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="p-5 border border-slate-100 bg-slate-50/50 rounded-xl opacity-60 flex flex-col justify-center">
-                      <h4 className="font-bold text-slate-400 text-sm mb-1 italic">No Installments</h4>
-                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">Partial payment not enabled for this program</p>
-                    </div>
-                  )}
-                </div>
+                  </>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -1009,7 +1069,7 @@ function RegisterForm({ pageContent }) {
               {isSubmitting 
                 ? "Processing..." 
                 : step === 3 
-                  ? "Process enrollment" 
+                  ? ((couponDetails ? (couponDetails.discount_type === 'percentage' ? Number(selectedCourse?.price) * (1 - couponDetails.discount_value / 100) : Number(selectedCourse?.price) - couponDetails.discount_value) : Number(selectedCourse?.price || 0)) <= 0 ? "Complete Free Registration" : "Process enrollment") 
                   : step === 2 && !isEmailVerified
                     ? "Verify Email to Continue"
                     : "Continue"
