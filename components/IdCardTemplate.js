@@ -12,6 +12,9 @@ const IdCardTemplate = ({
   emergencyContact = "+91 98765 43210",
   logoUrl = "/assets/logo.png"
 }) => {
+  const formattedName = studentName ? studentName.replace(/([a-z])([A-Z])/g, '$1 $2') : "Student Name";
+  const formattedCourse = courseName ? courseName.replace(/([a-z])([A-Z])/g, '$1 $2') : "Academic Program";
+
   return (
     <div id="id-card-element" className="w-[320px] h-[500px] bg-white rounded-[24px] shadow-2xl overflow-hidden font-body relative border-2 border-slate-100">
       {/* Header Pattern */}
@@ -20,7 +23,7 @@ const IdCardTemplate = ({
         <div className="absolute top-20 -left-10 w-32 h-32 bg-primary/10 rounded-full blur-xl"></div>
 
         <div className="relative pt-6 px-6 flex flex-col items-center text-center">
-          <img src={logoUrl} alt="Logo" className="h-10 brightness-200 mb-2 object-contain" />
+          <img crossOrigin="anonymous" src={logoUrl} alt="Logo" className="h-10 brightness-200 mb-2 object-contain" />
           <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Student Identity Card</h2>
           <p className="text-[8px] text-white/60 uppercase font-medium mt-1">Official Academic Credential</p>
         </div>
@@ -32,7 +35,7 @@ const IdCardTemplate = ({
         <div className="w-32 h-32 rounded-3xl bg-white p-1.5 shadow-xl border border-slate-100 z-10">
           <div className="w-full h-full rounded-2xl bg-slate-50 flex items-center justify-center overflow-hidden border border-slate-50">
             {photo ? (
-              <img src={photo} alt={studentName} className="w-full h-full object-cover" />
+              <img crossOrigin="anonymous" src={photo} alt={formattedName} className="w-full h-full object-cover" />
             ) : (
               <div className="flex flex-col items-center text-slate-300">
                 <ShieldCheck size={40} className="mb-1" />
@@ -43,10 +46,10 @@ const IdCardTemplate = ({
         </div>
 
         {/* Identity Info */}
-        <div className="mt-4 text-center w-full">
-          <h3 className="text-xl font-bold text-slate-900 leading-tight">{studentName}</h3>
-          <div className="inline-block mt-1 px-3 py-1 bg-primary/10 rounded-full">
-            <span className="text-[10px] font-bold text-navy uppercase tracking-wider">{courseName}</span>
+        <div className="mt-4 text-center w-full px-2">
+          <h3 className="text-xl font-bold text-slate-900 leading-snug mb-2">{formattedName}</h3>
+          <div className="inline-block px-3 py-1 bg-primary/10 rounded-full">
+            <span className="text-[10px] font-bold text-navy uppercase tracking-wider">{formattedCourse}</span>
           </div>
         </div>
 

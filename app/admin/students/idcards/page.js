@@ -104,6 +104,23 @@ export default function IdCardManagement() {
             } catch (e) {}
           });
 
+          let fontFaces = '';
+          for (let i = 0; i < document.styleSheets.length; i++) {
+            try {
+              const rules = document.styleSheets[i].cssRules;
+              for (let j = 0; j < rules.length; j++) {
+                if (rules[j].type === CSSRule.FONT_FACE_RULE) {
+                  fontFaces += rules[j].cssText + '\n';
+                }
+              }
+            } catch (e) {}
+          }
+          if (fontFaces) {
+            const style = clonedDoc.createElement('style');
+            style.innerHTML = fontFaces;
+            clonedDoc.head.appendChild(style);
+          }
+
           const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
           linkTags.forEach(tag => {
             if (tag.href && !tag.href.includes('fonts.googleapis.com')) {
@@ -161,44 +178,6 @@ export default function IdCardManagement() {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const handlePrint = () => {
-    if (!selectedStudent) return;
-    const printWindow = window.open("", "_blank");
-    const element = document.getElementById("id-card-element");
-    if (!printWindow || !element) return;
-
-    const printHtml = `
-      <html>
-        <head>
-          <title>Print ID - ${selectedStudent.name}</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-          <style>
-            @page { size: 53.98mm 85.6mm; margin: 0; }
-            body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
-            .print-container { width: 53.98mm; height: 85.6mm; overflow: hidden; position: relative; }
-            .bg-navy { background-color: #001f3f !important; }
-            .text-primary { color: #f59e0b !important; }
-            * { font-family: 'Inter', sans-serif !important; }
-          </style>
-        </head>
-        <body>
-          <div class="print-container">
-            ${element.outerHTML}
-          </div>
-          <script>
-            window.onload = () => {
-              window.print();
-              setTimeout(() => window.close(), 500);
-            };
-          </script>
-        </body>
-      </html>
-    `;
-    printWindow.document.write(printHtml);
-    printWindow.document.close();
   };
 
   const handleIssueId = async (studentIds, issue = true) => {
@@ -431,15 +410,6 @@ export default function IdCardManagement() {
                         <span>{isGenerating ? "Processing Graphics..." : "Export High-Res ID Card"}</span>
                       </button>
                     </div>
-                    
-                    <button 
-                      onClick={handlePrint}
-                      disabled={!selectedStudent.id_card_issued}
-                      className="w-full py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all flex items-center justify-center space-x-3 disabled:opacity-30"
-                    >
-                      <Printer size={18} />
-                      <span>Direct Print (CR80)</span>
-                    </button>
                   </div>
                 </div>
               ) : (

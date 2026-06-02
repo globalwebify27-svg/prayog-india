@@ -239,14 +239,31 @@ export default function CertificateManagement() {
               } catch (e) {}
             });
 
-            // Remove external stylesheets to prevent html2canvas parsing errors on modern CSS colors.
-            // Google Fonts are preserved so @font-face rules still apply.
-            const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
-            linkTags.forEach(tag => {
-              if (tag.href && !tag.href.includes('fonts.googleapis.com')) {
-                tag.remove();
+            let fontFaces = '';
+          for (let i = 0; i < document.styleSheets.length; i++) {
+            try {
+              const rules = document.styleSheets[i].cssRules;
+              for (let j = 0; j < rules.length; j++) {
+                if (rules[j].type === CSSRule.FONT_FACE_RULE) {
+                  fontFaces += rules[j].cssText + '\n';
+                }
               }
-            });
+            } catch (e) {}
+          }
+          if (fontFaces) {
+            const style = clonedDoc.createElement('style');
+            style.innerHTML = fontFaces;
+            clonedDoc.head.appendChild(style);
+          }
+
+          // Remove external stylesheets to prevent html2canvas parsing errors on modern CSS colors.
+          // Google Fonts are preserved so @font-face rules still apply.
+          const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
+          linkTags.forEach(tag => {
+            if (tag.href && !tag.href.includes('fonts.googleapis.com')) {
+              tag.remove();
+            }
+          });
 
             const inlineStyles = (source, target) => {
               if (!source || !target) return;
@@ -572,9 +589,7 @@ export default function CertificateManagement() {
                       {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} className="text-primary" />}
                       <span>{isDownloading ? "Generating PDF..." : "Download High-Res PDF"}</span>
                     </button>
-                    <button onClick={() => { window.print(); }} className="w-full flex items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-200 text-slate-700 gap-3 text-xs font-bold uppercase">
-                      <Printer size={18} /><span>Print Certificate</span>
-                    </button>
+
                     <button onClick={() => sendEmail(selectedCert)} className="w-full flex items-center justify-center p-4 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all border border-emerald-100 text-emerald-700 gap-3 text-xs font-bold uppercase">
                       <Mail size={18} /><span>Send Professional Mail</span>
                     </button>

@@ -68,6 +68,96 @@ export default function StudentIdCardPage() {
         scale: 3,
         useCORS: true,
         backgroundColor: "#ffffff",
+        onclone: (clonedDoc, elementNode) => {
+          const dummyCanvas = document.createElement('canvas');
+          dummyCanvas.width = 1;
+          dummyCanvas.height = 1;
+          const ctx = dummyCanvas.getContext('2d', { willReadFrequently: true });
+          
+          const normalizeColorStr = (str) => {
+            if (!str || typeof str !== 'string') return str;
+            const matches = str.match(/(?:oklch|lab|oklab|lch|color)\((?:[^)(]+|\([^)(]*\))*\)/g);
+            if (!matches) return str;
+            
+            let result = str;
+            matches.forEach(match => {
+              ctx.clearRect(0, 0, 1, 1);
+              ctx.fillStyle = 'rgba(0,0,0,0)';
+              ctx.fillStyle = match;
+              ctx.fillRect(0, 0, 1, 1);
+              const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+              const rgbaStr = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+              result = result.split(match).join(rgbaStr);
+            });
+            return result;
+          };
+
+          const styleTags = clonedDoc.querySelectorAll('style');
+          styleTags.forEach(tag => {
+            try {
+              if (tag.innerHTML && tag.innerHTML.match(/(oklch|lab|oklab|lch|color)\(/)) {
+                tag.innerHTML = normalizeColorStr(tag.innerHTML);
+              }
+            } catch (e) {}
+          });
+
+          let fontFaces = '';
+          for (let i = 0; i < document.styleSheets.length; i++) {
+            try {
+              const rules = document.styleSheets[i].cssRules;
+              for (let j = 0; j < rules.length; j++) {
+                if (rules[j].type === CSSRule.FONT_FACE_RULE) {
+                  fontFaces += rules[j].cssText + '\n';
+                }
+              }
+            } catch (e) {}
+          }
+          if (fontFaces) {
+            const style = clonedDoc.createElement('style');
+            style.innerHTML = fontFaces;
+            clonedDoc.head.appendChild(style);
+          }
+
+          const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
+          linkTags.forEach(tag => {
+            if (tag.href && !tag.href.includes('fonts.googleapis.com')) {
+              tag.remove();
+            }
+          });
+
+          const inlineStyles = (source, target) => {
+            if (!source || !target) return;
+            const computed = window.getComputedStyle(source);
+            for (let i = 0; i < computed.length; i++) {
+              const key = computed[i];
+              let value = computed.getPropertyValue(key);
+              
+              if (value && (value.includes('oklch') || value.includes('lab') || value.includes('color('))) {
+                value = normalizeColorStr(value);
+              }
+              try {
+                target.style[key] = value;
+              } catch (e) {}
+            }
+            
+            for (let i = 0; i < source.children.length; i++) {
+              if (target.children[i]) {
+                inlineStyles(source.children[i], target.children[i]);
+              }
+            }
+          };
+
+          const originalElement = document.getElementById("id-card-element");
+          if (originalElement && elementNode) {
+            inlineStyles(originalElement, elementNode);
+            const allElements = clonedDoc.body.querySelectorAll('*');
+            allElements.forEach(el => {
+              if (!elementNode.contains(el) && el !== elementNode && !el.contains(elementNode) && el.tagName !== 'STYLE' && el.tagName !== 'LINK') {
+                el.setAttribute('data-html2canvas-ignore', 'true');
+              }
+            });
+          }
+        }
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -143,21 +233,14 @@ export default function StudentIdCardPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <div className="w-full mt-4">
           <button 
             onClick={downloadIdCard}
             disabled={isGenerating}
-            className="flex items-center justify-center space-x-2 bg-navy text-white py-4 rounded-2xl font-bold text-sm hover:bg-black transition-all shadow-lg disabled:opacity-70"
+            className="w-full flex items-center justify-center space-x-2 bg-navy text-white py-4 rounded-2xl font-bold text-sm hover:bg-black transition-all shadow-lg disabled:opacity-70"
           >
             {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
             <span>Download Digital Copy</span>
-          </button>
-          <button 
-            onClick={() => window.print()}
-            className="flex items-center justify-center space-x-2 bg-white border border-slate-200 text-slate-600 py-4 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all"
-          >
-            <Printer size={18} />
-            <span>Print Credential</span>
           </button>
         </div>
         

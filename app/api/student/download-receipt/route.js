@@ -114,7 +114,9 @@ export async function GET(request) {
     }
 
     // Redirect to the URL
-    return NextResponse.redirect(new URL(receiptUrl, request.url));
+    const origin = new URL(request.url).origin;
+    const finalUrl = receiptUrl.startsWith("http") ? receiptUrl : new URL(receiptUrl, origin).toString();
+    return NextResponse.redirect(finalUrl);
   } catch (error) {
     console.error("Receipt Download Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -15,7 +15,7 @@ export async function GET(request) {
           u.name as student_name, 
           c.id as course_id, 
           c.title as course_name,
-          e.enrolled_at as issue_date
+          MAX(e.enrolled_at) as issue_date
         FROM enrollments e
         JOIN users u ON e.user_id = u.id
         JOIN courses c ON e.course_id = c.id
@@ -27,6 +27,7 @@ export async function GET(request) {
         query += " AND c.id = ?";
         params.push(courseId);
       }
+      query += " GROUP BY u.id, u.name, c.id, c.title";
       const [rows] = await pool.execute(query, params);
       return NextResponse.json({ success: true, certificates: rows });
     }
