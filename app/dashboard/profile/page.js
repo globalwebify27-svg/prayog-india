@@ -187,9 +187,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (section) => {
     // Aadhar validation for students
-    if (user?.role !== 'teacher') {
+    if (user?.role !== 'teacher' && section === 'kyc') {
       if (!formData.id_number || formData.id_number.replace(/\D/g, '').length !== 12) {
         showAlert("Validation Error", "Aadhar number is mandatory and must be exactly 12 digits.", "error");
         return;
@@ -203,7 +203,8 @@ export default function ProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          expertise: typeof formData.expertise === 'string' ? formData.expertise.split(',').map(e => e.trim()).filter(e => e) : formData.expertise
+          expertise: typeof formData.expertise === 'string' ? formData.expertise.split(',').map(e => e.trim()).filter(e => e) : formData.expertise,
+          section
         })
       });
       const data = await res.json();
@@ -328,14 +329,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        <button 
-          onClick={handleSave}
-          disabled={isSaving}
-          className="flex items-center space-x-2 bg-navy text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
-        >
-          {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          <span>{isSaving ? "Saving..." : "Save changes"}</span>
-        </button>
       </div>
 
       {/* Tabs */}
@@ -515,6 +508,17 @@ export default function ProfilePage() {
                   ></textarea>
                 </div>
               </div>
+              
+              <div className="flex justify-end pt-6 border-t border-slate-100">
+                <button 
+                  onClick={() => handleSave('personal')}
+                  disabled={isSaving}
+                  className="flex items-center space-x-2 bg-navy text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  <span>Save General Details</span>
+                </button>
+              </div>
             </motion.div>
           )}
 
@@ -561,6 +565,17 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="flex justify-end pt-6 border-t border-slate-100">
+                <button 
+                  onClick={() => handleSave('academic')}
+                  disabled={isSaving}
+                  className="flex items-center space-x-2 bg-navy text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  <span>Save Academic Records</span>
+                </button>
               </div>
             </motion.div>
           )}
@@ -742,6 +757,17 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
+
+              <div className="flex justify-end pt-6 border-t border-slate-100">
+                <button 
+                  onClick={() => handleSave('kyc')}
+                  disabled={isSaving}
+                  className="flex items-center space-x-2 bg-navy text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  <span>Save Identity Documents</span>
+                </button>
+              </div>
             </motion.div>
           )}
 
@@ -798,6 +824,17 @@ export default function ProfilePage() {
                   placeholder="Share your journey and expertise with students..." 
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium resize-none"
                 ></textarea>
+              </div>
+              
+              <div className="flex justify-end pt-6 border-t border-slate-100">
+                <button 
+                  onClick={() => handleSave('professional')}
+                  disabled={isSaving}
+                  className="flex items-center space-x-2 bg-navy text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  <span>Save Professional Info</span>
+                </button>
               </div>
             </motion.div>
           )}

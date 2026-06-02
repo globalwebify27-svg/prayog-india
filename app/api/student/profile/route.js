@@ -30,8 +30,8 @@ export async function POST(req) {
 
     // Aadhar validation for students
     if (userRole !== 'teacher') {
-      if (!id_number || id_number.replace(/\D/g, '').length !== 12) {
-        return NextResponse.json({ success: false, message: "Aadhar number is mandatory and must be exactly 12 digits." }, { status: 400 });
+      if (id_number && id_number.replace(/\D/g, '').length !== 12) {
+        return NextResponse.json({ success: false, message: "If provided, Aadhar number must be exactly 12 digits." }, { status: 400 });
       }
     }
 
