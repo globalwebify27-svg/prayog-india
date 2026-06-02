@@ -114,7 +114,10 @@ export async function GET(request) {
     }
 
     // Redirect to the URL
-    const origin = new URL(request.url).origin;
+    const host = request.headers.get("host") || "localhost:3000";
+    const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+    const origin = `${protocol}://${host}`;
+
     const finalUrl = receiptUrl.startsWith("http") ? receiptUrl : new URL(receiptUrl, origin).toString();
     return NextResponse.redirect(finalUrl);
   } catch (error) {

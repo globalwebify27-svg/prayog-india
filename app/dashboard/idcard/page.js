@@ -101,22 +101,12 @@ export default function StudentIdCardPage() {
             } catch (e) {}
           });
 
-          let fontFaces = '';
-          for (let i = 0; i < document.styleSheets.length; i++) {
-            try {
-              const rules = document.styleSheets[i].cssRules;
-              for (let j = 0; j < rules.length; j++) {
-                if (rules[j].type === CSSRule.FONT_FACE_RULE) {
-                  fontFaces += rules[j].cssText + '\n';
-                }
-              }
-            } catch (e) {}
-          }
-          if (fontFaces) {
-            const style = clonedDoc.createElement('style');
-            style.innerHTML = fontFaces;
-            clonedDoc.head.appendChild(style);
-          }
+          // Inject Google Fonts directly to ensure html2canvas has the correct fonts
+          // even if local stylesheets are removed or fail to parse.
+          const fontLink = clonedDoc.createElement('link');
+          fontLink.rel = 'stylesheet';
+          fontLink.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap';
+          clonedDoc.head.appendChild(fontLink);
 
           const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
           linkTags.forEach(tag => {
@@ -136,9 +126,18 @@ export default function StudentIdCardPage() {
                 value = normalizeColorStr(value);
               }
               try {
+                // Prevent html2canvas text-rendering and font-ligatures bugs
+                if (key === 'text-rendering') value = 'auto';
+                if (key === 'font-variant-ligatures') value = 'normal';
+                
                 target.style[key] = value;
               } catch (e) {}
             }
+            
+            // Force safe text properties
+            target.style.textRendering = 'auto';
+            target.style.fontVariantLigatures = 'normal';
+            target.style.letterSpacing = computed.letterSpacing === 'normal' ? '0px' : computed.letterSpacing;
             
             for (let i = 0; i < source.children.length; i++) {
               if (target.children[i]) {
