@@ -30,7 +30,7 @@ export async function GET() {
     
     // 2. Get Enrollments with Meeting Links
     const [enrollments] = await pool.query(`
-      SELECT e.*, c.title, c.duration, c.type as mode, b.meeting_link, b.start_time, b.end_time, b.schedule 
+      SELECT e.*, c.title, c.duration, c.type as mode, c.modules, b.meeting_link, b.start_time, b.end_time, b.schedule 
       FROM enrollments e 
       JOIN courses c ON e.course_id = c.id 
       LEFT JOIN batches b ON e.batch_id = b.id

@@ -153,6 +153,17 @@ export default function ProfilePage() {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Validate file size
+    const isImage = file.type.startsWith('image/');
+    const maxSizeMB = isImage ? 5 : 32;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+    if (file.size > maxSizeBytes) {
+      showAlert("File Too Large", `The selected file exceeds the allowed size limit. Images must be under 5MB. Other files can be up to 32MB.`, "warning");
+      e.target.value = '';
+      return;
+    }
+
     setIsUploading(true);
     const uploadData = new FormData();
     uploadData.append("file", file);
@@ -177,6 +188,14 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
+    // Aadhar validation for students
+    if (user?.role !== 'teacher') {
+      if (!formData.id_number || formData.id_number.replace(/\D/g, '').length !== 12) {
+        showAlert("Validation Error", "Aadhar number is mandatory and must be exactly 12 digits.", "error");
+        return;
+      }
+    }
+
     setIsSaving(true);
     try {
       const res = await fetch("/api/student/profile", {
@@ -574,24 +593,24 @@ export default function ProfilePage() {
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-slate-700 ml-1">Identity Document Type</label>
                       <select 
-                        value={formData.id_type} 
-                        onChange={(e) => setFormData({...formData, id_type: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium appearance-none"
+                        value="Aadhar Card"
+                        disabled
+                        className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg outline-none text-slate-500 text-sm font-medium appearance-none cursor-not-allowed"
                       >
-                        <option value="">Select ID Type</option>
                         <option value="Aadhar Card">Aadhar Card</option>
-                        <option value="PAN Card">PAN Card</option>
-                        <option value="Voter ID">Voter ID</option>
-                        <option value="Passport">Passport</option>
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-700 ml-1">Document / ID Number</label>
+                      <label className="text-xs font-bold text-slate-700 ml-1">Aadhar Number (12 Digits)</label>
                       <input 
                         type="text" 
+                        maxLength={12}
                         value={formData.id_number} 
-                        onChange={(e) => setFormData({...formData, id_number: e.target.value})}
-                        placeholder="Enter Identification Number" 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                          setFormData({...formData, id_number: val, id_type: 'Aadhar Card'});
+                        }}
+                        placeholder="Enter 12 Digit Aadhar Number" 
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
                       />
                     </div>

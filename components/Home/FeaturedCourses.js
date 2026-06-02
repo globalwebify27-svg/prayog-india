@@ -15,6 +15,26 @@ import 'swiper/css/pagination';
 export default function FeaturedCourses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+
+  useEffect(() => {
+    async function fetchEnrollments() {
+      try {
+        const authRes = await fetch("/api/auth/me");
+        const authData = await authRes.json();
+        if (authData.success && authData.user) {
+          const dashRes = await fetch("/api/student/dashboard");
+          const dashData = await dashRes.json();
+          if (dashData.success && dashData.data && dashData.data.enrollments) {
+            setEnrolledCourseIds(dashData.data.enrollments.map(e => e.course_id));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch enrollments in FeaturedCourses:", err);
+      }
+    }
+    fetchEnrollments();
+  }, []);
 
   useEffect(() => {
     async function fetchFeatured() {
@@ -93,8 +113,13 @@ export default function FeaturedCourses() {
         >
           {courses.map((course) => (
             <SwiperSlide key={course.id}>
-              <div className="relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all group h-full flex flex-col">
-                <Link href={course.id === 6 ? "/summer-camp" : `/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />
+              <div className={`relative bg-white rounded-2xl border border-slate-100 overflow-hidden transition-all group h-full flex flex-col ${enrolledCourseIds.includes(course.id) ? 'opacity-60 grayscale pointer-events-none shadow-none' : 'shadow-sm hover:shadow-xl'}`}>
+                {enrolledCourseIds.includes(course.id) ? null : <Link href={course.id === 6 ? "/summer-camp" : `/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />}
+                {enrolledCourseIds.includes(course.id) && (
+                  <div className="absolute top-5 -right-9 bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest py-1.5 px-10 rotate-45 z-30 shadow-md flex items-center justify-center pointer-events-none">
+                    Enrolled
+                  </div>
+                )}
                 {/* Image Area */}
                 <div className="relative h-44 overflow-hidden shrink-0 pointer-events-none">
                   {course.image ? (
@@ -140,12 +165,21 @@ export default function FeaturedCourses() {
                     <div className="flex items-center justify-between gap-4">
                       <span className="text-xl font-heading font-black text-navy">₹{Number(course.price).toLocaleString('en-IN')}</span>
                       <div className="flex space-x-2">
-                        <Link 
-                          href={course.id === 6 ? "/summer-camp" : `/register?course=${course.id}`}
-                          className="relative z-20 w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all group-hover:rotate-[-45deg] shadow-lg shadow-navy/20"
-                        >
-                          <ArrowRight size={18} />
-                        </Link>
+                        {enrolledCourseIds.includes(course.id) ? (
+                          <button 
+                            disabled
+                            className="relative z-20 px-4 h-10 rounded-xl bg-slate-300 text-slate-500 flex items-center justify-center font-bold text-xs shadow-none cursor-not-allowed"
+                          >
+                            Enrolled
+                          </button>
+                        ) : (
+                          <Link 
+                            href={course.id === 6 ? "/summer-camp" : `/register?course=${course.id}`}
+                            className="relative z-20 w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all group-hover:rotate-[-45deg] shadow-lg shadow-navy/20"
+                          >
+                            <ArrowRight size={18} />
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>

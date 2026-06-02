@@ -64,7 +64,42 @@ function RegisterForm({ pageContent }) {
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          setIsLoggedIn(true);
+          fetch("/api/student/dashboard")
+            .then(dRes => dRes.json())
+            .then(dData => {
+               const u = dData?.data?.user;
+               if (u) {
+                 setFormData(prev => ({
+                   ...prev,
+                   name: u.name || data.user.name || "",
+                   email: u.email || data.user.email || "",
+                   phone: u.phone || "",
+                   emergencyContact: u.emergency_contact || ""
+                 }));
+               } else {
+                 setFormData(prev => ({
+                   ...prev,
+                   name: data.user.name || "",
+                   email: data.user.email || ""
+                 }));
+               }
+            })
+            .catch(() => {});
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const checkEmailAvailability = async (email) => {
+    if (isLoggedIn) return;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return;
     }
@@ -167,14 +202,16 @@ function RegisterForm({ pageContent }) {
         newErrors.emergencyContact = "Emergency contact must be a valid 10-digit mobile number.";
       }
 
-      if (!formData.password) {
-        newErrors.password = "Security password is required.";
-      } else if (formData.password.length < 6) {
-        newErrors.password = "Password must be at least 6 characters long.";
-      }
+      if (!isLoggedIn) {
+        if (!formData.password) {
+          newErrors.password = "Security password is required.";
+        } else if (formData.password.length < 6) {
+          newErrors.password = "Password must be at least 6 characters long.";
+        }
 
-      if (formData.confirmPassword !== formData.password) {
-        newErrors.confirmPassword = "Passwords do not match.";
+        if (formData.confirmPassword !== formData.password) {
+          newErrors.confirmPassword = "Passwords do not match.";
+        }
       }
     }
     setErrors(newErrors);
@@ -275,6 +312,18 @@ function RegisterForm({ pageContent }) {
 
   const selectedCourse = courses.find(c => c.id == formData.courseId);
 
+  // Auto-select batch if only one is available
+  useEffect(() => {
+    if (selectedCourse && selectedCourse.batches) {
+      const availableBatches = selectedCourse.batches.filter(b => b.type === formData.mode.toLowerCase());
+      if (availableBatches.length === 1 && formData.batch_id !== availableBatches[0].id) {
+        setFormData(prev => ({ ...prev, batch_id: availableBatches[0].id }));
+      } else if (availableBatches.length === 0 && formData.batch_id !== "") {
+        setFormData(prev => ({ ...prev, batch_id: "" }));
+      }
+    }
+  }, [selectedCourse, formData.mode, formData.batch_id]);
+
   // Resend OTP countdown timer
   useEffect(() => {
     let timer;
@@ -286,10 +335,14 @@ function RegisterForm({ pageContent }) {
 
   // Reset verification if user changes email
   useEffect(() => {
+    if (isLoggedIn) {
+      setIsEmailVerified(true);
+      return;
+    }
     setIsEmailVerified(false);
     setIsOtpModalOpen(false);
     setOtpCode("");
-  }, [formData.email]);
+  }, [formData.email, isLoggedIn]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -751,10 +804,11 @@ function RegisterForm({ pageContent }) {
                         name="name" 
                         value={formData.name} 
                         onChange={handleInputChange} 
+                        disabled={isLoggedIn}
                         placeholder="Rahul Sharma" 
                         className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
                           errors.name ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
-                        }`} 
+                        } ${isLoggedIn ? "opacity-70 cursor-not-allowed bg-slate-100" : ""}`} 
                       />
                     </div>
                     {errors.name && (
@@ -776,12 +830,12 @@ function RegisterForm({ pageContent }) {
                           name="email" 
                           value={formData.email} 
                           onChange={handleInputChange} 
-                          disabled={isEmailVerified}
+                          disabled={isEmailVerified || isLoggedIn}
                           onBlur={(e) => checkEmailAvailability(e.target.value)}
                           placeholder="name@email.com" 
                           className={`w-full pl-11 pr-10 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
                             errors.email ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
-                          } ${isEmailVerified ? "border-emerald-300 bg-emerald-50/20 text-emerald-800" : ""}`} 
+                          } ${isEmailVerified ? "border-emerald-300 bg-emerald-50/20 text-emerald-800" : ""} ${isLoggedIn ? "opacity-70 cursor-not-allowed bg-slate-100" : ""}`} 
                         />
                         {isCheckingEmail && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
@@ -813,16 +867,18 @@ function RegisterForm({ pageContent }) {
                     {isEmailVerified && (
                       <div className="flex justify-between items-center mt-1 ml-1">
                         <p className="text-[10px] text-emerald-600 font-bold">Email verified successfully.</p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsEmailVerified(false);
-                            setOtpCode("");
-                          }}
-                          className="text-[10px] text-rose-500 font-bold hover:underline"
-                        >
-                          Change Email
-                        </button>
+                        {!isLoggedIn && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsEmailVerified(false);
+                              setOtpCode("");
+                            }}
+                            className="text-[10px] text-rose-500 font-bold hover:underline"
+                          >
+                            Change Email
+                          </button>
+                        )}
                       </div>
                     )}
                     {errors.email && (
@@ -846,10 +902,11 @@ function RegisterForm({ pageContent }) {
                           if (val.length > 10) val = val.slice(0, 10);
                           setFormData({...formData, phone: val});
                         }}
+                        disabled={isLoggedIn}
                         placeholder="70330XXXXX (10-digits)" 
                         className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
                           errors.phone ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
-                        }`} 
+                        } ${isLoggedIn ? "opacity-70 cursor-not-allowed bg-slate-100" : ""}`} 
                       />
                     </div>
                     {errors.phone && (
@@ -872,10 +929,11 @@ function RegisterForm({ pageContent }) {
                           if (val.length > 10) val = val.slice(0, 10);
                           setFormData({...formData, emergencyContact: val});
                         }}
+                        disabled={isLoggedIn}
                         placeholder="Guardian's 10-digit Number" 
                         className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
                           errors.emergencyContact ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
-                        }`} 
+                        } ${isLoggedIn ? "opacity-70 cursor-not-allowed bg-slate-100" : ""}`} 
                       />
                     </div>
                     {errors.emergencyContact && (
@@ -885,65 +943,69 @@ function RegisterForm({ pageContent }) {
                     )}
                   </div>
                   
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Secure password</label>
-                    <div className="relative group">
-                      <LockIcon size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.password ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
-                      <input 
-                        type={showPassword ? "text" : "password"} 
-                        name="password" 
-                        value={formData.password} 
-                        onChange={handleInputChange} 
-                        placeholder="••••••••" 
-                        className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
-                          errors.password ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
-                        }`} 
-                      />
-                      <button 
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                    {errors.password && (
-                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
-                        <AlertCircle size={10} /> {errors.password}
-                      </p>
-                    )}
-                  </div>
+                  {!isLoggedIn && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Secure password</label>
+                        <div className="relative group">
+                          <LockIcon size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.password ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
+                          <input 
+                            type={showPassword ? "text" : "password"} 
+                            name="password" 
+                            value={formData.password} 
+                            onChange={handleInputChange} 
+                            placeholder="••••••••" 
+                            className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-lg outline-none focus:bg-white transition-all text-sm font-medium ${
+                              errors.password ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" : "border-slate-200 focus:border-navy"
+                            }`} 
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                        {errors.password && (
+                          <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                            <AlertCircle size={10} /> {errors.password}
+                          </p>
+                        )}
+                      </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Confirm password</label>
-                    <div className="relative group">
-                      <LockIcon size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.confirmPassword ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
-                      <input 
-                        type={showConfirmPassword ? "text" : "password"} 
-                        name="confirmPassword" 
-                        value={formData.confirmPassword} 
-                        onChange={handleInputChange} 
-                        placeholder="••••••••" 
-                        className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-lg outline-none transition-all text-sm font-medium ${
-                          errors.confirmPassword
-                            ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" 
-                            : "border-slate-200 focus:border-navy focus:bg-white"
-                        }`} 
-                      />
-                      <button 
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                    {errors.confirmPassword && (
-                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
-                        <AlertCircle size={10} /> {errors.confirmPassword}
-                      </p>
-                    )}
-                  </div>
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Confirm password</label>
+                        <div className="relative group">
+                          <LockIcon size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${errors.confirmPassword ? 'text-rose-400' : 'text-slate-400 group-focus-within:text-navy'}`} />
+                          <input 
+                            type={showConfirmPassword ? "text" : "password"} 
+                            name="confirmPassword" 
+                            value={formData.confirmPassword} 
+                            onChange={handleInputChange} 
+                            placeholder="••••••••" 
+                            className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-lg outline-none transition-all text-sm font-medium ${
+                              errors.confirmPassword
+                                ? "border-rose-300 focus:border-rose-500 bg-rose-50/30" 
+                                : "border-slate-200 focus:border-navy focus:bg-white"
+                            }`} 
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
+                          >
+                            {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                        {errors.confirmPassword && (
+                          <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                            <AlertCircle size={10} /> {errors.confirmPassword}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.div>
             )}

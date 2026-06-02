@@ -37,17 +37,24 @@ export async function POST(req) {
     
     if (existing.length > 0) {
       userId = existing[0].id;
-      // Check if they have any paid enrollment
-      const [paidEnrollments] = await pool.query("SELECT id FROM enrollments WHERE user_id = ? AND payment_status != 'pending'", [userId]);
+      // Check if they have a paid enrollment for THIS SPECIFIC course
+      const [paidEnrollments] = await pool.query("SELECT id FROM enrollments WHERE user_id = ? AND course_id = ? AND payment_status != 'pending'", [userId, course_id]);
       if (paidEnrollments.length > 0) {
-        return NextResponse.json({ success: false, message: "Email already registered with active enrollments. Please login." }, { status: 400 });
+        return NextResponse.json({ success: false, message: "You are already enrolled in this specific course. Please login to your dashboard." }, { status: 400 });
       } else {
-        // Ghost user (failed payment previously). Update details so they can try again.
-        const hashedPassword = await bcrypt.hash(password || "Prayog@2026", 10);
-        await pool.query(
-          "UPDATE users SET name = ?, password = ?, phone = ?, emergency_contact = ? WHERE id = ?",
-          [name, hashedPassword, phone, emergency_contact, userId]
-        );
+        // Existing user enrolling in a new course (or re-attempting). Update details so they match the new form submission.
+        if (password) {
+          const hashedPassword = await bcrypt.hash(password, 10);
+          await pool.query(
+            "UPDATE users SET name = ?, password = ?, phone = ?, emergency_contact = ? WHERE id = ?",
+            [name, hashedPassword, phone, emergency_contact, userId]
+          );
+        } else {
+          await pool.query(
+            "UPDATE users SET name = ?, phone = ?, emergency_contact = ? WHERE id = ?",
+            [name, phone, emergency_contact, userId]
+          );
+        }
       }
     } else {
       // 2. Hash Password

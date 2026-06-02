@@ -50,13 +50,18 @@ export default function ResourcesPage() {
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Learning Resources</h1>
           <p className="text-slate-500 text-sm mt-1">Access study materials, assignments, and recorded archives.</p>
         </div>
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Search materials..." 
-            className="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold focus:border-navy focus:ring-2 focus:ring-navy/10 outline-none w-64 shadow-sm transition-all"
-          />
+        <div className="flex items-center gap-4">
+          <Link href="/courses" className="px-4 py-2.5 bg-navy text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-black transition-colors shadow-md">
+            Browse New Courses
+          </Link>
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search materials..." 
+              className="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold focus:border-navy focus:ring-2 focus:ring-navy/10 outline-none w-64 shadow-sm transition-all"
+            />
+          </div>
         </div>
       </div>
 
@@ -93,7 +98,28 @@ export default function ResourcesPage() {
 
                 <div className="divide-y divide-slate-100">
                   {!courseMaterials[course.course_id] || courseMaterials[course.course_id].length === 0 ? (
-                    <p className="p-10 text-center text-xs font-medium text-slate-400 italic">No materials uploaded by faculty yet.</p>
+                    (() => {
+                      const modulesArr = course.modules ? (typeof course.modules === 'string' ? JSON.parse(course.modules) : course.modules) : [];
+                      if (modulesArr.length === 0) {
+                        return <p className="p-10 text-center text-xs font-medium text-slate-400 italic">No materials uploaded by faculty yet.</p>;
+                      }
+                      return modulesArr.map((mod, i) => (
+                        <div key={`mod-${i}`} className="p-5 flex items-center justify-between group hover:bg-slate-50 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 rounded-lg bg-navy/5 text-navy transition-transform group-hover:scale-110">
+                              <BookOpen size={20} />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-slate-900">{mod}</h4>
+                              <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                                Learning Module • Module {String(i + 1).padStart(2, '0')}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest border border-slate-200 px-2 py-1 rounded bg-slate-50">Pending Materials</span>
+                        </div>
+                      ));
+                    })()
                   ) : courseMaterials[course.course_id].map((m) => (
                     <div key={m.id} className={`p-5 flex items-center justify-between group transition-colors ${m.is_locked ? 'bg-slate-50/50 opacity-60' : 'hover:bg-slate-50'}`}>
                       <div className="flex items-center gap-4">

@@ -15,6 +15,14 @@ export async function POST(request) {
     const buffer = Buffer.from(bytes);
 
     const mimeType = file.type || 'application/octet-stream';
+    const isImage = mimeType.startsWith('image/');
+    const maxSizeMB = isImage ? 5 : 32;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+    if (buffer.length > maxSizeBytes) {
+      return NextResponse.json({ error: `File size exceeds the allowed limit. Images must be under 5MB. Other files can be up to 32MB.` }, { status: 400 });
+    }
+
     const filename = file.name.replaceAll(" ", "_");
 
     // Connect to database

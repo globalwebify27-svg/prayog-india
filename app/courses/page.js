@@ -36,6 +36,26 @@ function CoursesPageContent() {
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [dynamicCategories, setDynamicCategories] = useState(["All", "Internships", "1:1 Training"]);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+
+  useEffect(() => {
+    async function fetchEnrollments() {
+      try {
+        const authRes = await fetch("/api/auth/me");
+        const authData = await authRes.json();
+        if (authData.success && authData.user) {
+          const dashRes = await fetch("/api/student/dashboard");
+          const dashData = await dashRes.json();
+          if (dashData.success && dashData.data && dashData.data.enrollments) {
+            setEnrolledCourseIds(dashData.data.enrollments.map(e => e.course_id));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch enrollments:", err);
+      }
+    }
+    fetchEnrollments();
+  }, []);
 
   useEffect(() => {
     async function fetchCourses() {
@@ -179,11 +199,16 @@ function CoursesPageContent() {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={`bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all flex group overflow-hidden relative ${
+                className={`bg-white border border-slate-200 transition-all flex group overflow-hidden relative ${
                   viewMode === 'grid' ? 'flex-col rounded-2xl' : 'flex-row items-center rounded-xl p-3'
-                }`}
+                } ${enrolledCourseIds.includes(course.id) ? 'opacity-60 grayscale pointer-events-none shadow-none' : 'shadow-sm hover:shadow-md'}`}
               >
-                <Link href={`/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />
+                {enrolledCourseIds.includes(course.id) ? null : <Link href={`/courses/${course.id}`} className="absolute inset-0 z-10" aria-label={`View details for ${course.title}`} />}
+                {enrolledCourseIds.includes(course.id) && (
+                  <div className="absolute top-5 -right-9 bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest py-1.5 px-10 rotate-45 z-30 shadow-md flex items-center justify-center pointer-events-none">
+                    Enrolled
+                  </div>
+                )}
                 {/* Image */}
                 <div className={`relative overflow-hidden shrink-0 bg-slate-100 ${
                   viewMode === 'grid' ? 'h-52 w-full' : 'h-24 w-36 rounded-lg'
@@ -249,9 +274,15 @@ function CoursesPageContent() {
                       </div>
                     </div>
                     
-                    <Link href={`/register?course=${course.id}`} className="relative z-20 w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm group-hover:shadow-md shrink-0">
-                      <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                    </Link>
+                    {enrolledCourseIds.includes(course.id) ? (
+                      <button disabled className="relative z-20 px-4 h-10 rounded-xl bg-slate-300 text-slate-500 font-bold text-xs flex items-center justify-center shadow-sm shrink-0 cursor-not-allowed">
+                        Enrolled
+                      </button>
+                    ) : (
+                      <Link href={`/register?course=${course.id}`} className="relative z-20 w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center hover:bg-black transition-all shadow-sm group-hover:shadow-md shrink-0">
+                        <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </Link>
+                    )}
                   </div>
                 </div>
               </motion.div>

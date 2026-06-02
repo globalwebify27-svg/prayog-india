@@ -79,11 +79,18 @@ export async function POST(req) {
     
     if (existing.length > 0) {
       userId = existing[0].id;
-      const hashedPassword = await bcrypt.hash(password || "Prayog@2026", 10);
-      await pool.query(
-        "UPDATE users SET name = ?, password = ?, phone = ?, emergency_contact = ? WHERE id = ?",
-        [name, hashedPassword, phone, emergency_contact || null, userId]
-      );
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await pool.query(
+          "UPDATE users SET name = ?, password = ?, phone = ?, emergency_contact = ? WHERE id = ?",
+          [name, hashedPassword, phone, emergency_contact || null, userId]
+        );
+      } else {
+        await pool.query(
+          "UPDATE users SET name = ?, phone = ?, emergency_contact = ? WHERE id = ?",
+          [name, phone, emergency_contact || null, userId]
+        );
+      }
     } else {
       const hashedPassword = await bcrypt.hash(password || "Prayog@2026", 10);
       const [userResult] = await pool.execute(

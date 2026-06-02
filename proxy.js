@@ -48,8 +48,8 @@ export async function proxy(request) {
     }
   }
 
-  // 4. Redirect logged-in users away from login/register pages
-  if (token && (pathname === "/login" || pathname === "/register")) {
+  // 4. Redirect logged-in users away from login page
+  if (token && pathname === "/login") {
     try {
       const { payload } = await jwtVerify(token, SECRET);
       if (payload.role === "admin" || payload.role === "teacher") {
@@ -70,7 +70,6 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/dashboard/:path*",
-    "/login",
-    "/register"
+    "/login"
   ],
 };

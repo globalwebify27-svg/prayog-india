@@ -68,11 +68,13 @@ export default function CourseDetailPage() {
       <section className="pt-28 pb-12 bg-navy relative overflow-hidden flex items-center">
         {/* Background Layer */}
         <div className="absolute inset-0">
-          <img
-            src={course.image}
-            className="w-full h-full object-cover opacity-20"
-            alt={course.title}
-          />
+          {course.image ? (
+            <img
+              src={course.image}
+              className="w-full h-full object-cover opacity-20"
+              alt={course.title}
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/95 to-navy/70" />
         </div>
 

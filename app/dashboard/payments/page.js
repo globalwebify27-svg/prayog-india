@@ -28,7 +28,9 @@ export default async function PaymentsPage() {
         i.paid_at,
         i.receipt_url,
         c.title as course_name,
-        e.id as enrollment_id
+        e.id as enrollment_id,
+        (SELECT COUNT(*) FROM installments i2 WHERE i2.enrollment_id = e.id AND i2.id <= i.id) as installment_no,
+        (SELECT COUNT(*) FROM installments i3 WHERE i3.enrollment_id = e.id) as total_installments
       FROM installments i
       JOIN enrollments e ON i.enrollment_id = e.id
       JOIN courses c ON e.course_id = c.id
@@ -45,7 +47,9 @@ export default async function PaymentsPage() {
         NULL as paid_at,
         e.receipt_url,
         c.title as course_name,
-        e.id as enrollment_id
+        e.id as enrollment_id,
+        NULL as installment_no,
+        1 as total_installments
       FROM enrollments e
       JOIN courses c ON e.course_id = c.id
       WHERE e.user_id = ? AND NOT EXISTS (SELECT 1 FROM installments i WHERE i.enrollment_id = e.id)
@@ -109,6 +113,8 @@ export default async function PaymentsPage() {
           <div className="divide-y divide-slate-100">
             {history.map((item, index) => {
               const isOverdue = item.status === 'pending' && new Date(item.due_date) < new Date();
+              const isFullPayment = item.type === 'full' || item.total_installments === 1;
+              
               return (
                 <div key={`${item.type}-${item.id}`} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-4">
@@ -122,9 +128,9 @@ export default async function PaymentsPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-slate-900">
-                          {item.type === 'installment' ? `Installment ${index + 1}` : 'Full Program Payment'}
+                          {isFullPayment ? 'Full Payment' : `Installment ${item.installment_no} of ${item.total_installments}`}
                         </p>
-                        {item.type === 'full' && (
+                        {isFullPayment && (
                           <span className="text-[9px] font-bold bg-navy/10 text-navy px-1.5 py-0.5 rounded uppercase tracking-tighter">Full Payment</span>
                         )}
                       </div>
@@ -143,9 +149,9 @@ export default async function PaymentsPage() {
                     </div>
                     
                     <div className="flex gap-2">
-                      {item.status === 'paid' && item.receipt_url && (
+                      {item.status === 'paid' && (
                         <a 
-                          href={item.receipt_url} 
+                          href={`/api/student/download-receipt?type=${item.type}&id=${item.id}`} 
                           target="_blank" 
                           className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 hover:text-navy hover:border-navy rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all"
                         >
