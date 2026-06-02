@@ -74,8 +74,8 @@ const CertificateTemplate = ({
         {/* Middle Section: Recipient & Course */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, justifyContent: "center" }}>
           <p style={{ fontSize: "14px", color: "#A0B2C6", letterSpacing: "3px", textTransform: "uppercase", margin: "0 0 15px 0", fontFamily: "'Arial', sans-serif" }}>This is proudly presented to</p>
-          <h2 style={{ fontSize: "64px", fontWeight: "700", color: "#FFFFFF", margin: "0 0 20px 0", fontStyle: "italic", letterSpacing: "1px" }}>
-            {studentName.replace(/([a-z])([A-Z])/g, '$1 $2')}
+          <h2 style={{ fontSize: "64px", fontWeight: "700", color: "#FFFFFF", margin: "0 0 20px 0", fontStyle: "italic", letterSpacing: "3px" }}>
+            {studentName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/ /g, '\u00A0')}
           </h2>
           
           <p style={{ fontSize: "15px", color: "#A0B2C6", margin: "0 0 15px 0", lineHeight: "1.6", maxWidth: "800px", textAlign: "center", fontFamily: "'Arial', sans-serif" }}>
