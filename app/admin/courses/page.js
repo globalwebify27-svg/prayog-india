@@ -188,6 +188,8 @@ export default function AdminCoursesPage() {
         } else {
           setCourseToEdit({ ...courseToEdit, image: data.url });
         }
+      } else {
+        showAlert("Upload Failed", data.error || "Unable to process the image document.", "error", () => {}, "OK", false);
       }
     } catch (error) {
       showAlert("Upload Failed", "A technical error occurred during the visual asset upload.", "error", () => {}, "OK", false);
@@ -212,7 +214,7 @@ export default function AdminCoursesPage() {
           setCourseToEdit(prev => ({ ...prev, brochure: data.url }));
         }
       } else {
-        showAlert("Brochure Failed", data.message || "Unable to process the brochure document.", "error", () => {}, "OK", false);
+        showAlert("Brochure Failed", data.error || data.message || "Unable to process the brochure document.", "error", () => {}, "OK", false);
       }
     } catch (error) {
       showAlert("Upload Error", "System failure during brochure transmission.", "error", () => {}, "OK", false);
