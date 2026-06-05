@@ -99,7 +99,7 @@ export default function CertificateManagement() {
     try {
       const params = new URLSearchParams();
       if (filterCourse !== "all") params.append("courseId", filterCourse);
-      if (filterStatus !== "all") params.append("status", filterStatus);
+      params.append("status", filterStatus);
       
       const res = await fetch(`/api/certificates?${params.toString()}`);
       const data = await res.json();

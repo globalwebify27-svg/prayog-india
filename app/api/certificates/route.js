@@ -15,7 +15,9 @@ export async function GET(request) {
           u.name as student_name, 
           c.id as course_id, 
           c.title as course_name,
-          MAX(e.enrolled_at) as issue_date
+          MAX(e.enrolled_at) as issue_date,
+          NULL as id, NULL as certificate_number, NULL as qr_code_data,
+          NULL as from_date, NULL as to_date, NULL as institute_name
         FROM enrollments e
         JOIN users u ON e.user_id = u.id
         JOIN courses c ON e.course_id = c.id
@@ -30,6 +32,50 @@ export async function GET(request) {
       query += " GROUP BY u.id, u.name, c.id, c.title";
       const [rows] = await pool.execute(query, params);
       return NextResponse.json({ success: true, certificates: rows });
+    }
+
+    if (status === "all") {
+      let params = [];
+      let courseFilter = "";
+      if (courseId) {
+        courseFilter = " AND cr.id = ?";
+        params.push(courseId);
+      }
+
+      // Issued certificates
+      let issuedQuery = `
+        SELECT c.*, u.name as student_name, cr.title as course_name 
+        FROM certificates c 
+        JOIN users u ON c.user_id = u.id 
+        JOIN courses cr ON c.course_id = cr.id
+        WHERE 1=1${courseFilter}
+      `;
+
+      // Pending (enrolled but no certificate)
+      let pendingParams = [];
+      let pendingCourseFilter = "";
+      if (courseId) {
+        pendingCourseFilter = " AND cs.id = ?";
+        pendingParams.push(courseId);
+      }
+      let pendingQuery = `
+        SELECT 
+          NULL as id, u.id as user_id, cs.id as course_id,
+          NULL as certificate_number, MAX(e.enrolled_at) as issue_date, 
+          NULL as qr_code_data, NULL as from_date, NULL as to_date, NULL as institute_name,
+          u.name as student_name, cs.title as course_name
+        FROM enrollments e
+        JOIN users u ON e.user_id = u.id
+        JOIN courses cs ON e.course_id = cs.id
+        LEFT JOIN certificates cert ON e.user_id = cert.user_id AND e.course_id = cert.course_id
+        WHERE cert.id IS NULL${pendingCourseFilter}
+        GROUP BY u.id, u.name, cs.id, cs.title
+      `;
+
+      const [issuedRows] = await pool.execute(issuedQuery, params);
+      const [pendingRows] = await pool.execute(pendingQuery, pendingParams);
+      const combined = [...issuedRows, ...pendingRows];
+      return NextResponse.json({ success: true, certificates: combined });
     }
 
     let query = "SELECT c.*, u.name as student_name, cr.title as course_name FROM certificates c JOIN users u ON c.user_id = u.id JOIN courses cr ON c.course_id = cr.id";
