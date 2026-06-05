@@ -14,6 +14,10 @@ export default function VerifyCertificate() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [settings, setSettings] = useState({
+    signatory_name: "Authorized Signatory",
+    signatory_signature: "/assets/signature.png"
+  });
 
   useEffect(() => {
     if (id) {
@@ -23,12 +27,22 @@ export default function VerifyCertificate() {
 
   const fetchCertificate = async () => {
     try {
-      const res = await fetch(`/api/certificates/verify?certNo=${id}`);
-      const data = await res.json();
+      const [certRes, settingsRes] = await Promise.all([
+        fetch(`/api/certificates/verify?certNo=${id}`),
+        fetch('/api/admin/settings')
+      ]);
+      const data = await certRes.json();
+      const settingsData = await settingsRes.json();
       if (data.success) {
         setCert(data.certificate);
       } else {
         setError(data.error || "Certificate not found");
+      }
+      if (settingsData.success) {
+        setSettings({
+          signatory_name: settingsData.settings.signatory_name || "Authorized Signatory",
+          signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png"
+        });
       }
     } catch (err) {
       setError("Failed to verify certificate");
@@ -220,6 +234,8 @@ export default function VerifyCertificate() {
               date={new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               certificateNumber={cert.certificate_number}
               qrCodeData={cert.qr_code_data}
+              signatoryName={settings.signatory_name}
+              signatorySignature={settings.signatory_signature}
               fromDate={cert.from_date ? new Date(cert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
               toDate={cert.to_date ? new Date(cert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
               instituteName={cert.institute_name || ''}

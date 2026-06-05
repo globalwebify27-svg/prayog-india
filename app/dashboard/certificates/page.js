@@ -26,6 +26,10 @@ export default function CertificatesPage() {
   const [search, setSearch] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedCertForDownload, setSelectedCertForDownload] = useState(null);
+  const [settings, setSettings] = useState({
+    signatory_name: "Authorized Signatory",
+    signatory_signature: "/assets/signature.png"
+  });
   
   const certificateRef = useRef(null);
 
@@ -41,10 +45,20 @@ export default function CertificatesPage() {
       
       if (userData.success) {
         setUser(userData.user);
-        const certRes = await fetch(`/api/certificates?userId=${userData.user.id}`);
+        const [certRes, settingsRes] = await Promise.all([
+          fetch(`/api/certificates?userId=${userData.user.id}`),
+          fetch('/api/admin/settings')
+        ]);
         const certData = await certRes.json();
+        const settingsData = await settingsRes.json();
         if (certData.success) {
           setCertificates(certData.certificates);
+        }
+        if (settingsData.success) {
+          setSettings({
+            signatory_name: settingsData.settings.signatory_name || "Authorized Signatory",
+            signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png"
+          });
         }
       }
     } catch (error) {
@@ -315,6 +329,8 @@ export default function CertificatesPage() {
                 date={new Date(selectedCertForDownload.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} 
                 certificateNumber={selectedCertForDownload.certificate_number} 
                 qrCodeData={selectedCertForDownload.qr_code_data}
+                signatoryName={settings.signatory_name}
+                signatorySignature={settings.signatory_signature}
                 fromDate={selectedCertForDownload.from_date ? new Date(selectedCertForDownload.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
                 toDate={selectedCertForDownload.to_date ? new Date(selectedCertForDownload.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
                 instituteName={selectedCertForDownload.institute_name || ''}
