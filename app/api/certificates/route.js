@@ -62,7 +62,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { userId, courseId, issueDate, bulkCertificates } = body;
+    const { userId, courseId, issueDate, fromDate, toDate, instituteName, bulkCertificates } = body;
 
     if (bulkCertificates && Array.isArray(bulkCertificates)) {
       const results = [];
@@ -71,15 +71,18 @@ export async function POST(request) {
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://prayogindiarobotics.com";
         const qrData = `${baseUrl}/verify/${certNo}`;
         const query = `
-          INSERT INTO certificates (user_id, course_id, certificate_number, issue_date, qr_code_data)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO certificates (user_id, course_id, certificate_number, issue_date, qr_code_data, from_date, to_date, institute_name)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
         const [result] = await pool.execute(query, [
           cert.userId, 
           cert.courseId, 
           certNo, 
           issueDate || new Date().toISOString().split('T')[0],
-          qrData
+          qrData,
+          fromDate || null,
+          toDate || null,
+          instituteName || null
         ]);
         results.push({ userId: cert.userId, certificateNumber: certNo });
       }
@@ -94,8 +97,8 @@ export async function POST(request) {
     const certNo = `PR-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const query = `
-      INSERT INTO certificates (user_id, course_id, certificate_number, issue_date, qr_code_data)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO certificates (user_id, course_id, certificate_number, issue_date, qr_code_data, from_date, to_date, institute_name)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://prayogindiarobotics.com";
     const qrData = `${baseUrl}/verify/${certNo}`;
@@ -105,7 +108,10 @@ export async function POST(request) {
       courseId, 
       certNo, 
       issueDate || new Date().toISOString().split('T')[0],
-      qrData
+      qrData,
+      fromDate || null,
+      toDate || null,
+      instituteName || null
     ]);
 
     // Send Email Notification

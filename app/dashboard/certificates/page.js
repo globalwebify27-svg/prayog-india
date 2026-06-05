@@ -314,7 +314,10 @@ export default function CertificatesPage() {
                 courseName={selectedCertForDownload.course_name} 
                 date={new Date(selectedCertForDownload.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} 
                 certificateNumber={selectedCertForDownload.certificate_number} 
-                qrCodeData={selectedCertForDownload.qr_code_data} 
+                qrCodeData={selectedCertForDownload.qr_code_data}
+                fromDate={selectedCertForDownload.from_date ? new Date(selectedCertForDownload.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
+                toDate={selectedCertForDownload.to_date ? new Date(selectedCertForDownload.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
+                instituteName={selectedCertForDownload.institute_name || ''}
              />
           </div>
         )}

@@ -220,6 +220,9 @@ export default function VerifyCertificate() {
               date={new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               certificateNumber={cert.certificate_number}
               qrCodeData={cert.qr_code_data}
+              fromDate={cert.from_date ? new Date(cert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
+              toDate={cert.to_date ? new Date(cert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
+              instituteName={cert.institute_name || ''}
             />
           </div>
         </div>

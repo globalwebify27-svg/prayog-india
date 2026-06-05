@@ -10,8 +10,8 @@ export async function POST(req) {
     }
 
     const [rows] = await pool.query(
-      "SELECT * FROM promo_codes WHERE code = ? AND (course_ids IS NULL OR JSON_CONTAINS(course_ids, CAST(? AS JSON), '$') OR course_id = ?) AND is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())",
-      [code, courseId, courseId]
+      "SELECT * FROM promo_codes WHERE code = ? AND (course_ids IS NULL OR JSON_CONTAINS(course_ids, ?) OR course_id = ?) AND is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())",
+      [code, String(courseId), courseId]
     );
 
     if (rows.length === 0) {

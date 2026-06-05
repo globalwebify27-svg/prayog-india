@@ -46,6 +46,10 @@ export default function CertificateManagement() {
   
   // New Cert Form
   const [newCert, setNewCert] = useState({ userId: "", courseId: "", studentName: "", courseName: "" });
+  const [certFromDate, setCertFromDate] = useState("");
+  const [certToDate, setCertToDate] = useState("");
+  const [certInstituteName, setCertInstituteName] = useState("");
+  const [showBulkDateModal, setShowBulkDateModal] = useState(false);
   const [studentsList, setStudentsList] = useState([]);
   const [coursesList, setCoursesList] = useState([]);
   const [settings, setSettings] = useState({
@@ -139,13 +143,16 @@ export default function CertificateManagement() {
       const res = await fetch("/api/certificates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newCert)
+        body: JSON.stringify({ ...newCert, fromDate: certFromDate, toDate: certToDate, instituteName: certInstituteName })
       });
       const data = await res.json();
       if (data.success) {
         fetchCertificates();
         setShowGenerator(false);
         setNewCert({ userId: "", courseId: "", studentName: "", courseName: "" });
+        setCertFromDate("");
+        setCertToDate("");
+        setCertInstituteName("");
       }
     } catch (error) {
       alert("Generation failed");
@@ -156,6 +163,10 @@ export default function CertificateManagement() {
 
   const handleBulkGenerate = async () => {
     if (selectedItems.length === 0) return;
+    if (!certFromDate || !certToDate) {
+      setShowBulkDateModal(true);
+      return;
+    }
     setIsProcessing(true);
     try {
       const bulkCertificates = selectedItems.map(id => {
@@ -169,12 +180,16 @@ export default function CertificateManagement() {
       const res = await fetch("/api/certificates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bulkCertificates })
+        body: JSON.stringify({ bulkCertificates, fromDate: certFromDate, toDate: certToDate, instituteName: certInstituteName })
       });
       const data = await res.json();
       if (data.success) {
         alert(`Successfully generated ${data.results.length} certificates.`);
         setSelectedItems([]);
+        setCertFromDate("");
+        setCertToDate("");
+        setCertInstituteName("");
+        setShowBulkDateModal(false);
         fetchCertificates();
       }
     } catch (error) {
@@ -534,7 +549,7 @@ export default function CertificateManagement() {
             <div id="sidebar-preview-container" className="w-full relative group overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-inner" style={{ height: selectedCert ? `${794 * previewScale}px` : 'auto' }}>
               {selectedCert ? (
                  <div className="origin-top-left absolute top-0 left-0" style={{ width: '1123px', height: '794px', transform: `scale(${previewScale})` }}>
-                    <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} />
+                    <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} />
                  </div>
               ) : (
                 <div className="w-full aspect-[1.41/1] flex flex-col items-center justify-center text-slate-400 italic text-xs p-10 text-center"><Award size={32} className="mb-2 opacity-20" />Select a record to preview</div>
@@ -563,7 +578,7 @@ export default function CertificateManagement() {
               {/* Left Side: Preview */}
               <div className="flex-grow bg-slate-100 p-6 flex items-center justify-center overflow-auto" id="modal-preview-container">
                 <div style={{ width: '1123px', height: '794px', transform: `scale(${previewScale})`, transformOrigin: 'center center', flexShrink: 0 }} ref={modalCertificateRef} className="shadow-2xl">
-                  <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} />
+                  <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} />
                 </div>
               </div>
               {/* Right Side: Actions */}
@@ -615,7 +630,7 @@ export default function CertificateManagement() {
       <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
         {selectedCert && (
           <div ref={certificateRef}>
-             <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} />
+             <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} />
           </div>
         )}
       </div>
@@ -631,8 +646,53 @@ export default function CertificateManagement() {
                 <form onSubmit={handleGenerate} className="space-y-5">
                   <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Student</label><select required value={newCert.userId} onChange={(e) => { const std = studentsList.find(s => s.id == e.target.value); setNewCert({...newCert, userId: e.target.value, studentName: std?.name}); }} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all"><option value="">Choose a student...</option>{studentsList.map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}</select></div>
                   <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Program</label><select required value={newCert.courseId} onChange={(e) => { const crs = coursesList.find(c => c.id == e.target.value); setNewCert({...newCert, courseId: e.target.value, courseName: crs?.title}); }} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all"><option value="">Choose a course...</option>{coursesList.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
+                  <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student Institute / School</label><input type="text" placeholder="e.g. Delhi Public School" value={certInstituteName} onChange={(e) => setCertInstituteName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" /></div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program From Date</label><input type="date" value={certFromDate} onChange={(e) => setCertFromDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" /></div>
+                    <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program To Date</label><input type="date" value={certToDate} onChange={(e) => setCertToDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" /></div>
+                  </div>
                   <button disabled={isProcessing} className="w-full bg-navy text-white py-4 rounded-xl font-bold text-sm hover:bg-black transition-all flex items-center justify-center space-x-2 shadow-lg disabled:opacity-50">{isProcessing ? <Loader2 className="animate-spin" size={18} /> : <Award size={18} className="text-primary" />}<span>Generate & Issue Official Certificate</span></button>
                 </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Bulk Date Modal */}
+      <AnimatePresence>
+        {showBulkDateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowBulkDateModal(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden">
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-slate-900">Program Duration</h3>
+                  <button onClick={() => setShowBulkDateModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button>
+                </div>
+                <p className="text-xs text-slate-500 mb-5">These details will apply to all <span className="font-bold text-navy">{selectedItems.length}</span> selected certificates.</p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student Institute / School</label>
+                    <input type="text" placeholder="e.g. Delhi Public School" value={certInstituteName} onChange={(e) => setCertInstituteName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program From Date</label>
+                    <input type="date" required value={certFromDate} onChange={(e) => setCertFromDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program To Date</label>
+                    <input type="date" required value={certToDate} onChange={(e) => setCertToDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" />
+                  </div>
+                  <button 
+                    onClick={() => { if (certFromDate && certToDate) { setShowBulkDateModal(false); handleBulkGenerate(); } else { alert('Please select both dates'); } }} 
+                    disabled={isProcessing} 
+                    className="w-full bg-navy text-white py-4 rounded-xl font-bold text-sm hover:bg-black transition-all flex items-center justify-center space-x-2 shadow-lg disabled:opacity-50 mt-2"
+                  >
+                    {isProcessing ? <Loader2 className="animate-spin" size={18} /> : <Award size={18} className="text-primary" />}
+                    <span>Generate {selectedItems.length} Certificates</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
