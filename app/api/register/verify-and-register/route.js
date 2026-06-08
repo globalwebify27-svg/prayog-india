@@ -189,9 +189,13 @@ export async function POST(req) {
       const passwordMessage = "[Hidden for Security - Use the password you entered, or Prayog@2026 if left blank]";
       // Fetch logo_url for dynamic branding
       const [logoRows] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'logo_url'");
+      const envBase = process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com';
+      const emailBaseUrl = (envBase.includes('localhost') || envBase.includes('127.0.0.1'))
+        ? 'https://prayogindiarobotics.com'
+        : envBase;
       const logoUrl = logoRows[0]?.setting_value
-        ? `${process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com'}${logoRows[0].setting_value}`
-        : 'https://prayogindiarobotics.com/assets/logo.png';
+        ? `${emailBaseUrl}${logoRows[0].setting_value}`
+        : `${emailBaseUrl}/assets/logo.png`;
       const emailHtml = getOnboardingEmailTemplate(
         name, 
         email, 

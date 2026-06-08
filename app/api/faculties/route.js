@@ -62,9 +62,13 @@ export async function POST(request) {
     // Send Onboarding Email
     try {
       const [logoRows] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'logo_url'");
+      const envBase = process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com';
+      const emailBaseUrl = (envBase.includes('localhost') || envBase.includes('127.0.0.1'))
+        ? 'https://prayogindiarobotics.com'
+        : envBase;
       const logoUrl = logoRows[0]?.setting_value
-        ? `${process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com'}${logoRows[0].setting_value}`
-        : 'https://prayogindiarobotics.com/assets/logo.png';
+        ? `${emailBaseUrl}${logoRows[0].setting_value}`
+        : `${emailBaseUrl}/assets/logo.png`;
       const emailHtml = getFacultyOnboardingEmailTemplate(name, email, password || "Teacher@123", role, logoUrl);
       await sendMail(email, "Welcome to Prayog India - Faculty Portal Access", emailHtml);
     } catch (mailError) {

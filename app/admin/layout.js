@@ -203,6 +203,14 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-body">
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)} 
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+        />
+      )}
+
       {/* Sidebar */}
       <AnimatePresence mode="wait">
         {isSidebarOpen && (

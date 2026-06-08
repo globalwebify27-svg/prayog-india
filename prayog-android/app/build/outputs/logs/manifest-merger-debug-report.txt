@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:2:1-26:12
-INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:2:1-26:12
-INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:2:1-26:12
-INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:2:1-26:12
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:2:1-40:12
+INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:2:1-40:12
+INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:2:1-40:12
+INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:2:1-40:12
 MERGED from [com.google.android.material:material:1.9.0] /Users/ahmadsana/.gradle/caches/8.13/transforms/2effe97f28e129a40424e11402ca5947/transformed/material-1.9.0/AndroidManifest.xml:17:1-26:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /Users/ahmadsana/.gradle/caches/8.13/transforms/4e53e1f76a79b87e3f27995a1c5bc0eb/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] /Users/ahmadsana/.gradle/caches/8.13/transforms/0b7e35062faa283cfcae67b02e018b18/transformed/constraintlayout-2.0.1/AndroidManifest.xml:2:1-11:12
@@ -60,9 +60,45 @@ uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:5:5-79
 	android:name
 		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:5:22-76
+uses-permission#android.permission.ACCESS_WIFI_STATE
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:6:5-76
+	android:name
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:6:22-73
+uses-permission#android.permission.CAMERA
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:9:5-65
+	android:name
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:9:22-62
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:12:5-107
+	android:maxSdkVersion
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:12:78-104
+	android:name
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:12:22-77
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:13:5-108
+	android:maxSdkVersion
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:13:79-105
+	android:name
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:13:22-78
+uses-permission#android.permission.READ_MEDIA_IMAGES
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:14:5-76
+	android:name
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:14:22-73
+uses-permission#android.permission.READ_MEDIA_VIDEO
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:15:5-75
+	android:name
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:15:22-72
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:18:5-79
+	android:name
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:18:22-76
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:19:5-81
+	android:name
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:19:22-78
 application
-ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:7:5-24:19
-INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:7:5-24:19
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:21:5-38:19
+INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:21:5-38:19
 MERGED from [com.google.android.material:material:1.9.0] /Users/ahmadsana/.gradle/caches/8.13/transforms/2effe97f28e129a40424e11402ca5947/transformed/material-1.9.0/AndroidManifest.xml:24:5-20
 MERGED from [com.google.android.material:material:1.9.0] /Users/ahmadsana/.gradle/caches/8.13/transforms/2effe97f28e129a40424e11402ca5947/transformed/material-1.9.0/AndroidManifest.xml:24:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] /Users/ahmadsana/.gradle/caches/8.13/transforms/0b7e35062faa283cfcae67b02e018b18/transformed/constraintlayout-2.0.1/AndroidManifest.xml:9:5-20
@@ -82,35 +118,35 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/ahma
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.9.0] /Users/ahmadsana/.gradle/caches/8.13/transforms/8d8bfd94dac38f2c26105cfc08c1a224/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:12:9-35
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:26:9-35
 	android:label
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:10:9-41
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:24:9-41
 	android:roundIcon
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:11:9-48
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:25:9-48
 	android:icon
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:9:9-43
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:23:9-43
 	android:allowBackup
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:8:9-35
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:22:9-35
 	android:theme
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:13:9-49
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:27:9-49
 activity#com.prayog.india.MainActivity
-ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:15:9-23:20
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:29:9-37:20
 	android:exported
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:17:13-36
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:31:13-36
 	android:theme
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:18:13-65
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:32:13-65
 	android:name
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:16:13-41
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:30:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:19:13-22:29
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:33:13-36:29
 action#android.intent.action.MAIN
-ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:20:17-69
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:34:17-69
 	android:name
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:20:25-66
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:34:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:21:17-77
+ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:35:17-77
 	android:name
-		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:21:27-74
+		ADDED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml:35:27-74
 uses-sdk
 INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/ahmadsana/Documents/prayog-india/prayog-android/app/src/main/AndroidManifest.xml

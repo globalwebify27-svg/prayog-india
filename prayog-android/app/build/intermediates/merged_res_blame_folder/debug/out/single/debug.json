@@ -8,8 +8,24 @@
         "source": "com.prayog.india.app-main-30:/mipmap-hdpi/ic_launcher.png"
     },
     {
+        "merged": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-merged_res-28:/layout_activity_main.xml.flat",
+        "source": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-main-30:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-merged_res-28:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-main-30:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-merged_res-28:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-main-30:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
         "merged": "com.prayog.india.app-merged_res-28:/mipmap-xxxhdpi_ic_launcher.png.flat",
         "source": "com.prayog.india.app-main-30:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-merged_res-28:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-main-30:/mipmap-hdpi/ic_launcher.png"
     },
     {
         "merged": "com.prayog.india.app-merged_res-28:/mipmap-xxhdpi_ic_launcher.png.flat",
@@ -20,7 +36,11 @@
         "source": "com.prayog.india.app-main-30:/mipmap-mdpi/ic_launcher.png"
     },
     {
-        "merged": "com.prayog.india.app-merged_res-28:/layout_activity_main.xml.flat",
-        "source": "com.prayog.india.app-main-30:/layout/activity_main.xml"
+        "merged": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-merged_res-28:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-main-30:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-merged_res-28:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "/Users/ahmadsana/.gradle/daemon/8.13/com.prayog.india.app-main-30:/mipmap-xxhdpi/ic_launcher.png"
     }
 ]
