@@ -6,7 +6,23 @@ import path from "path";
 export const dynamic = "force-dynamic";
 
 export async function GET(request) {
-  // Try to serve user-defined favicon.svg first
+  // Try to serve user-defined favicon.png first
+  try {
+    const pngPath = path.join(process.cwd(), "public", "favicon.png");
+    if (fs.existsSync(pngPath)) {
+      const fileBuffer = fs.readFileSync(pngPath);
+      return new Response(fileBuffer, {
+        headers: {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error reading favicon.png in icon route:", error);
+  }
+
+  // Try to serve user-defined favicon.svg next
   try {
     const svgPath = path.join(process.cwd(), "public", "favicon.svg");
     if (fs.existsSync(svgPath)) {
