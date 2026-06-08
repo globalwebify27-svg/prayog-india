@@ -1,8 +1,8 @@
 import TrainingPageContent from "./TrainingPageContent";
 
 export const metadata = {
-  title: "Robotics & STEM Training Programs | Prayog India",
-  description: "Interactive STEM, AI, IoT, Robotics, Drone Technology, and Coding training programs for Class 1 to 12. Hands-on school activities.",
+  title: "Training Programs for Kids | Robotics, AI, IoT, Drone Technology & STEM Education | PRAYOG INDIA ROBOTICS",
+  description: "Explore age-specific Robotics, AI, IoT, Drone Technology, and STEM Education programs for Class 1-12 students. Hands-on learning, innovation, creativity, and future-ready skills.",
 };
 
 export default function TrainingPage() {
