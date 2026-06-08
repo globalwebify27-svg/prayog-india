@@ -19,7 +19,7 @@ export default function Footer() {
             <div className="space-y-1">
               <h3 className="text-white font-bold text-xs uppercase tracking-widest">PRAYOG INDIA ROBOTICS PVT. LTD.</h3>
               <p className="text-blue-100/40 text-sm leading-relaxed font-medium">
-                India's premier STEM & robotics learning hub for school students. Empowering the next generation of innovators through hands-on technology education.
+                Leading Robotics, AI, IoT, Drone Technology, STEM, 3D Design &amp; Embedded Systems Training and Internship Centre. Learn, Build, Innovate with PRAYOG INDIA ROBOTICS.
               </p>
             </div>
             <div className="flex items-center space-x-5 pt-2">
@@ -45,8 +45,8 @@ export default function Footer() {
               <li><Link href="/about" className="hover:text-white transition-colors">Our Vision</Link></li>
               <li><Link href="/faculties" className="hover:text-white transition-colors">Expert Faculty</Link></li>
               <li><Link href="/infrastructure" className="hover:text-white transition-colors">Research Labs</Link></li>
-
               <li><Link href="/stories" className="hover:text-white transition-colors">Our Stories</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
