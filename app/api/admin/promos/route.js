@@ -36,7 +36,7 @@ export async function POST(req) {
     const body = await req.json();
     const {
       title, subtitle, description, date_text, price,
-      tag, image, target_date, is_active, registration_link, start_date
+      tag, image, target_date, is_active, show_sticky, registration_link, start_date
     } = body;
 
     // Format target_date for MySQL: YYYY-MM-DD HH:MM:SS
@@ -66,8 +66,8 @@ export async function POST(req) {
     }
 
     const [result] = await pool.query(
-      `INSERT INTO promos (title, subtitle, description, date_text, price, tag, image, target_date, is_active, registration_link, start_date) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO promos (title, subtitle, description, date_text, price, tag, image, target_date, is_active, show_sticky, registration_link, start_date) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title || "",
         subtitle || "",
@@ -78,6 +78,7 @@ export async function POST(req) {
         image || "",
         formattedDate,
         is_active === undefined ? true : is_active,
+        show_sticky === undefined ? true : show_sticky,
         registration_link || '/register',
         formattedStartDate
       ]
@@ -98,7 +99,7 @@ export async function PUT(req) {
     const body = await req.json();
     const {
       id, title, subtitle, description, date_text,
-      price, tag, image, target_date, is_active, registration_link, start_date
+      price, tag, image, target_date, is_active, show_sticky, registration_link, start_date
     } = body;
 
     if (!id) {
@@ -135,7 +136,7 @@ export async function PUT(req) {
       `UPDATE promos SET 
         title = ?, subtitle = ?, description = ?, date_text = ?, 
         price = ?, tag = ?, image = ?, target_date = ?, 
-        is_active = ?, registration_link = ?, start_date = ?
+        is_active = ?, show_sticky = ?, registration_link = ?, start_date = ?
        WHERE id = ?`,
       [
         title || "",
@@ -147,6 +148,7 @@ export async function PUT(req) {
         image || "",
         formattedDate,
         is_active === undefined ? true : is_active,
+        show_sticky === undefined ? true : show_sticky,
         registration_link || "/register",
         formattedStartDate,
         id

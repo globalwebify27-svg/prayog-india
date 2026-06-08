@@ -17,6 +17,72 @@ export default function PromoManagement() {
   const [promoToEdit, setPromoToEdit] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+  const [currentSection, setCurrentSection] = useState("programs");
+
+  const [selectedPromoId, setSelectedPromoId] = useState("");
+  const [stickyData, setStickyData] = useState({
+    title: "",
+    target_date: "",
+    show_sticky: true,
+    registration_link: "/register"
+  });
+  const [isSavingSticky, setIsSavingSticky] = useState(false);
+
+  useEffect(() => {
+    if (selectedPromoId && promos.length > 0) {
+      const p = promos.find(item => item.id === parseInt(selectedPromoId));
+      if (p) {
+        setStickyData({
+          title: p.title || "",
+          target_date: p.target_date ? new Date(new Date(p.target_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "",
+          show_sticky: p.show_sticky !== 0,
+          registration_link: p.registration_link || "/register"
+        });
+      }
+    } else if (promos.length > 0 && !selectedPromoId) {
+      const active = promos.find(p => p.is_active) || promos[0];
+      if (active) {
+        setSelectedPromoId(active.id.toString());
+      }
+    }
+  }, [selectedPromoId, promos]);
+
+  const handleSaveSticky = async (e) => {
+    e.preventDefault();
+    if (!selectedPromoId) return;
+    setIsSavingSticky(true);
+
+    const originalPromo = promos.find(p => p.id === parseInt(selectedPromoId));
+    if (!originalPromo) return;
+
+    const body = {
+      ...originalPromo,
+      title: stickyData.title,
+      target_date: stickyData.target_date,
+      show_sticky: stickyData.show_sticky,
+      registration_link: stickyData.registration_link
+    };
+
+    try {
+      const res = await fetch("/api/admin/promos", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        fetchPromos();
+        showAlert("Sticky Bar Saved", "Sticky Action Bar configurations synchronized successfully.", "success");
+      } else {
+        const err = await res.json();
+        showAlert("Save Error", err.error || "Unable to save sticky bar configurations.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert("Technical Error", "Connectivity issue with security server.", "error");
+    } finally {
+      setIsSavingSticky(false);
+    }
+  };
 
   const [newPromo, setNewPromo] = useState({
     title: "",
@@ -28,6 +94,7 @@ export default function PromoManagement() {
     image: "",
     target_date: "",
     is_active: true,
+    show_sticky: true,
     registration_link: "/register",
     start_date: ""
   });
@@ -140,7 +207,7 @@ export default function PromoManagement() {
         setNewPromo({
           title: "", subtitle: "", description: "", date_text: "",
           price: "", tag: "Limited Time", image: "", target_date: "",
-          is_active: true, registration_link: "/register", start_date: ""
+          is_active: true, show_sticky: true, registration_link: "/register", start_date: ""
         });
         showAlert("Campaign Launched", "Marketing campaign has been synchronized successfully.", "success");
       } else {
@@ -186,90 +253,205 @@ export default function PromoManagement() {
               <span>Marketing Console</span>
             </div>
             <h1 className="text-3xl font-heading font-black text-navy uppercase tracking-tight">
-              Seasonal <span className="text-primary italic">Promos</span>
+              Seasonal <span className="text-primary italic">Programs</span>
             </h1>
           </div>
-          <button 
-            onClick={() => setShowModal(true)}
-            className="bg-navy text-white px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest flex items-center gap-3 hover:bg-black transition-all shadow-xl shadow-navy/10"
+          {currentSection === "programs" && (
+            <button 
+              onClick={() => setShowModal(true)}
+              className="bg-navy text-white px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest flex items-center gap-3 hover:bg-black transition-all shadow-xl shadow-navy/10"
+            >
+              <Plus size={18} className="text-primary" />
+              Create Program
+            </button>
+          )}
+        </div>
+
+        {/* Section selection tabs */}
+        <div className="flex space-x-6 border-b border-slate-200 mb-10 pb-px">
+          <button
+            onClick={() => setCurrentSection("programs")}
+            className={`pb-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all relative ${
+              currentSection === "programs" 
+                ? "text-navy border-navy" 
+                : "text-slate-400 border-transparent hover:text-navy"
+            }`}
           >
-            <Plus size={18} className="text-primary" />
-            Create Promo
+            Programs Directory
+          </button>
+          <button
+            onClick={() => setCurrentSection("sticky")}
+            className={`pb-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all relative ${
+              currentSection === "sticky" 
+                ? "text-navy border-navy" 
+                : "text-slate-400 border-transparent hover:text-navy"
+            }`}
+          >
+            Promo Sticky Bar
           </button>
         </div>
 
-        {/* Filters/Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-           <div className="bg-white p-6 rounded-[2rem] border border-navy/5 shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Highlights</p>
-              <p className="text-3xl font-heading font-black text-navy">{promos.filter(p => p.is_active).length}</p>
-           </div>
-           <div className="bg-white p-6 rounded-[2rem] border border-navy/5 shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Scheduled</p>
-              <p className="text-3xl font-heading font-black text-navy">{promos.length}</p>
-           </div>
-           <Link href="/admin" className="bg-navy p-6 rounded-[2rem] border border-white/5 shadow-xl flex items-center justify-between group">
-              <div>
-                <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Control Center</p>
-                <p className="text-lg font-heading font-black text-white">Back to Dashboard</p>
-              </div>
-              <ArrowLeft className="text-white group-hover:-translate-x-2 transition-transform" />
-           </Link>
-        </div>
+        {currentSection === "programs" ? (
+          <>
+            {/* Filters/Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+               <div className="bg-white p-6 rounded-[2rem] border border-navy/5 shadow-sm">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Highlights</p>
+                  <p className="text-3xl font-heading font-black text-navy">{promos.filter(p => p.is_active).length}</p>
+               </div>
+               <div className="bg-white p-6 rounded-[2rem] border border-navy/5 shadow-sm">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Scheduled</p>
+                  <p className="text-3xl font-heading font-black text-navy">{promos.length}</p>
+               </div>
+               <Link href="/admin" className="bg-navy p-6 rounded-[2rem] border border-white/5 shadow-xl flex items-center justify-between group">
+                  <div>
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Control Center</p>
+                    <p className="text-lg font-heading font-black text-white">Back to Dashboard</p>
+                  </div>
+                  <ArrowLeft className="text-white group-hover:-translate-x-2 transition-transform" />
+               </Link>
+            </div>
 
-        {/* Promo List */}
-        <div className="grid grid-cols-1 gap-6">
-          {loading ? (
-            <div className="py-20 text-center">
-              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-sm font-bold text-navy/40 uppercase tracking-widest">Loading Campaigns...</p>
-            </div>
-          ) : promos.length === 0 ? (
-            <div className="bg-white rounded-[3rem] p-20 text-center border border-navy/5">
-               <Zap size={40} className="text-slate-200 mx-auto mb-6" />
-               <h3 className="text-xl font-bold text-navy mb-2">No active promos found</h3>
-               <p className="text-slate-400 text-sm mb-8">Start your first seasonal marketing campaign to engage more students.</p>
-               <button onClick={() => setShowModal(true)} className="text-primary font-bold uppercase tracking-widest text-xs border-b-2 border-primary pb-1">Create Now</button>
-            </div>
-          ) : (
-            promos.map((promo) => (
-              <div key={promo.id} className="bg-white rounded-[2.5rem] overflow-hidden border border-navy/5 shadow-sm hover:shadow-xl transition-all flex flex-col md:flex-row group">
-                <div className="md:w-1/4 h-48 md:h-auto relative">
-                  <img src={promo.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
-                  <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg ${promo.is_active ? 'bg-green-500 text-white' : 'bg-slate-400 text-white'}`}>
-                    {promo.is_active ? 'Live' : 'Inactive'}
-                  </div>
+            {/* Promo List */}
+            <div className="grid grid-cols-1 gap-6">
+              {loading ? (
+                <div className="py-20 text-center">
+                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-sm font-bold text-navy/40 uppercase tracking-widest">Loading Campaigns...</p>
                 </div>
-                <div className="md:w-3/4 p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="flex-grow">
-                    <div className="flex items-center gap-3 text-navy/40 font-bold text-[10px] uppercase tracking-widest mb-3">
-                       <Calendar size={12} className="text-primary" />
-                       <span>{promo.date_text}</span>
-                       <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                       <span>{promo.price}</span>
+              ) : promos.length === 0 ? (
+                <div className="bg-white rounded-[3rem] p-20 text-center border border-navy/5">
+                   <Zap size={40} className="text-slate-200 mx-auto mb-6" />
+                   <h3 className="text-xl font-bold text-navy mb-2">No active promos found</h3>
+                   <p className="text-slate-400 text-sm mb-8">Start your first seasonal marketing campaign to engage more students.</p>
+                   <button onClick={() => setShowModal(true)} className="text-primary font-bold uppercase tracking-widest text-xs border-b-2 border-primary pb-1">Create Now</button>
+                </div>
+              ) : (
+                promos.map((promo) => (
+                  <div key={promo.id} className="bg-white rounded-[2.5rem] overflow-hidden border border-navy/5 shadow-sm hover:shadow-xl transition-all flex flex-col md:flex-row group">
+                    <div className="md:w-1/4 h-48 md:h-auto relative">
+                      <img src={promo.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
+                      <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg ${promo.is_active ? 'bg-green-500 text-white' : 'bg-slate-400 text-white'}`}>
+                        {promo.is_active ? 'Live' : 'Inactive'}
+                      </div>
                     </div>
-                    <h3 className="text-2xl font-heading font-black text-navy mb-2">{promo.title}</h3>
-                    <p className="text-slate-500 text-xs font-medium line-clamp-2 max-w-xl">{promo.description}</p>
+                    <div className="md:w-3/4 p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+                      <div className="flex-grow">
+                        <div className="flex items-center gap-3 text-navy/40 font-bold text-[10px] uppercase tracking-widest mb-3">
+                           <Calendar size={12} className="text-primary" />
+                           <span>{promo.date_text}</span>
+                           <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                           <span>{promo.price}</span>
+                        </div>
+                        <h3 className="text-2xl font-heading font-black text-navy mb-2">{promo.title}</h3>
+                        <p className="text-slate-500 text-xs font-medium line-clamp-2 max-w-xl">{promo.description}</p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <button 
+                          onClick={() => { setPromoToEdit(promo); setShowModal(true); }}
+                          className="w-12 h-12 rounded-2xl bg-navy/5 text-navy flex items-center justify-center hover:bg-navy hover:text-white transition-all"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(promo.id)}
+                          className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <button 
-                      onClick={() => { setPromoToEdit(promo); setShowModal(true); }}
-                      className="w-12 h-12 rounded-2xl bg-navy/5 text-navy flex items-center justify-center hover:bg-navy hover:text-white transition-all"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(promo.id)}
-                      className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
+                ))
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-navy/5 shadow-sm max-w-4xl mx-auto space-y-10">
+            <div>
+              <h2 className="text-2xl font-heading font-black text-navy mb-2">Countdown Sticky Bar Configuration</h2>
+              <p className="text-slate-500 text-sm">Configure the yellow countdown action banner displayed at the bottom of the landing pages.</p>
+            </div>
+
+            <form onSubmit={handleSaveSticky} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-navy uppercase tracking-widest flex items-center gap-2">Select Program to Highlight</label>
+                <select 
+                  value={selectedPromoId}
+                  onChange={(e) => setSelectedPromoId(e.target.value)}
+                  className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                >
+                  <option value="">Select a Program</option>
+                  {promos.map(p => (
+                    <option key={p.id} value={p.id}>{p.title} {p.is_active ? '(Live)' : '(Inactive)'}</option>
+                  ))}
+                </select>
               </div>
-            ))
-          )}
-        </div>
+
+              {selectedPromoId && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-navy uppercase tracking-widest">Sticky Bar Display Title / Text</label>
+                    <input 
+                      required
+                      type="text" 
+                      value={stickyData.title}
+                      onChange={(e) => setStickyData({...stickyData, title: e.target.value})}
+                      className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none"
+                      placeholder="e.g. Robotics Summer Camp 2025"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-navy uppercase tracking-widest">Countdown Target Date & Time</label>
+                      <input 
+                        type="datetime-local" 
+                        value={stickyData.target_date}
+                        onChange={(e) => setStickyData({...stickyData, target_date: e.target.value})}
+                        className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-navy uppercase tracking-widest">Registration Page Link</label>
+                      <input 
+                        type="text" 
+                        value={stickyData.registration_link}
+                        onChange={(e) => setStickyData({...stickyData, registration_link: e.target.value})}
+                        className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none"
+                        placeholder="e.g. /register"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-navy/5">
+                    <input 
+                      type="checkbox" 
+                      checked={stickyData.show_sticky}
+                      onChange={(e) => setStickyData({...stickyData, show_sticky: e.target.checked})}
+                      className="w-5 h-5 rounded border-navy/10 text-primary focus:ring-primary"
+                      id="enable_sticky"
+                    />
+                    <label htmlFor="enable_sticky" className="text-[10px] font-black text-navy uppercase tracking-widest cursor-pointer">Enable Countdown Sticky Bar on Website</label>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <button 
+                      type="submit"
+                      disabled={isSavingSticky}
+                      className="bg-navy text-white px-10 py-3.5 rounded-xl font-bold text-xs uppercase tracking-[0.2em] shadow-xl shadow-navy/20 flex items-center gap-3 hover:scale-105 transition-all disabled:opacity-50"
+                    >
+                      {isSavingSticky && (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      )}
+                      <span>Save Sticky Bar Settings</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -295,7 +477,7 @@ export default function PromoManagement() {
                       </div>
                       <div>
                          <h2 className="text-xl font-heading font-black text-navy uppercase tracking-tight">
-                           {promoToEdit ? 'Edit Program' : 'New Seasonal Program'}
+                           {promoToEdit ? 'Edit Promo' : 'New Promo & Sticky Bar'}
                          </h2>
                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Marketing Campaign</p>
                       </div>
@@ -449,6 +631,16 @@ export default function PromoManagement() {
                                className="w-5 h-5 rounded border-navy/10 text-primary focus:ring-primary"
                             />
                             <label className="text-[10px] font-black text-navy uppercase tracking-widest cursor-pointer">Active on Website</label>
+                         </div>
+
+                         <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-navy/5">
+                            <input 
+                               type="checkbox" 
+                               checked={promoToEdit ? (promoToEdit.show_sticky !== undefined ? !!promoToEdit.show_sticky : true) : !!newPromo.show_sticky}
+                               onChange={(e) => promoToEdit ? setPromoToEdit({...promoToEdit, show_sticky: e.target.checked}) : setNewPromo({...newPromo, show_sticky: e.target.checked})}
+                               className="w-5 h-5 rounded border-navy/10 text-primary focus:ring-primary"
+                            />
+                            <label className="text-[10px] font-black text-navy uppercase tracking-widest cursor-pointer">Show Countdown Sticky Bar</label>
                          </div>
                       </div>
                    </div>

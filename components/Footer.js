@@ -19,7 +19,7 @@ export default function Footer() {
             <div className="space-y-1">
               <h3 className="text-white font-bold text-xs uppercase tracking-widest">PRAYOG INDIA ROBOTICS PVT. LTD.</h3>
               <p className="text-blue-100/40 text-sm leading-relaxed font-medium">
-                India's premier institutional hub for industrial robotics, AI, and hardware innovation. Empowering the next generation of engineers through technical mastery.
+                India's premier STEM & robotics learning hub for school students. Empowering the next generation of innovators through hands-on technology education.
               </p>
             </div>
             <div className="flex items-center space-x-5 pt-2">

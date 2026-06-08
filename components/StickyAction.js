@@ -70,7 +70,7 @@ export default function StickyAction() {
 
   return (
     <AnimatePresence>
-      {(isVisible && promo && !isDismissed) && (
+      {(isVisible && promo && promo.show_sticky !== 0 && !isDismissed) && (
         <motion.div
           initial={{ y: 100 }}
           animate={{ y: 0 }}

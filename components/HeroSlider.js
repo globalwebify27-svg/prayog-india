@@ -9,8 +9,8 @@ const slides = [
   {
     id: "01",
     title: "Revolutionizing Robotics",
-    subtitle: "NEXT-GEN AUTOMATION",
-    description: "Experience the pinnacle of industrial robotics with hands-on training on state-of-the-art FANUC & KUKA systems.",
+    subtitle: "STEM & INNOVATION",
+    description: "Explore the fascinating world of robotics. Learn to design, build, and program your own robots using hands-on kits.",
     image: "/assets/hero-indian-2.png",
     accent: "#FFC107"
   },

@@ -11,10 +11,10 @@ const montserrat = Montserrat({
 });
 
 export const metadata = {
-  title: "Prayog India | Premier Robotics & STEM Education",
-  description: "Empowering the next generation with hands-on robotics, AI, and STEM workshops.",
+  title: "Prayog India | STEM & Robotics Education for Class 1-12",
+  description: "India's leading STEM & robotics education hub for school students. Hands-on learning programs in coding, IoT, drones, and AI logic.",
   icons: {
-    icon: "/favicon.jpeg",
+    icon: "/favicon.svg",
   },
 };
 

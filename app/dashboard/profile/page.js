@@ -67,6 +67,65 @@ export default function ProfilePage() {
     });
   };
 
+  const isTabComplete = (tabId) => {
+    if (tabId === "personal") {
+      return !!(
+        formData.name &&
+        formData.phone &&
+        formData.dob &&
+        formData.address &&
+        formData.blood_group &&
+        formData.emergency_contact &&
+        formData.father_name &&
+        formData.mother_name &&
+        formData.gender &&
+        formData.image
+      );
+    }
+    if (tabId === "academic") {
+      return !!(
+        formData.qualification &&
+        formData.school_college &&
+        formData.last_qualification_year
+      );
+    }
+    if (tabId === "kyc") {
+      return !!(
+        formData.id_number &&
+        formData.id_image &&
+        formData.school_college &&
+        formData.school_id_number &&
+        formData.school_id_card
+      );
+    }
+    if (tabId === "professional") {
+      return !!(
+        formData.specialty &&
+        formData.faculty_education &&
+        formData.expertise &&
+        formData.bio
+      );
+    }
+    if (tabId === "security") {
+      return true;
+    }
+    return false;
+  };
+
+  const handleTabClick = (targetTabId) => {
+    if (activeTab === "personal" && targetTabId !== "personal") {
+      if (!formData.image) {
+        showAlert(
+          "Profile Picture Required",
+          "Please upload your profile picture first to proceed to other sections. Use the camera button on your profile photo avatar.",
+          "warning"
+        );
+        return;
+      }
+    }
+    setActiveTab(targetTabId);
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -188,6 +247,25 @@ export default function ProfilePage() {
   };
 
   const handleSave = async (section) => {
+    // General details validation
+    if (section === 'personal') {
+      if (
+        !formData.name ||
+        !formData.phone ||
+        !formData.dob ||
+        !formData.address ||
+        !formData.blood_group ||
+        !formData.emergency_contact ||
+        !formData.father_name ||
+        !formData.mother_name ||
+        !formData.gender ||
+        !formData.image
+      ) {
+        showAlert("Validation Error", "All fields in General Details (including profile picture) are mandatory.", "error");
+        return;
+      }
+    }
+
     // Aadhar validation for students
     if (user?.role !== 'teacher' && section === 'kyc') {
       if (!formData.id_number || formData.id_number.replace(/\D/g, '').length !== 12) {
@@ -209,7 +287,14 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (data.success) {
-        showAlert("Profile Updated", "Your institutional profile has been synchronized successfully.", "success", () => fetchProfile());
+        showAlert("Profile Updated", "Your institutional profile has been synchronized successfully.", "success", () => {
+          fetchProfile();
+          const currentTabId = section === 'personal' ? 'personal' : section === 'academic' ? 'academic' : section === 'kyc' ? 'kyc' : section === 'professional' ? 'professional' : '';
+          const currentIndex = tabs.findIndex(t => t.id === currentTabId);
+          if (currentIndex !== -1 && currentIndex < tabs.length - 1) {
+            setActiveTab(tabs[currentIndex + 1].id);
+          }
+        });
       } else {
         showAlert("Update Failed", data.message || "We were unable to update your profile.", "error");
       }
@@ -285,6 +370,11 @@ export default function ProfilePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="flex items-center space-x-6">
           <div className="relative group">
+            {/* Tooltip on Hover */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-lg z-50 font-bold">
+              Click camera button to upload photo
+            </div>
+            
             <div className="w-24 h-24 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden shadow-sm relative">
               {formData.image ? (
                 <img src={formData.image} alt={user?.name} className="w-full h-full object-cover" />
@@ -319,6 +409,12 @@ export default function ProfilePage() {
             <p className="text-slate-500 text-sm mt-1">
               {user?.role === 'teacher' ? 'Faculty Member' : `Student ID: PR-${10000 + user?.id}`} | Session: 2026
             </p>
+            {!formData.image && (
+              <div className="mt-2.5 text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 animate-pulse shadow-sm max-w-max">
+                <AlertCircle size={12} className="text-rose-500 shrink-0" />
+                <span>Upload a profile picture using the camera button to proceed</span>
+              </div>
+            )}
             <div className="flex items-center space-x-3 mt-3">
               <span className="px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase border border-emerald-100">
                 {user?.role === 'teacher' ? 'Official Mentor' : 'Verified identity'}
@@ -333,21 +429,32 @@ export default function ProfilePage() {
 
       {/* Tabs */}
       <div className="flex space-x-1 border-b border-slate-200 overflow-x-auto no-scrollbar">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center space-x-2 px-6 py-3 text-sm font-semibold transition-all relative ${
-              activeTab === tab.id ? "text-navy" : "text-slate-400 hover:text-slate-600"
-            }`}
-          >
-            {tab.icon}
-            <span>{tab.label}</span>
-            {activeTab === tab.id && (
-              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-navy" />
-            )}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const isComplete = isTabComplete(tab.id);
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleTabClick(tab.id)}
+              className={`flex items-center space-x-2 px-6 py-3 text-sm font-semibold transition-all relative ${
+                activeTab === tab.id 
+                  ? "text-navy" 
+                  : isComplete && tab.id !== 'security'
+                    ? "text-emerald-600 hover:text-emerald-700 font-bold" 
+                    : "text-slate-400 hover:text-slate-600"
+              }`}
+            >
+              {isComplete && tab.id !== 'security' ? (
+                <CheckCircle size={16} className="text-emerald-500 shrink-0" />
+              ) : (
+                tab.icon
+              )}
+              <span>{tab.label}</span>
+              {activeTab === tab.id && (
+                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-navy" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Content */}
@@ -406,6 +513,7 @@ export default function ProfilePage() {
                         value={formData.dob} 
                         onChange={(e) => setFormData({...formData, dob: e.target.value})}
                         disabled={!!user?.dob}
+                        max={new Date().toISOString().split('T')[0]}
                         className={`w-full pl-11 pr-4 py-2.5 border border-slate-200 rounded-lg outline-none text-sm font-medium transition-all ${
                           user?.dob 
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 

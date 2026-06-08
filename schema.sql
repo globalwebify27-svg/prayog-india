@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
   blood_group VARCHAR(5),
   emergency_contact VARCHAR(20),
   profile_img VARCHAR(255),
+  reset_token VARCHAR(255),
+  reset_expiry DATETIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -186,5 +188,22 @@ CREATE TABLE IF NOT EXISTS images (
   filename VARCHAR(255) NOT NULL,
   mime_type VARCHAR(100) NOT NULL,
   data LONGBLOB NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS promos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  subtitle VARCHAR(255),
+  description TEXT,
+  date_text VARCHAR(100),
+  price VARCHAR(50),
+  tag VARCHAR(50),
+  image VARCHAR(500),
+  target_date DATETIME,
+  is_active TINYINT(1) DEFAULT 1,
+  show_sticky TINYINT(1) DEFAULT 1,
+  registration_link VARCHAR(500) DEFAULT '/register',
+  start_date DATE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

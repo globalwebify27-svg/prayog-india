@@ -22,6 +22,47 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState("");
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email");
+
+    if (!email) {
+      setErrors({ email: "Email is required." });
+      return;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrors({ email: "Invalid email format." });
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+    setForgotSuccess("");
+    setErrors({});
+
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setForgotSuccess(data.message || "A reset link has been sent to your email.");
+      } else {
+        setError(data.message || "Something went wrong. Please try again.");
+      }
+    } catch (err) {
+      setError("A system error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -98,81 +139,152 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Right Column: Login Form */}
+            {/* Right Column: Form Block */}
             <div className="w-full max-w-md mx-auto lg:ml-auto">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white rounded-3xl p-8 md:p-10 border border-slate-200 shadow-xl shadow-navy/5"
               >
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">Sign In</h2>
-                  <p className="text-slate-500 text-sm">Welcome back. Please enter your details.</p>
-                </div>
-
-                {error && (
-                  <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-xs font-semibold leading-relaxed">
-                    {error}
-                  </div>
-                )}
-
-                <form onSubmit={handleLogin} className="space-y-6">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 ml-1">Institutional email</label>
-                    <div className="relative">
-                      <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input 
-                        type="email" 
-                        name="email"
-                        placeholder="e.g. name@prayogindia.in"
-                        className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${errors.email ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`}
-                      />
+                {!isForgotPassword ? (
+                  <>
+                    <div className="mb-8">
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2">Sign In</h2>
+                      <p className="text-slate-500 text-sm">Welcome back. Please enter your details.</p>
                     </div>
-                    {errors.email && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
-                  </div>
 
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center px-1">
-                      <label className="text-xs font-bold text-slate-700">Security password</label>
-                      <button type="button" className="text-[11px] font-bold text-navy hover:text-primary transition-colors">Forgot password?</button>
-                    </div>
-                    <div className="relative group">
-                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
-                      <input 
-                        type={showPassword ? "text" : "password"} 
-                        name="password"
-                        placeholder="••••••••"
-                        className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${errors.password ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`}
-                      />
+                    {error && (
+                      <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-xs font-semibold leading-relaxed">
+                        {error}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleLogin} className="space-y-6">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 ml-1">Institutional email</label>
+                        <div className="relative">
+                          <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input 
+                            type="email" 
+                            name="email"
+                            placeholder="e.g. name@prayogindia.in"
+                            className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${errors.email ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`}
+                          />
+                        </div>
+                        {errors.email && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center px-1">
+                          <label className="text-xs font-bold text-slate-700">Security password</label>
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              setIsForgotPassword(true);
+                              setError("");
+                              setForgotSuccess("");
+                              setErrors({});
+                            }}
+                            className="text-[11px] font-bold text-navy hover:text-primary transition-colors"
+                          >
+                            Forgot password?
+                          </button>
+                        </div>
+                        <div className="relative group">
+                          <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-navy transition-colors" />
+                          <input 
+                            type={showPassword ? "text" : "password"} 
+                            name="password"
+                            placeholder="••••••••"
+                            className={`w-full pl-11 pr-12 py-3 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${errors.password ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`}
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                        {errors.password && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.password}</p>}
+                      </div>
+
                       <button 
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-navy transition-colors"
+                        type="submit" 
+                        disabled={isLoading}
+                        className="w-full bg-navy text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-navy/10 hover:bg-black active:scale-[0.98] transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
                       >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        <span>{isLoading ? "Authenticating..." : "Authorize access"}</span>
+                        {!isLoading && <ArrowRight size={18} />}
                       </button>
+
+                      <div className="pt-6 text-center">
+                        <p className="text-sm text-slate-500">
+                          New to the portal?{" "}
+                          <Link href="/register" className="text-navy font-bold hover:text-primary transition-colors inline-flex items-center">
+                            Register now <ChevronRight size={14} className="ml-1" />
+                          </Link>
+                        </p>
+                      </div>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-8">
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setIsForgotPassword(false);
+                          setError("");
+                          setForgotSuccess("");
+                          setErrors({});
+                        }}
+                        className="flex items-center text-xs font-bold text-navy hover:text-primary transition-colors mb-4"
+                      >
+                        <ArrowLeft size={14} className="mr-1.5" /> Back to login
+                      </button>
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2">Forgot Password</h2>
+                      <p className="text-slate-500 text-sm">Enter your email address to receive a recovery link.</p>
                     </div>
-                    {errors.password && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.password}</p>}
-                  </div>
 
-                  <button 
-                    type="submit" 
-                    disabled={isLoading}
-                    className="w-full bg-navy text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-navy/10 hover:bg-black active:scale-[0.98] transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
-                  >
-                    <span>{isLoading ? "Authenticating..." : "Authorize access"}</span>
-                    {!isLoading && <ArrowRight size={18} />}
-                  </button>
+                    {error && (
+                      <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-xs font-semibold leading-relaxed">
+                        {error}
+                      </div>
+                    )}
 
-                  <div className="pt-6 text-center">
-                    <p className="text-sm text-slate-500">
-                      New to the portal?{" "}
-                      <Link href="/register" className="text-navy font-bold hover:text-primary transition-colors inline-flex items-center">
-                        Register now <ChevronRight size={14} className="ml-1" />
-                      </Link>
-                    </p>
-                  </div>
-                </form>
+                    {forgotSuccess && (
+                      <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-xs font-semibold leading-relaxed">
+                        {forgotSuccess}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleForgotPassword} className="space-y-6">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 ml-1">Institutional email</label>
+                        <div className="relative">
+                          <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input 
+                            type="email" 
+                            name="email"
+                            placeholder="e.g. name@prayogindia.in"
+                            className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${errors.email ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500' : 'border-slate-200 focus:border-navy focus:bg-white'}`}
+                          />
+                        </div>
+                        {errors.email && <p className="text-[10px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
+                      </div>
+
+                      <button 
+                        type="submit" 
+                        disabled={isLoading}
+                        className="w-full bg-navy text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-navy/10 hover:bg-black active:scale-[0.98] transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                      >
+                        <span>{isLoading ? "Sending link..." : "Send reset link"}</span>
+                        {!isLoading && <ArrowRight size={18} />}
+                      </button>
+                    </form>
+                  </>
+                )}
               </motion.div>
             </div>
 

@@ -1,8 +1,8 @@
 import TrainingPageContent from "./TrainingPageContent";
 
 export const metadata = {
-  title: "Training Programs | Robotics & STEM Education | Prayog India",
-  description: "Future-focused learning ecosystem for Class 1 to 12. STEM, AI, IoT, Robotics, Drone Technology, and Coding practical activities.",
+  title: "Robotics & STEM Training Programs | Prayog India",
+  description: "Interactive STEM, AI, IoT, Robotics, Drone Technology, and Coding training programs for Class 1 to 12. Hands-on school activities.",
 };
 
 export default function TrainingPage() {
