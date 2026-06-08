@@ -14,7 +14,7 @@ export const metadata = {
   title: "PRAYOG INDIA ROBOTICS | Training & Internship Centre",
   description: "Leading Robotics, AI, IoT, Drone Technology, STEM, 3D Design & Embedded Systems Training and Internship Centre at Ranchi, Jharkhand. Learn, Build, Innovate with PRAYOG INDIA ROBOTICS.",
   icons: {
-    icon: "/favicon.svg",
+    icon: "/favicon.png",
     apple: "/favicon.png",
   },
   openGraph: {
