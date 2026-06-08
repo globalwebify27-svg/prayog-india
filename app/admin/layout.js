@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSettings } from "@/components/SettingsContext";
 import { 
   LayoutDashboard, 
   Users, 
@@ -173,6 +174,7 @@ export default function AdminLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
   const pathname = usePathname();
+  const settings = useSettings();
 
   useEffect(() => {
     fetchUser();
@@ -212,7 +214,7 @@ export default function AdminLayout({ children }) {
           >
             <div className="p-6 flex items-center justify-between border-b border-white/5">
               <Link href="/">
-                <img src="/assets/logo.png" alt="Prayog India" className="h-8 brightness-200" />
+                <img src={settings?.logo_url || "/assets/logo.png"} alt="Prayog India" className="h-8 brightness-200" />
               </Link>
               <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-white/40 hover:text-white transition-colors">
                 <X size={20} />

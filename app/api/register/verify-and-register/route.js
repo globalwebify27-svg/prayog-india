@@ -187,6 +187,11 @@ export async function POST(req) {
     // 9. Send Welcome Email
     try {
       const passwordMessage = "[Hidden for Security - Use the password you entered, or Prayog@2026 if left blank]";
+      // Fetch logo_url for dynamic branding
+      const [logoRows] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'logo_url'");
+      const logoUrl = logoRows[0]?.setting_value
+        ? `${process.env.NEXT_PUBLIC_BASE_URL || 'https://prayogindiarobotics.com'}${logoRows[0].setting_value}`
+        : 'https://prayogindiarobotics.com/assets/logo.png';
       const emailHtml = getOnboardingEmailTemplate(
         name, 
         email, 
@@ -194,8 +199,9 @@ export async function POST(req) {
         course.title,
         batch,
         payment_method || 'online',
-        initialPaymentAmount, // Show the amount just paid
-        installmentData
+        initialPaymentAmount,
+        installmentData,
+        logoUrl
       );
 
       const path = require('path');

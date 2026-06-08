@@ -13,7 +13,8 @@ const CertificateTemplate = ({
   signatorySignature = "/assets/signature.png",
   fromDate = "",
   toDate = "",
-  instituteName = ""
+  instituteName = "",
+  logoUrl = "/assets/logo.png"
 }) => {
   return (
     <div
@@ -59,7 +60,7 @@ const CertificateTemplate = ({
 
           {/* Center: Prayog India Logo */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <img src="/assets/logo.png" alt="Prayog India" style={{ height: "80px", objectFit: "contain", marginBottom: "6px" }} />
+            <img src={logoUrl} alt="Prayog India" style={{ height: "80px", objectFit: "contain", marginBottom: "6px" }} />
             <p style={{ color: "#000", fontSize: "15px", letterSpacing: "2px", margin: 0, fontWeight: "bold", fontFamily: "'Arial', sans-serif" }}>
               <span style={{ fontStyle: "italic" }}>The World of</span> ROBOTICS
             </p>

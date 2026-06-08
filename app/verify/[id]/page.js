@@ -16,7 +16,8 @@ export default function VerifyCertificate() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [settings, setSettings] = useState({
     signatory_name: "Authorized Signatory",
-    signatory_signature: "/assets/signature.png"
+    signatory_signature: "/assets/signature.png",
+    logo_url: "/assets/logo.png"
   });
 
   useEffect(() => {
@@ -41,7 +42,8 @@ export default function VerifyCertificate() {
       if (settingsData.success) {
         setSettings({
           signatory_name: settingsData.settings.signatory_name || "Authorized Signatory",
-          signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png"
+          signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png",
+          logo_url: settingsData.settings.logo_url || "/assets/logo.png"
         });
       }
     } catch (err) {
@@ -239,6 +241,7 @@ export default function VerifyCertificate() {
               fromDate={cert.from_date ? new Date(cert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
               toDate={cert.to_date ? new Date(cert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
               instituteName={cert.institute_name || ''}
+              logoUrl={settings.logo_url}
             />
           </div>
         </div>

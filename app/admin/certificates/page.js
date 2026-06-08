@@ -54,7 +54,8 @@ export default function CertificateManagement() {
   const [coursesList, setCoursesList] = useState([]);
   const [settings, setSettings] = useState({
     signatory_name: "Authorized Signatory",
-    signatory_signature: "/assets/signature.png"
+    signatory_signature: "/assets/signature.png",
+    logo_url: "/assets/logo.png"
   });
 
   const certificateRef = useRef(null);
@@ -128,7 +129,8 @@ export default function CertificateManagement() {
       if (settingsData.success) {
         setSettings({
           signatory_name: settingsData.settings.signatory_name || "Authorized Signatory",
-          signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png"
+          signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png",
+          logo_url: settingsData.settings.logo_url || "/assets/logo.png"
         });
       }
     } catch (error) {
@@ -549,7 +551,7 @@ export default function CertificateManagement() {
             <div id="sidebar-preview-container" className="w-full relative group overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-inner" style={{ height: selectedCert ? `${794 * previewScale}px` : 'auto' }}>
               {selectedCert ? (
                  <div className="origin-top-left absolute top-0 left-0" style={{ width: '1123px', height: '794px', transform: `scale(${previewScale})` }}>
-                    <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} />
+                    <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} logoUrl={settings.logo_url} />
                  </div>
               ) : (
                 <div className="w-full aspect-[1.41/1] flex flex-col items-center justify-center text-slate-400 italic text-xs p-10 text-center"><Award size={32} className="mb-2 opacity-20" />Select a record to preview</div>
@@ -578,7 +580,7 @@ export default function CertificateManagement() {
               {/* Left Side: Preview */}
               <div className="flex-grow bg-slate-100 p-6 flex items-center justify-center overflow-auto" id="modal-preview-container">
                 <div style={{ width: '1123px', height: '794px', transform: `scale(${previewScale})`, transformOrigin: 'center center', flexShrink: 0 }} ref={modalCertificateRef} className="shadow-2xl">
-                  <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} />
+                  <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} logoUrl={settings.logo_url} />
                 </div>
               </div>
               {/* Right Side: Actions */}
@@ -630,7 +632,7 @@ export default function CertificateManagement() {
       <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
         {selectedCert && (
           <div ref={certificateRef}>
-             <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} />
+             <CertificateTemplate studentName={selectedCert.student_name} courseName={selectedCert.course_name} date={new Date(selectedCert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} certificateNumber={selectedCert.certificate_number} qrCodeData={selectedCert.qr_code_data} signatoryName={settings.signatory_name} signatorySignature={settings.signatory_signature} fromDate={selectedCert.from_date ? new Date(selectedCert.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} toDate={selectedCert.to_date ? new Date(selectedCert.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''} instituteName={selectedCert.institute_name || ''} logoUrl={settings.logo_url} />
           </div>
         )}
       </div>

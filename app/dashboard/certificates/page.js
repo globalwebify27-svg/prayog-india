@@ -28,7 +28,8 @@ export default function CertificatesPage() {
   const [selectedCertForDownload, setSelectedCertForDownload] = useState(null);
   const [settings, setSettings] = useState({
     signatory_name: "Authorized Signatory",
-    signatory_signature: "/assets/signature.png"
+    signatory_signature: "/assets/signature.png",
+    logo_url: "/assets/logo.png"
   });
   
   const certificateRef = useRef(null);
@@ -57,7 +58,8 @@ export default function CertificatesPage() {
         if (settingsData.success) {
           setSettings({
             signatory_name: settingsData.settings.signatory_name || "Authorized Signatory",
-            signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png"
+            signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png",
+            logo_url: settingsData.settings.logo_url || "/assets/logo.png"
           });
         }
       }
@@ -334,6 +336,7 @@ export default function CertificatesPage() {
                 fromDate={selectedCertForDownload.from_date ? new Date(selectedCertForDownload.from_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
                 toDate={selectedCertForDownload.to_date ? new Date(selectedCertForDownload.to_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
                 instituteName={selectedCertForDownload.institute_name || ''}
+                logoUrl={settings.logo_url}
              />
           </div>
         )}
