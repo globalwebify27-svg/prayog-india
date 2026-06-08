@@ -106,9 +106,10 @@ const CertificateTemplate = ({
           </div>
 
           {/* Body paragraph */}
-          <div style={{ lineHeight: "2", fontSize: "20px", fontStyle: "italic", color: "#222", width: "80%" }}>
+          <div style={{ lineHeight: "1.8", fontSize: "20px", fontStyle: "italic", color: "#222", width: "85%" }}>
             Student of <span style={{ display: "inline-block", minWidth: "20%", borderBottom: "2px dotted #444", margin: "0 4px", verticalAlign: "bottom", fontStyle: "normal", fontWeight: "bold", fontSize: "20px" }}>{instituteName || '\u00A0'}</span> for actively participating in the<br />
-            <span style={{ fontWeight: "bold", fontStyle: "normal", color: "#000", fontSize: "21px" }}>"{courseName}"</span> from <span style={{ display: "inline-block", minWidth: "12%", borderBottom: "2px dotted #444", margin: "0 4px", verticalAlign: "bottom", fontStyle: "normal", fontWeight: "bold", fontSize: "18px" }}>{fromDate || '\u00A0'}</span> to <span style={{ display: "inline-block", minWidth: "12%", borderBottom: "2px dotted #444", margin: "0 4px", verticalAlign: "bottom", fontStyle: "normal", fontWeight: "bold", fontSize: "18px" }}>{toDate || '\u00A0'}</span> at<br />
+            <span style={{ fontWeight: "bold", fontStyle: "normal", color: "#000", fontSize: "21px", display: "inline-block", maxWidth: "95%", wordBreak: "break-word", lineHeight: "1.3", margin: "6px 0" }}>"{courseName}"</span><br />
+            from <span style={{ display: "inline-block", minWidth: "12%", borderBottom: "2px dotted #444", margin: "0 4px", verticalAlign: "bottom", fontStyle: "normal", fontWeight: "bold", fontSize: "18px" }}>{fromDate || '\u00A0'}</span> to <span style={{ display: "inline-block", minWidth: "12%", borderBottom: "2px dotted #444", margin: "0 4px", verticalAlign: "bottom", fontStyle: "normal", fontWeight: "bold", fontSize: "18px" }}>{toDate || '\u00A0'}</span> at<br />
             <span style={{ fontStyle: "italic", fontSize: "22px", letterSpacing: "1px" }}>PRAYOG INDIA ROBOTICS.</span><br />
             <span style={{ fontStyle: "italic", fontSize: "20px" }}>We extend our best wishes for his/her continued success ahead.</span>
           </div>

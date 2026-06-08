@@ -13,7 +13,7 @@ const IdCardTemplate = ({
   logoUrl = "/assets/logo.png"
 }) => {
   const formattedName = studentName ? studentName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/ /g, '\u00A0') : "Student\u00A0Name";
-  const formattedCourse = courseName ? courseName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/ /g, '\u00A0') : "Academic\u00A0Program";
+  const formattedCourse = courseName ? courseName.replace(/([a-z])([A-Z])/g, '$1 $2') : "Academic Program";
 
   return (
     <div id="id-card-element" className="w-[320px] h-[500px] bg-white rounded-[24px] shadow-2xl overflow-hidden font-body relative border-2 border-slate-100">
@@ -48,8 +48,8 @@ const IdCardTemplate = ({
         {/* Identity Info */}
         <div className="mt-4 text-center w-full px-2">
           <h3 className="text-xl font-bold text-slate-900 leading-snug mb-5">{formattedName}</h3>
-          <div className="inline-block px-3 py-1 bg-primary/10 rounded-full">
-            <span className="text-[10px] font-bold text-navy uppercase tracking-wider">{formattedCourse}</span>
+          <div className="inline-block px-3 py-1 bg-primary/10 rounded-2xl max-w-full">
+            <span className="text-[9px] font-bold text-navy uppercase tracking-wider block whitespace-normal break-words leading-tight">{formattedCourse}</span>
           </div>
         </div>
 
