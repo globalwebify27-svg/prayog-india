@@ -11,15 +11,15 @@ const montserrat = Montserrat({
 });
 
 export const metadata = {
-  title: "Prayog India | STEM & Robotics Education for Class 1-12",
-  description: "India's leading STEM & robotics education hub for school students. Hands-on learning programs in coding, IoT, drones, and AI logic.",
+  title: "PRAYOG INDIA ROBOTICS | Training & Internship Centre",
+  description: "Leading Robotics, AI, IoT, Drone Technology, STEM, 3D Design & Embedded Systems Training and Internship Centre. Learn, Build, Innovate with PRAYOG INDIA ROBOTICS.",
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.png",
   },
   openGraph: {
-    title: "Prayog India | STEM & Robotics Education for Class 1-12",
-    description: "India's leading STEM & robotics education hub for school students. Hands-on learning programs in coding, IoT, drones, and AI logic.",
+    title: "PRAYOG INDIA ROBOTICS | Training & Internship Centre",
+    description: "Leading Robotics, AI, IoT, Drone Technology, STEM, 3D Design & Embedded Systems Training and Internship Centre. Learn, Build, Innovate with PRAYOG INDIA ROBOTICS.",
     url: "https://prayogindiarobotics.com",
     siteName: "Prayog India",
     images: [
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Prayog India | STEM & Robotics Education for Class 1-12",
-    description: "India's leading STEM & robotics education hub for school students. Hands-on learning programs in coding, IoT, drones, and AI logic.",
+    title: "PRAYOG INDIA ROBOTICS | Training & Internship Centre",
+    description: "Leading Robotics, AI, IoT, Drone Technology, STEM, 3D Design & Embedded Systems Training and Internship Centre. Learn, Build, Innovate with PRAYOG INDIA ROBOTICS.",
     images: ["/favicon.png"],
   },
 };
