@@ -1,0 +1,11 @@
+R_DEF: Internal format may change without notice
+local
+color accent
+color primary
+color primary_dark
+id webview
+layout activity_main
+mipmap ic_launcher
+string app_name
+style Theme.PrayogIndia
+style Theme.PrayogIndia.NoActionBar
