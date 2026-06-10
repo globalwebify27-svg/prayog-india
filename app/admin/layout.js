@@ -207,7 +207,7 @@ export default function AdminLayout({ children }) {
       {isSidebarOpen && (
         <div 
           onClick={() => setIsSidebarOpen(false)} 
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
         />
       )}
 
@@ -218,13 +218,13 @@ export default function AdminLayout({ children }) {
             initial={{ x: -300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -300, opacity: 0 }}
-            className="fixed lg:static z-50 w-72 h-screen bg-navy text-white flex flex-col shadow-lg shrink-0"
+            className="fixed md:static z-50 w-72 h-screen bg-navy text-white flex flex-col shadow-lg shrink-0"
           >
             <div className="p-6 flex items-center justify-between border-b border-white/5">
               <Link href="/">
                 <img src={settings?.logo_url || "/assets/logo.png"} alt="Prayog India" className="h-8 brightness-200" />
               </Link>
-              <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-white/40 hover:text-white transition-colors">
+              <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-white/40 hover:text-white transition-colors">
                 <X size={20} />
               </button>
             </div>

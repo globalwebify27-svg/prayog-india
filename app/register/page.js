@@ -159,12 +159,36 @@ function RegisterForm({ pageContent }) {
     courseId: "",
     mode: "Offline",
     batch_id: "",
-    isInstallment: true
+    timing_id: "",
+    custom_timing: "",
+    start_date: "",
+    isInstallment: true,
+    academic_type: "",
+    branch_stream: "",
+    semester_year: "",
+    college_school_name: "",
+    university_board: "",
+    registration_no: "",
+    academic_session: ""
   });
 
   const [dynamicCategories, setDynamicCategories] = useState(["All", "Internships", "1:1 Training"]);
 
   const [errors, setErrors] = useState({});
+
+  const getUpcomingDates = () => {
+    if (selectedCourse?.upcoming_start_dates) {
+      // Split by comma, trim whitespace and filter empty strings
+      const dates = selectedCourse.upcoming_start_dates
+        .split(",")
+        .map(d => d.trim())
+        .filter(d => d && /^\d{4}-\d{2}-\d{2}$/.test(d));
+      if (dates.length > 0) {
+        return dates;
+      }
+    }
+    return [];
+  };
 
   const validateStep = () => {
     let newErrors = {};
@@ -173,9 +197,27 @@ function RegisterForm({ pageContent }) {
         newErrors.courseId = "Please select a specific program to continue.";
       } else {
         const selectedCourse = courses.find(c => c.id === formData.courseId);
-        const availableBatches = selectedCourse?.batches?.filter(b => b.type === formData.mode.toLowerCase()) || [];
-        if (availableBatches.length > 0 && !formData.batch_id) {
-          newErrors.batch_id = "Please select a batch schedule to continue.";
+        const hasTimings = selectedCourse?.timings && selectedCourse.timings.length > 0;
+        const hasCustomTimings = selectedCourse?.custom_timings && selectedCourse.custom_timings.split("\n").map(t => t.trim()).filter(Boolean).length > 0;
+
+        if (hasCustomTimings) {
+          if (!formData.custom_timing) {
+            newErrors.custom_timing = "Please select a timing slot to continue.";
+          }
+        } else if (hasTimings) {
+          if (!formData.timing_id) {
+            newErrors.timing_id = "Please select a timing slot to continue.";
+          }
+        } else {
+          const availableBatches = selectedCourse?.batches?.filter(b => b.type === formData.mode.toLowerCase()) || [];
+          if (availableBatches.length > 0 && !formData.batch_id) {
+            newErrors.batch_id = "Please select a batch schedule to continue.";
+          }
+        }
+        
+        // Start date is required only if the course has configured upcoming start dates
+        if (getUpcomingDates().length > 0 && !formData.start_date) {
+          newErrors.start_date = "Please select a program starting date to continue.";
         }
       }
     } else if (step === 2) {
@@ -217,6 +259,7 @@ function RegisterForm({ pageContent }) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
 
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
@@ -312,17 +355,41 @@ function RegisterForm({ pageContent }) {
 
   const selectedCourse = courses.find(c => c.id == formData.courseId);
 
-  // Auto-select batch if only one is available
+  // Auto-select batch or timing if only one is available
   useEffect(() => {
-    if (selectedCourse && selectedCourse.batches) {
-      const availableBatches = selectedCourse.batches.filter(b => b.type === formData.mode.toLowerCase());
-      if (availableBatches.length === 1 && formData.batch_id !== availableBatches[0].id) {
-        setFormData(prev => ({ ...prev, batch_id: availableBatches[0].id }));
-      } else if (availableBatches.length === 0 && formData.batch_id !== "") {
-        setFormData(prev => ({ ...prev, batch_id: "" }));
+    if (selectedCourse) {
+      if (selectedCourse.timings && selectedCourse.timings.length > 0) {
+        if (selectedCourse.timings.length === 1 && formData.timing_id !== selectedCourse.timings[0].id) {
+          setFormData(prev => ({ ...prev, timing_id: selectedCourse.timings[0].id, batch_id: "" }));
+        } else if (selectedCourse.timings.length === 0 && formData.timing_id !== "") {
+          setFormData(prev => ({ ...prev, timing_id: "" }));
+        }
+      } else if (selectedCourse.batches) {
+        const availableBatches = selectedCourse.batches.filter(b => b.type === formData.mode.toLowerCase());
+        if (availableBatches.length === 1 && formData.batch_id !== availableBatches[0].id) {
+          setFormData(prev => ({ ...prev, batch_id: availableBatches[0].id, timing_id: "" }));
+        } else if (availableBatches.length === 0 && formData.batch_id !== "") {
+          setFormData(prev => ({ ...prev, batch_id: "" }));
+        }
+      }
+
+      // Auto select custom timing if there is only one defined
+      const customTimings = selectedCourse.custom_timings ? selectedCourse.custom_timings.split("\n").map(t => t.trim()).filter(Boolean) : [];
+      if (customTimings.length === 1 && formData.custom_timing !== customTimings[0]) {
+        setFormData(prev => ({ ...prev, custom_timing: customTimings[0], timing_id: "", batch_id: "" }));
+      } else if (customTimings.length === 0 && formData.custom_timing !== "") {
+        setFormData(prev => ({ ...prev, custom_timing: "" }));
+      }
+
+      // Auto select starting date if there's only one date defined
+      const dates = getUpcomingDates();
+      if (dates.length === 1 && formData.start_date !== dates[0]) {
+        setFormData(prev => ({ ...prev, start_date: dates[0] }));
+      } else if (dates.length === 0 && formData.start_date !== "") {
+        setFormData(prev => ({ ...prev, start_date: "" }));
       }
     }
-  }, [selectedCourse, formData.mode, formData.batch_id]);
+  }, [selectedCourse, formData.mode, formData.batch_id, formData.timing_id, formData.custom_timing, formData.start_date]);
 
   // Resend OTP countdown timer
   useEffect(() => {
@@ -436,7 +503,10 @@ function RegisterForm({ pageContent }) {
         body: JSON.stringify({
           course_id: formData.courseId,
           coupon_code: couponDetails?.code,
-          isInstallment: formData.isInstallment
+          isInstallment: formData.isInstallment,
+          timing_id: formData.timing_id,
+          custom_timing: formData.custom_timing,
+          start_date: formData.start_date
         })
       });
 
@@ -461,9 +531,19 @@ function RegisterForm({ pageContent }) {
                 course_id: formData.courseId,
                 mode: formData.mode,
                 batch_id: formData.batch_id,
+                timing_id: formData.timing_id,
+                custom_timing: formData.custom_timing,
+                start_date: formData.start_date,
                 isInstallment: formData.isInstallment,
                 coupon_code: couponDetails?.code,
-                payment_method: 'free'
+                payment_method: 'free',
+                academic_type: formData.academic_type,
+                branch_stream: formData.branch_stream,
+                semester_year: formData.semester_year,
+                college_name: formData.college_school_name,
+                university_board: formData.university_board,
+                registration_no: formData.registration_no,
+                academic_session: formData.academic_session
               })
             });
             
@@ -514,9 +594,19 @@ function RegisterForm({ pageContent }) {
                   course_id: formData.courseId,
                   mode: formData.mode,
                   batch_id: formData.batch_id,
+                  timing_id: formData.timing_id,
+                  custom_timing: formData.custom_timing,
+                  start_date: formData.start_date,
                   isInstallment: formData.isInstallment,
                   coupon_code: couponDetails?.code,
-                  payment_method: 'online'
+                  payment_method: 'online',
+                  academic_type: formData.academic_type,
+                  branch_stream: formData.branch_stream,
+                  semester_year: formData.semester_year,
+                  college_name: formData.college_school_name,
+                  university_board: formData.university_board,
+                  registration_no: formData.registration_no,
+                  academic_session: formData.academic_session
                 })
               });
               
@@ -751,13 +841,56 @@ function RegisterForm({ pageContent }) {
                     <p className="text-xs text-slate-500 italic p-4 bg-slate-50 rounded-xl border border-slate-200 text-center font-medium">
                       Select a program above to see available batches
                     </p>
+                  ) : selectedCourse.custom_timings && selectedCourse.custom_timings.split("\n").map(t => t.trim()).filter(Boolean).length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {selectedCourse.custom_timings.split("\n").map(t => t.trim()).filter(Boolean).map((t, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setFormData({...formData, custom_timing: t, timing_id: "", batch_id: ""})}
+                          className={`p-4 rounded-xl border-2 transition-all text-sm font-bold flex flex-col items-center justify-center gap-1 ${
+                            formData.custom_timing === t
+                              ? "bg-navy/5 border-navy text-navy shadow-sm" 
+                              : "bg-white border-slate-100 text-slate-600 hover:border-navy/30 hover:bg-slate-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {t.toLowerCase().includes("morning") ? <Sun size={16} className="text-amber-500" /> : <Moon size={16} className="text-indigo-400" />}
+                            <span>{t}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : selectedCourse.timings && selectedCourse.timings.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {selectedCourse.timings.map(t => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setFormData({...formData, timing_id: t.id, batch_id: "", custom_timing: ""})}
+                            className={`p-4 rounded-xl border-2 transition-all text-sm font-bold flex flex-col items-center justify-center gap-1 ${
+                              formData.timing_id === t.id 
+                                ? "bg-navy/5 border-navy text-navy shadow-sm" 
+                                : "bg-white border-slate-100 text-slate-600 hover:border-navy/30 hover:bg-slate-50"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {t.name.toLowerCase().includes("morning") ? <Sun size={16} /> : <Moon size={16} />}
+                              <span>{t.name}</span>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                              {t.slot || 'Flexible Timing'}
+                            </span>
+                          </button>
+                      ))}
+                    </div>
                   ) : selectedCourse.batches && selectedCourse.batches.filter(b => b.type === formData.mode.toLowerCase()).length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {selectedCourse.batches.filter(b => b.type === formData.mode.toLowerCase()).map(b => (
                           <button
                             key={b.id}
                             type="button"
-                            onClick={() => setFormData({...formData, batch_id: b.id})}
+                            onClick={() => setFormData({...formData, batch_id: b.id, timing_id: "", custom_timing: ""})}
                             className={`p-4 rounded-xl border-2 transition-all text-sm font-bold flex flex-col items-center justify-center gap-1 ${
                               formData.batch_id === b.id 
                                 ? "bg-navy/5 border-navy text-navy shadow-sm" 
@@ -779,12 +912,58 @@ function RegisterForm({ pageContent }) {
                       No batches scheduled for {formData.mode} mode yet.
                     </p>
                   )}
+                  {errors.custom_timing && (
+                    <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                      <AlertCircle size={10} /> {errors.custom_timing}
+                    </p>
+                  )}
+                  {errors.timing_id && (
+                    <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                      <AlertCircle size={10} /> {errors.timing_id}
+                    </p>
+                  )}
                   {errors.batch_id && (
                     <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
                       <AlertCircle size={10} /> {errors.batch_id}
                     </p>
                   )}
                 </div>
+
+                {selectedCourse && getUpcomingDates().length > 0 && (
+                  <div className="space-y-3 pt-2">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1">Select Program Starting Date</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {getUpcomingDates().map(d => {
+                        const dateObj = new Date(d);
+                        const formattedDate = dateObj.toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        });
+                        return (
+                          <button
+                            key={d}
+                            type="button"
+                            onClick={() => setFormData({...formData, start_date: d})}
+                            className={`p-4 rounded-xl border-2 transition-all text-sm font-bold flex flex-col items-center justify-center gap-1 ${
+                              formData.start_date === d 
+                                ? "bg-navy/5 border-navy text-navy shadow-sm" 
+                                : "bg-white border-slate-100 text-slate-600 hover:border-navy/30 hover:bg-slate-50"
+                            }`}
+                          >
+                            <span className="text-navy">{formattedDate}</span>
+                            <span className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-600">Upcoming Batch</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {errors.start_date && (
+                      <p className="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1 mt-1">
+                        <AlertCircle size={10} /> {errors.start_date}
+                      </p>
+                    )}
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -1009,6 +1188,8 @@ function RegisterForm({ pageContent }) {
                 </div>
               </motion.div>
             )}
+
+            {/* Academic Information step removed from checkout */}
 
             {step === 3 && (
               <motion.div key="step3" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-8">

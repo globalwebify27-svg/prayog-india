@@ -9,16 +9,31 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Code is required" }, { status: 400 });
     }
 
+    // 1. Find if the coupon code exists and is active
     const [rows] = await pool.query(
-      "SELECT * FROM promo_codes WHERE code = ? AND (course_ids IS NULL OR JSON_CONTAINS(course_ids, ?) OR course_id = ?) AND is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())",
-      [code, String(courseId), courseId]
+      "SELECT * FROM promo_codes WHERE code = ? AND is_active = 1",
+      [code]
     );
 
     if (rows.length === 0) {
-      return NextResponse.json({ success: false, message: "Invalid or expired coupon code" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "Invalid coupon code" }, { status: 400 });
     }
 
     const coupon = rows[0];
+
+    // 2. Check if coupon is expired
+    if (coupon.expiry_date && new Date(coupon.expiry_date) < new Date(new Date().setHours(0,0,0,0))) {
+      return NextResponse.json({ success: false, message: "Coupon expired" }, { status: 400 });
+    }
+
+    // 3. Check if coupon is applicable for this course
+    const courseMatch = !coupon.course_ids && !coupon.course_id;
+    const courseIdsArray = coupon.course_ids ? (typeof coupon.course_ids === 'string' ? JSON.parse(coupon.course_ids) : coupon.course_ids) : [];
+    const isApplicable = courseMatch || courseIdsArray.includes(Number(courseId)) || Number(coupon.course_id) === Number(courseId);
+
+    if (!isApplicable) {
+      return NextResponse.json({ success: false, message: "This coupon is not applicable for this program" }, { status: 400 });
+    }
     return NextResponse.json({
       success: true,
       discount_type: coupon.discount_type,

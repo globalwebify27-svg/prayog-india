@@ -8,9 +8,27 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import CustomModal from "@/components/CustomModal";
-
 export default function CouponsManagement() {
   const [coupons, setCoupons] = useState([]);
+  const [activeTab, setActiveTab] = useState("active");
+
+  const isExpired = (coupon) => {
+    return coupon.expiry_date && new Date(coupon.expiry_date) < new Date();
+  };
+
+  const filteredCoupons = coupons.filter(coupon => {
+    const expired = isExpired(coupon);
+    if (activeTab === "active") {
+      return coupon.is_active && !expired;
+    }
+    if (activeTab === "inactive") {
+      return !coupon.is_active && !expired;
+    }
+    if (activeTab === "expired") {
+      return expired;
+    }
+    return true;
+  });
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [couponToEdit, setCouponToEdit] = useState(null);
@@ -168,6 +186,31 @@ export default function CouponsManagement() {
            </Link>
         </div>
 
+        {/* Tab Filters */}
+        <div className="flex space-x-1 border-b border-navy/10 mb-8 overflow-x-auto no-scrollbar">
+          {[
+            { id: "active", label: "Active", count: coupons.filter(p => p.is_active && !isExpired(p)).length },
+            { id: "inactive", label: "Inactive", count: coupons.filter(p => !p.is_active && !isExpired(p)).length },
+            { id: "expired", label: "Expired", count: coupons.filter(p => isExpired(p)).length }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-2 px-6 py-4 text-xs font-bold uppercase transition-all relative ${
+                activeTab === tab.id ? "text-navy" : "text-slate-400 hover:text-slate-600"
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+                activeTab === tab.id ? "bg-navy text-white" : "bg-slate-100 text-slate-500"
+              }`}>{tab.count}</span>
+              {activeTab === tab.id && (
+                <motion.div layoutId="activeTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-navy" />
+              )}
+            </button>
+          ))}
+        </div>
+
         {/* Coupon List */}
         <div className="grid grid-cols-1 gap-6">
           {loading ? (
@@ -175,15 +218,15 @@ export default function CouponsManagement() {
               <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="text-sm font-bold text-navy/40 uppercase tracking-widest">Loading Coupons...</p>
             </div>
-          ) : coupons.length === 0 ? (
+          ) : filteredCoupons.length === 0 ? (
             <div className="bg-white rounded-[3rem] p-20 text-center border border-navy/5">
                <Tag size={40} className="text-slate-200 mx-auto mb-6" />
-               <h3 className="text-xl font-bold text-navy mb-2">No coupons found</h3>
-               <p className="text-slate-400 text-sm mb-8">Start your first discount campaign to engage more students.</p>
+               <h3 className="text-xl font-bold text-navy mb-2">No coupons here</h3>
+               <p className="text-slate-400 text-sm mb-8">No coupons matching the "{activeTab}" filter currently exist.</p>
                <button onClick={() => setShowModal(true)} className="text-primary font-bold uppercase tracking-widest text-xs border-b-2 border-primary pb-1">Create Now</button>
             </div>
           ) : (
-            coupons.map((coupon) => (
+            filteredCoupons.map((coupon) => (
               <div key={coupon.id} className="bg-white rounded-[2.5rem] overflow-hidden border border-navy/5 shadow-sm hover:shadow-xl transition-all p-8 flex flex-col md:flex-row items-center justify-between gap-8 group">
                 <div className="flex-grow flex items-center gap-6">
                   <div className={`w-20 h-20 rounded-2xl flex items-center justify-center ${coupon.is_active ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400'}`}>
@@ -195,6 +238,12 @@ export default function CouponsManagement() {
                        <span>{coupon.discount_type === 'percentage' ? `${coupon.discount_value}% OFF` : `₹${coupon.discount_value} OFF`}</span>
                        <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                        <span>{coupon.is_active ? 'Active' : 'Inactive'}</span>
+                       {isExpired(coupon) && (
+                         <>
+                           <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                           <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase">Expired</span>
+                         </>
+                       )}
                     </div>
                     <h3 className="text-2xl font-heading font-black text-navy tracking-widest uppercase mb-1">{coupon.code}</h3>
                     <p className="text-slate-500 text-xs font-medium">

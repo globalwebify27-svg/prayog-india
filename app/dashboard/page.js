@@ -60,8 +60,11 @@ export default function StudentDashboard() {
         const u = result.data.user;
         const essentialFields = [
           u.father_name, u.mother_name, u.gender, 
-          u.qualification, u.address, u.dob, 
-          u.id_number, u.image, u.school_id_card, u.school_id_number
+          u.address, u.dob, 
+          u.id_number, u.image, u.school_id_card,
+          (u.registration_no || u.school_id_number),
+          (u.college_name || u.school_college),
+          u.academic_type
         ];
         const isActuallyComplete = essentialFields.every(f => f && String(f).trim() !== "");
         
@@ -119,12 +122,11 @@ export default function StudentDashboard() {
 
   // Dynamic Profile Fields for Strength and Checklist
   const profileFields = [
-    { label: "Family Details", val: user.father_name && user.mother_name },
     { label: "Identity Image", val: user.image },
-    { label: "Academic Records", val: user.qualification && user.school_college },
-    { label: "Basic Info (DOB/Gender)", val: user.dob && user.gender },
+    { label: "Academic Records", val: user.academic_type && (user.college_name || user.school_college) },
+    { label: "Basic Info (DOB/Gender/Parents)", val: user.dob && user.gender && user.father_name && user.mother_name },
     { label: "Verification ID", val: user.id_number },
-    { label: "School ID/Roll Number", val: user.school_id_number },
+    { label: "School ID/Roll Number", val: (user.registration_no || user.school_id_number) },
     { label: "School ID Card", val: user.school_id_card }
   ];
   const completedCount = profileFields.filter(f => f.val).length;
@@ -371,33 +373,28 @@ export default function StudentDashboard() {
       {/* Profile Completion Prompt Modal */}
       <AnimatePresence>
         {showProfilePrompt && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-navy/60 backdrop-blur-md">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-navy/60 backdrop-blur-md">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
+              className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"
             >
               {/* Abstract Background Element */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl" />
-              
-              <button 
-                onClick={() => setShowProfilePrompt(false)}
-                className="absolute top-6 right-6 text-slate-400 hover:text-navy transition-colors p-1"
-              >
-                <X size={20} />
-              </button>
-
-              <div className="relative z-10 text-center">
-                <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center text-navy mx-auto mb-6 shadow-inner">
-                  <UserPlus size={36} strokeWidth={1.5} />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
+ 
+              <div className="relative z-10 overflow-y-auto pr-1 space-y-6 flex-grow max-h-[calc(90vh-140px)] no-scrollbar">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center text-navy mx-auto mb-4 shadow-inner">
+                    <UserPlus size={32} strokeWidth={1.5} />
+                  </div>
+                  
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">Institutional Onboarding</h2>
                 </div>
                 
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">Institutional Onboarding</h2>
-                
                 {/* Completion Percentage */}
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-2 px-1">
+                <div>
+                  <div className="flex justify-between items-center mb-1.5 px-1">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profile Strength</p>
                     <p className="text-xs font-bold text-navy">{profilePercent}%</p>
                   </div>
@@ -409,32 +406,32 @@ export default function StudentDashboard() {
                     />
                   </div>
                 </div>
-
-                <p className="text-slate-500 text-sm leading-relaxed mb-8">
+ 
+                <p className="text-slate-500 text-xs md:text-sm leading-relaxed text-center">
                   Please complete your official student profile to ensure your certification records and ID cards are generated correctly.
                 </p>
-
-                <div className="space-y-3 mb-8 text-left">
+ 
+                <div className="space-y-2 text-left">
                   {profileFields.map((f, i) => (
-                    <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${f.val ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-                      {f.val ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <Clock size={16} className="text-slate-400 shrink-0" />}
-                      <p className={`text-[10px] font-bold uppercase tracking-tight ${f.val ? 'text-emerald-700' : 'text-slate-400'}`}>
+                    <div key={i} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${f.val ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
+                      {f.val ? <CheckCircle2 size={14} className="text-emerald-500 shrink-0" /> : <Clock size={14} className="text-slate-400 shrink-0" />}
+                      <p className={`text-[9px] font-bold uppercase tracking-tight ${f.val ? 'text-emerald-700' : 'text-slate-400'}`}>
                         {f.label} {f.val ? 'Verified' : 'Pending'}
                       </p>
                     </div>
                   ))}
                 </div>
+              </div>
 
-                <div className="flex flex-col gap-3">
-                  <Link 
-                    href="/dashboard/profile"
-                    className="w-full px-6 py-4 bg-navy text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black shadow-lg shadow-navy/20 transition-all flex items-center justify-center gap-2"
-                  >
-                    <span>Complete My Profile</span>
-                    <ChevronRight size={14} />
-                  </Link>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Verification is mandatory for hub access</p>
-                </div>
+              <div className="pt-4 border-t border-slate-100 flex flex-col gap-2 shrink-0 bg-white relative z-10">
+                <Link 
+                  href="/dashboard/profile"
+                  className="w-full px-5 py-3.5 bg-navy text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black shadow-lg shadow-navy/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <span>Complete My Profile</span>
+                  <ChevronRight size={14} />
+                </Link>
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter text-center">Verification is mandatory for hub access</p>
               </div>
             </motion.div>
           </div>

@@ -6,7 +6,9 @@ import { sendMail, getFacultyOnboardingEmailTemplate } from "@/lib/mailer";
 export async function GET() {
   try {
     const [rows] = await pool.query(`
-      SELECT f.*, u.email, 
+      SELECT f.*, 
+             u.email as email, 
+             u.name as user_name,
              GROUP_CONCAT(DISTINCT c.id) as selectedCourses,
              GROUP_CONCAT(DISTINCT ft.timing_id) as selectedTimings
       FROM faculties f 

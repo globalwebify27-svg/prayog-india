@@ -13,7 +13,8 @@ export async function POST(req) {
       razorpay_payment_id, 
       razorpay_signature,
       // User/Registration details
-      name, email, phone, emergency_contact, password, course_id, mode, batch, batch_id, isInstallment, payment_method, coupon_code 
+      name, email, phone, emergency_contact, password, course_id, mode, batch, batch_id, timing_id, start_date, isInstallment, payment_method, coupon_code, custom_timing,
+      academic_type, branch_stream, semester_year, college_name, university_board, registration_no, academic_session
     } = await req.json();
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -48,15 +49,22 @@ export async function POST(req) {
     // 3. Handle Coupon Code
     if (coupon_code) {
       const [couponRows] = await pool.query(
-        "SELECT * FROM promo_codes WHERE code = ? AND (course_id IS NULL OR course_id = ?) AND is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())",
-        [coupon_code, course_id]
+        "SELECT * FROM promo_codes WHERE code = ? AND is_active = 1",
+        [coupon_code]
       );
       if (couponRows.length > 0) {
         const coupon = couponRows[0];
-        if (coupon.discount_type === 'percentage') {
-          amount = amount - (amount * (Number(coupon.discount_value) / 100));
-        } else {
-          amount = amount - Number(coupon.discount_value);
+        const isNotExpired = !coupon.expiry_date || new Date(coupon.expiry_date) >= new Date(new Date().setHours(0,0,0,0));
+        const courseMatch = !coupon.course_ids && !coupon.course_id;
+        const courseIdsArray = coupon.course_ids ? (typeof coupon.course_ids === 'string' ? JSON.parse(coupon.course_ids) : coupon.course_ids) : [];
+        const isApplicable = courseMatch || courseIdsArray.includes(Number(course_id)) || Number(coupon.course_id) === Number(course_id);
+
+        if (isNotExpired && isApplicable) {
+          if (coupon.discount_type === 'percentage') {
+            amount = amount - (amount * (Number(coupon.discount_value) / 100));
+          } else {
+            amount = amount - Number(coupon.discount_value);
+          }
         }
       }
     }
@@ -71,9 +79,9 @@ export async function POST(req) {
     // Security Check: If it claims to be free, ensure the calculated amount is actually 0 or less
     if (isFreeEnrollment && initialPaymentAmount >= 1) {
        return NextResponse.json({ success: false, message: "Security Error: Course is not free." }, { status: 403 });
-    }
+     }
 
-    // 4. Create User
+    // 4. Create/Update User
     const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
     let userId;
     
@@ -82,20 +90,35 @@ export async function POST(req) {
       if (password) {
         const hashedPassword = await bcrypt.hash(password, 10);
         await pool.query(
-          "UPDATE users SET name = ?, password = ?, phone = ?, emergency_contact = ? WHERE id = ?",
-          [name, hashedPassword, phone, emergency_contact || null, userId]
+          "UPDATE users SET name = ?, password = ?, phone = ?, emergency_contact = ?, academic_type = ?, branch_stream = ?, semester_year = ?, college_name = ?, university_board = ?, registration_no = ?, academic_session = ? WHERE id = ?",
+          [
+            name, hashedPassword, phone, emergency_contact || null,
+            academic_type || null, branch_stream || null, semester_year || null,
+            college_name || null, university_board || null, registration_no || null,
+            academic_session || null, userId
+          ]
         );
       } else {
         await pool.query(
-          "UPDATE users SET name = ?, phone = ?, emergency_contact = ? WHERE id = ?",
-          [name, phone, emergency_contact || null, userId]
+          "UPDATE users SET name = ?, phone = ?, emergency_contact = ?, academic_type = ?, branch_stream = ?, semester_year = ?, college_name = ?, university_board = ?, registration_no = ?, academic_session = ? WHERE id = ?",
+          [
+            name, phone, emergency_contact || null,
+            academic_type || null, branch_stream || null, semester_year || null,
+            college_name || null, university_board || null, registration_no || null,
+            academic_session || null, userId
+          ]
         );
       }
     } else {
       const hashedPassword = await bcrypt.hash(password || "Prayog@2026", 10);
       const [userResult] = await pool.execute(
-        "INSERT INTO users (name, email, password, phone, emergency_contact, role) VALUES (?, ?, ?, ?, ?, 'student')",
-        [name, email, hashedPassword, phone, emergency_contact || null]
+        "INSERT INTO users (name, email, password, phone, emergency_contact, role, academic_type, branch_stream, semester_year, college_name, university_board, registration_no, academic_session) VALUES (?, ?, ?, ?, ?, 'student', ?, ?, ?, ?, ?, ?, ?)",
+        [
+          name, email, hashedPassword, phone, emergency_contact || null,
+          academic_type || null, branch_stream || null, semester_year || null,
+          college_name || null, university_board || null, registration_no || null,
+          academic_session || null
+        ]
       );
       userId = userResult.insertId;
     }
@@ -104,7 +127,80 @@ export async function POST(req) {
     let finalBatchId = batch_id;
     let finalBatchName = "Online Session";
     
-    if (finalBatchId) {
+    if (custom_timing) {
+      let friendlyDateStr = "";
+      if (start_date) {
+        try {
+          friendlyDateStr = " - Starting " + new Date(start_date).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+        } catch (_) {}
+      }
+      const expectedBatchName = `${custom_timing.trim()}${friendlyDateStr}`;
+      
+      let batchQuery = "SELECT id, name FROM batches WHERE course_id = ? AND name = ?";
+      let batchParams = [course_id, expectedBatchName];
+      if (start_date) {
+        batchQuery += " AND start_date = ?";
+        batchParams.push(start_date);
+      }
+      const [batchRows] = await pool.execute(batchQuery, batchParams);
+      if (batchRows.length > 0) {
+        finalBatchId = batchRows[0].id;
+        finalBatchName = batchRows[0].name;
+      } else {
+        const [batchInsert] = await pool.execute(
+          "INSERT INTO batches (course_id, name, type, schedule, start_date) VALUES (?, ?, ?, ?, ?)",
+          [course_id, expectedBatchName, mode ? mode.toLowerCase() : 'offline', custom_timing.trim(), start_date || null]
+        );
+        finalBatchId = batchInsert.insertId;
+        finalBatchName = expectedBatchName;
+      }
+    } else if (timing_id) {
+      // Find matching batch that also matches the start_date if supplied
+      let batchQuery = "SELECT id, name FROM batches WHERE course_id = ? AND timing_id = ?";
+      let batchParams = [course_id, timing_id];
+      if (start_date) {
+        batchQuery += " AND start_date = ?";
+        batchParams.push(start_date);
+      }
+      const [batchRows] = await pool.execute(batchQuery, batchParams);
+      if (batchRows.length > 0) {
+        finalBatchId = batchRows[0].id;
+        finalBatchName = batchRows[0].name;
+      } else {
+        const [timingRows] = await pool.execute(
+          "SELECT name, slot FROM timings WHERE id = ?",
+          [timing_id]
+        );
+        if (timingRows.length > 0) {
+          const tName = timingRows[0].name.trim();
+          const tSlot = timingRows[0].slot;
+          
+          let friendlyDateStr = "";
+          if (start_date) {
+            try {
+              friendlyDateStr = " - Starting " + new Date(start_date).toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              });
+            } catch (_) {}
+          }
+          
+          const batchName = `${tName} (${tSlot})${friendlyDateStr}`;
+          
+          const [batchInsert] = await pool.execute(
+            "INSERT INTO batches (course_id, name, type, timing_id, schedule, start_date) VALUES (?, ?, ?, ?, ?, ?)",
+            [course_id, batchName, mode ? mode.toLowerCase() : 'offline', timing_id, tSlot, start_date || null]
+          );
+          finalBatchId = batchInsert.insertId;
+          finalBatchName = batchName;
+        }
+      }
+    } else if (finalBatchId) {
       const [batchRows] = await pool.execute("SELECT name FROM batches WHERE id = ?", [finalBatchId]);
       if (batchRows.length > 0) {
         finalBatchName = batchRows[0].name;
@@ -114,7 +210,7 @@ export async function POST(req) {
       let fallbackBatch = batch || 'Default Batch';
       let [batchRows] = await pool.execute("SELECT id FROM batches WHERE name = ? AND course_id = ?", [fallbackBatch, course_id]);
       if (batchRows.length === 0) {
-          const [batchInsert] = await pool.execute("INSERT INTO batches (course_id, name, type) VALUES (?, ?, ?)", [course_id, fallbackBatch, mode ? mode.toLowerCase() : 'offline']);
+          const [batchInsert] = await pool.execute("INSERT INTO batches (course_id, name, type, start_date) VALUES (?, ?, ?, ?)", [course_id, fallbackBatch, mode ? mode.toLowerCase() : 'offline', start_date || null]);
           finalBatchId = batchInsert.insertId;
       } else {
           finalBatchId = batchRows[0].id;
@@ -201,7 +297,7 @@ export async function POST(req) {
         email, 
         passwordMessage,
         course.title,
-        batch,
+        finalBatchName,
         payment_method || 'online',
         initialPaymentAmount,
         installmentData,

@@ -9,7 +9,7 @@ const razorpay = new Razorpay({
 
 export async function POST(req) {
   try {
-    const { course_id, coupon_code, isInstallment } = await req.json();
+    const { course_id, coupon_code, isInstallment, timing_id, start_date } = await req.json();
 
     if (!course_id) {
       return NextResponse.json({ success: false, message: "Course ID is required" }, { status: 400 });
@@ -26,15 +26,23 @@ export async function POST(req) {
     // 2. Handle Coupon Code
     if (coupon_code) {
       const [couponRows] = await pool.query(
-        "SELECT * FROM promo_codes WHERE code = ? AND (course_id IS NULL OR course_id = ?) AND is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())",
-        [coupon_code, course_id]
+        "SELECT * FROM promo_codes WHERE code = ? AND is_active = 1",
+        [coupon_code]
       );
       if (couponRows.length > 0) {
         const coupon = couponRows[0];
-        if (coupon.discount_type === 'percentage') {
-          amount = amount - (amount * (Number(coupon.discount_value) / 100));
-        } else {
-          amount = amount - Number(coupon.discount_value);
+        // Only apply if not expired
+        const isNotExpired = !coupon.expiry_date || new Date(coupon.expiry_date) >= new Date(new Date().setHours(0,0,0,0));
+        const courseMatch = !coupon.course_ids && !coupon.course_id;
+        const courseIdsArray = coupon.course_ids ? (typeof coupon.course_ids === 'string' ? JSON.parse(coupon.course_ids) : coupon.course_ids) : [];
+        const isApplicable = courseMatch || courseIdsArray.includes(Number(course_id)) || Number(coupon.course_id) === Number(course_id);
+
+        if (isNotExpired && isApplicable) {
+          if (coupon.discount_type === 'percentage') {
+            amount = amount - (amount * (Number(coupon.discount_value) / 100));
+          } else {
+            amount = amount - Number(coupon.discount_value);
+          }
         }
       }
     }

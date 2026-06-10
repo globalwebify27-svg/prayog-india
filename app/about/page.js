@@ -566,50 +566,74 @@ export default function AboutPage() {
               <h2 className="text-3xl md:text-4xl font-extrabold text-[#01254d] tracking-tight">Meet Our Core Team</h2>
               <p className="text-slate-500 text-sm mt-2 max-w-xl">Slide through our core engineering and leadership team. Click any card to explore their full professional profile and specialties.</p>
             </div>
-
-            {/* Navigation buttons removed per request */}
           </motion.div>
 
-          {/* Horizontal Slider Track */}
-          <div
-            ref={sliderRef}
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-            onTouchStart={() => setIsSliderHovered(true)}
-            onTouchEnd={() => setIsSliderHovered(false)}
-            className="flex gap-6 overflow-x-auto py-6 no-scrollbar cursor-grab active:cursor-grabbing"
-          >
-            {[...teamList, ...teamList, ...teamList, ...teamList].map((m, idx) => (
-              <motion.div
-                key={idx}
-                onClick={() => setSelectedTeamMember(m)}
-                whileHover={{ y: -6 }}
-                className="shrink-0 w-[240px] bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 transition-all duration-300 cursor-pointer group flex flex-col shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)]"
-              >
-                {/* Image - fixed height */}
-                <div className="relative h-[200px] w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100/50 shrink-0">
-                  <Image src={m.img} alt={m.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                  {/* Focus badge overlay */}
-                  <div className="absolute bottom-3 left-3 right-3 bg-white/95 px-2 py-1 rounded-full shadow-sm">
-                    <p className="text-[#01254d] text-[9px] font-bold tracking-wide truncate text-center">{m.focus}</p>
+          {/* Slider with floating nav buttons */}
+          <div className="relative">
+            {/* Left Button */}
+            <button
+              onClick={() => { if (sliderRef.current) sliderRef.current.scrollBy({ left: -320, behavior: 'smooth' }); }}
+              onMouseEnter={() => setIsSliderHovered(true)}
+              onMouseLeave={() => setIsSliderHovered(false)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 w-11 h-11 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center text-[#01254d] hover:bg-[#01254d] hover:text-white hover:border-[#01254d] transition-all duration-200"
+              aria-label="Scroll left"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+
+            {/* Right Button */}
+            <button
+              onClick={() => { if (sliderRef.current) sliderRef.current.scrollBy({ left: 320, behavior: 'smooth' }); }}
+              onMouseEnter={() => setIsSliderHovered(true)}
+              onMouseLeave={() => setIsSliderHovered(false)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 w-11 h-11 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center text-[#01254d] hover:bg-[#01254d] hover:text-white hover:border-[#01254d] transition-all duration-200"
+              aria-label="Scroll right"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
+
+            {/* Horizontal Slider Track */}
+            <div
+              ref={sliderRef}
+              onMouseEnter={() => setIsSliderHovered(true)}
+              onMouseLeave={() => setIsSliderHovered(false)}
+              onTouchStart={() => setIsSliderHovered(true)}
+              onTouchEnd={() => setIsSliderHovered(false)}
+              className="flex gap-6 overflow-x-auto py-6 no-scrollbar cursor-grab active:cursor-grabbing px-2"
+            >
+              {[...teamList, ...teamList, ...teamList, ...teamList].map((m, idx) => (
+                <motion.div
+                  key={idx}
+                  onClick={() => setSelectedTeamMember(m)}
+                  whileHover={{ y: -6 }}
+                  className="shrink-0 w-[300px] bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 transition-all duration-300 cursor-pointer group flex flex-col shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)]"
+                >
+                  {/* Image - fixed height */}
+                  <div className="relative h-[260px] w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100/50 shrink-0">
+                    <Image src={m.img} alt={m.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                    {/* Focus badge overlay */}
+                    <div className="absolute bottom-3 left-3 right-3 bg-white/95 px-2 py-1 rounded-full shadow-sm">
+                      <p className="text-[#01254d] text-[9px] font-bold tracking-wide truncate text-center">{m.focus}</p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Text content - grows to fill space */}
-                <div className="flex-grow mt-3">
-                  <h3 className="text-[#01254d] text-base font-bold leading-tight group-hover:text-[#01254d]/85 transition-colors line-clamp-2">{m.name}</h3>
-                  <p className="text-slate-500 text-xs font-medium mt-1 line-clamp-1">{m.role}</p>
-                </div>
+                  {/* Text content - grows to fill space */}
+                  <div className="flex-grow mt-3">
+                    <h3 className="text-[#01254d] text-base font-bold leading-tight group-hover:text-[#01254d]/85 transition-colors line-clamp-2">{m.name}</h3>
+                    <p className="text-slate-500 text-xs font-medium mt-1 line-clamp-1">{m.role}</p>
+                  </div>
 
-                {/* Footer - always at bottom */}
-                <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-3 shrink-0">
-                  <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors font-medium">View Profile</span>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#01254d] group-hover:translate-x-1 transition-all duration-300" />
-                </div>
-              </motion.div>
-            ))}
+                  {/* Footer - always at bottom */}
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-3 shrink-0">
+                    <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors font-medium">View Profile</span>
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#01254d] group-hover:translate-x-1 transition-all duration-300" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
+
 
         {/* ── MODAL OVERLAY ── */}
         <AnimatePresence>
@@ -704,42 +728,67 @@ export default function AboutPage() {
             {/* Navigation buttons removed per request */}
           </motion.div>
 
-          <div
-            ref={facultySliderRef}
-            onMouseEnter={() => setIsFacultySliderHovered(true)}
-            onMouseLeave={() => setIsFacultySliderHovered(false)}
-            onTouchStart={() => setIsFacultySliderHovered(true)}
-            onTouchEnd={() => setIsFacultySliderHovered(false)}
-            className="flex gap-6 overflow-x-auto py-6 no-scrollbar cursor-grab active:cursor-grabbing"
-          >
-            {[...facultyList, ...facultyList, ...facultyList, ...facultyList].map((g, idx) => (
-              <motion.div
-                key={idx}
-                onClick={() => setSelectedFacultyMember(g)}
-                whileHover={{ y: -6 }}
-                className="shrink-0 w-[260px] lg:w-[230px] bg-white border border-slate-200 rounded-2xl p-6 transition-all duration-300 cursor-pointer group flex flex-col justify-between h-[340px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)] hover:border-[#FFC107]/45"
-              >
-                <div>
-                  {g.img_url ? (
-                    <div className="w-14 h-14 rounded-xl overflow-hidden mb-5 border border-slate-100 bg-slate-50 relative shrink-0">
-                      <Image src={g.img_url} alt={g.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                    </div>
-                  ) : (
-                    <div className="w-14 h-14 rounded-xl flex items-center justify-center font-black text-base text-white mb-5 shadow-inner"
-                      style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
-                      {g.initial || (g.name ? g.name.split(" ").map(n => n[0]).join("") : "GF")}
-                    </div>
-                  )}
-                  <h3 className="font-bold text-[#01254d] text-lg mb-1 group-hover:text-[#FFC107] transition-colors">{g.name}</h3>
-                  <p className="text-[#FFC107] text-xs font-semibold uppercase tracking-wider mb-4">{g.role}</p>
-                  <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">{g.desc}</p>
-                </div>
-                <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-4">
-                  <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors">View Profile</span>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#01254d] group-hover:translate-x-1 transition-all duration-300" />
-                </div>
-              </motion.div>
-            ))}
+          {/* Slider with floating nav buttons */}
+          <div className="relative">
+            {/* Left Button */}
+            <button
+              onClick={() => { if (facultySliderRef.current) facultySliderRef.current.scrollBy({ left: -320, behavior: 'smooth' }); }}
+              onMouseEnter={() => setIsFacultySliderHovered(true)}
+              onMouseLeave={() => setIsFacultySliderHovered(false)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 w-11 h-11 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center text-[#01254d] hover:bg-[#01254d] hover:text-white hover:border-[#01254d] transition-all duration-200"
+              aria-label="Scroll left"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+
+            {/* Right Button */}
+            <button
+              onClick={() => { if (facultySliderRef.current) facultySliderRef.current.scrollBy({ left: 320, behavior: 'smooth' }); }}
+              onMouseEnter={() => setIsFacultySliderHovered(true)}
+              onMouseLeave={() => setIsFacultySliderHovered(false)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 w-11 h-11 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center text-[#01254d] hover:bg-[#01254d] hover:text-white hover:border-[#01254d] transition-all duration-200"
+              aria-label="Scroll right"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
+
+            <div
+              ref={facultySliderRef}
+              onMouseEnter={() => setIsFacultySliderHovered(true)}
+              onMouseLeave={() => setIsFacultySliderHovered(false)}
+              onTouchStart={() => setIsFacultySliderHovered(true)}
+              onTouchEnd={() => setIsFacultySliderHovered(false)}
+              className="flex gap-6 overflow-x-auto py-6 no-scrollbar cursor-grab active:cursor-grabbing px-2"
+            >
+              {[...facultyList, ...facultyList, ...facultyList, ...facultyList].map((g, idx) => (
+                <motion.div
+                  key={idx}
+                  onClick={() => setSelectedFacultyMember(g)}
+                  whileHover={{ y: -6 }}
+                  className="shrink-0 w-[300px] bg-white border border-slate-200 rounded-2xl p-6 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[420px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)] hover:border-[#FFC107]/45"
+                >
+                  <div>
+                    {g.img_url ? (
+                      <div className="w-20 h-20 rounded-2xl overflow-hidden mb-5 border border-slate-100 bg-slate-50 relative shrink-0">
+                        <Image src={g.img_url} alt={g.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center font-black text-xl text-white mb-5 shadow-inner"
+                        style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
+                        {g.initial || (g.name ? g.name.split(" ").map(n => n[0]).join("") : "GF")}
+                      </div>
+                    )}
+                    <h3 className="font-bold text-[#01254d] text-xl mb-1 group-hover:text-[#FFC107] transition-colors">{g.name}</h3>
+                    <p className="text-[#FFC107] text-xs font-semibold uppercase tracking-wider mb-4">{g.role}</p>
+                    <p className="text-slate-500 text-sm leading-relaxed line-clamp-5">{g.desc}</p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-4">
+                    <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors">View Profile</span>
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#01254d] group-hover:translate-x-1 transition-all duration-300" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
 

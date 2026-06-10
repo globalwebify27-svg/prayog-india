@@ -35,6 +35,7 @@ export default function ProfilePage() {
   const [error, setError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [academicEditMode, setAcademicEditMode] = useState(false);
   const fileInputRef = useRef(null);
 
   // Password Change State
@@ -83,18 +84,26 @@ export default function ProfilePage() {
       );
     }
     if (tabId === "academic") {
-      return !!(
-        formData.qualification &&
-        formData.school_college &&
-        formData.last_qualification_year
+      if (!formData.academic_type) return false;
+      // All types require: college_name, university_board, registration_no, academic_session
+      // Diploma/B.Tech and higher also require branch_stream and semester_year
+      const base = !!(
+        formData.college_name &&
+        formData.university_board &&
+        formData.registration_no &&
+        formData.academic_session
       );
+      if (formData.academic_type === "School") {
+        return !!(base && formData.semester_year);
+      }
+      return !!(base && formData.branch_stream && formData.semester_year);
     }
     if (tabId === "kyc") {
-      return !!(
+      return !!( 
         formData.id_number &&
         formData.id_image &&
-        formData.school_college &&
-        formData.school_id_number &&
+        (formData.college_name || formData.school_college) &&
+        (formData.registration_no || formData.school_id_number) &&
         formData.school_id_card
       );
     }
@@ -145,6 +154,13 @@ export default function ProfilePage() {
     id_image: "",
     school_id_card: "",
     school_id_number: "",
+    academic_type: "",
+    branch_stream: "",
+    semester_year: "",
+    college_name: "",
+    university_board: "",
+    registration_no: "",
+    academic_session: "",
     // Faculty specific
     bio: "",
     specialty: "",
@@ -192,6 +208,13 @@ export default function ProfilePage() {
           id_image: u.id_image || "",
           school_id_card: u.school_id_card || "",
           school_id_number: u.school_id_number || "",
+          academic_type: u.academic_type || "",
+          branch_stream: u.branch_stream || "",
+          semester_year: u.semester_year || "",
+          college_name: u.college_name || "",
+          university_board: u.university_board || "",
+          registration_no: u.registration_no || "",
+          academic_session: u.academic_session || "",
           bio: u.bio || "",
           specialty: u.specialty || "",
           expertise: Array.isArray(u.expertise) ? u.expertise.join(", ") : (u.expertise || ""),
@@ -638,53 +661,185 @@ export default function ProfilePage() {
               exit={{ opacity: 0, x: -10 }}
               className="p-8 space-y-8"
             >
-              <div className="grid md:grid-cols-2 gap-8">
+              {/* ── LOCKED READ-ONLY VIEW ── */}
+              {isTabComplete("academic") && !academicEditMode ? (
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-700 ml-1">Highest Qualification</label>
-                    <input 
-                      type="text" 
-                      value={formData.qualification} 
-                      onChange={(e) => setFormData({...formData, qualification: e.target.value})}
-                      placeholder="e.g. B.Tech, XII Standard" 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
-                    />
+                  {/* Verified banner */}
+                  <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                    <div className="p-2 bg-emerald-100 rounded-xl text-emerald-600"><CheckCircle size={20} /></div>
+                    <div>
+                      <p className="text-sm font-bold text-emerald-800">Academic Records Submitted</p>
+                      <p className="text-[11px] text-emerald-600">Your records are locked. Contact admin if any corrections are needed.</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-700 ml-1">School / College Name</label>
-                    <input 
-                      type="text" 
-                      value={formData.school_college} 
-                      onChange={(e) => setFormData({...formData, school_college: e.target.value})}
-                      placeholder="Name of your last institution" 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
-                    />
-                  </div>
-                </div>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-700 ml-1">Passing Year</label>
-                    <input 
-                      type="text" 
-                      value={formData.last_qualification_year} 
-                      onChange={(e) => setFormData({...formData, last_qualification_year: e.target.value})}
-                      placeholder="YYYY" 
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
-                    />
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex justify-end pt-6 border-t border-slate-100">
-                <button 
-                  onClick={() => handleSave('academic')}
-                  disabled={isSaving}
-                  className="flex items-center space-x-2 bg-navy text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                  <span>Save Academic Records</span>
-                </button>
-              </div>
+                  {/* Summary grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {[
+                      { label: "Qualification", val: formData.academic_type },
+                      { label: "Branch / Stream", val: formData.branch_stream || "—" },
+                      { label: "Semester / Year / Class", val: formData.semester_year },
+                      { label: formData.academic_type === "School" ? "School Name" : "College Name", val: formData.college_name },
+                      { label: formData.academic_type === "School" ? "Board" : "University / Board", val: formData.university_board },
+                      { label: "Registration / Roll No.", val: formData.registration_no },
+                      { label: "Academic Session", val: formData.academic_session },
+                    ].map(({ label, val }) => (
+                      <div key={label} className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+                        <p className="text-sm font-semibold text-slate-800 truncate">{val || "—"}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                /* ── EDIT FORM ── */
+                <>
+                  <div className="space-y-4">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-tight ml-1 block">Qualification Type</label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { key: "School", label: "School" },
+                        { key: "Diploma / B.Tech", label: "Diploma / B.Tech" },
+                        { key: "Graduation in Other Stream", label: "Graduation in Other Stream" },
+                        { key: "PG", label: "PG" },
+                      ].map(({ key, label }) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setFormData({
+                            ...formData,
+                            academic_type: key,
+                            branch_stream: "",
+                            semester_year: "",
+                            college_name: "",
+                            university_board: "",
+                            registration_no: "",
+                            academic_session: ""
+                          })}
+                          className={`p-4 rounded-xl border-2 transition-all text-xs font-bold text-center leading-snug ${
+                            formData.academic_type === key
+                              ? "bg-navy/5 border-navy text-navy shadow-sm"
+                              : "bg-white border-slate-100 text-slate-600 hover:border-navy/30 hover:bg-slate-50"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {formData.academic_type ? (
+                    <div className="grid md:grid-cols-2 gap-6 pt-2">
+                      {/* Branch/Stream — not shown for School */}
+                      {formData.academic_type !== "School" && (
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-slate-700 ml-1">Branch / Stream / Specialisation</label>
+                          <input
+                            type="text"
+                            value={formData.branch_stream}
+                            onChange={(e) => setFormData({...formData, branch_stream: e.target.value})}
+                            placeholder={formData.academic_type === "PG" ? "e.g. MBA / M.Tech / MCA" : "e.g. Computer Science Engineering"}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium"
+                          />
+                        </div>
+                      )}
+
+                      {/* Semester / Year / Class */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-700 ml-1">
+                          {formData.academic_type === "School" ? "Class / Standard" : "Current Semester / Year"}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.semester_year}
+                          onChange={(e) => setFormData({...formData, semester_year: e.target.value})}
+                          placeholder={formData.academic_type === "School" ? "e.g. 10th / 12th" : "e.g. 3rd Year / 6th Sem"}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium"
+                        />
+                      </div>
+
+                      {/* Institution Name */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-700 ml-1">
+                          {formData.academic_type === "School" ? "School Name" : "College / Institution Name"}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.college_name}
+                          onChange={(e) => setFormData({...formData, college_name: e.target.value, school_college: e.target.value})}
+                          placeholder={formData.academic_type === "School" ? "e.g. Delhi Public School" : "e.g. Prayog Institute of Technology"}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium"
+                        />
+                      </div>
+
+                      {/* University / Board */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-700 ml-1">
+                          {formData.academic_type === "School" ? "Board" : "University / Affiliated Board"}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.university_board}
+                          onChange={(e) => setFormData({...formData, university_board: e.target.value})}
+                          placeholder={formData.academic_type === "School" ? "e.g. CBSE / ICSE / State Board" : "e.g. BPUT / VTU / Osmania"}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium"
+                        />
+                      </div>
+
+                      {/* Registration / Roll No. */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-700 ml-1">
+                          {formData.academic_type === "School" ? "Roll No." : "Registration No. / Roll No."}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.registration_no}
+                          onChange={(e) => setFormData({...formData, registration_no: e.target.value})}
+                          placeholder="e.g. 220102003 / Roll-04"
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium"
+                        />
+                      </div>
+
+                      {/* Academic Session */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-700 ml-1">Academic Session</label>
+                        <input
+                          type="text"
+                          value={formData.academic_session}
+                          onChange={(e) => setFormData({...formData, academic_session: e.target.value})}
+                          placeholder="e.g. 2024-2025"
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
+                      <GraduationCap size={32} className="mx-auto text-slate-300 mb-3" />
+                      <p className="text-sm font-medium text-slate-500">Select your qualification type above to fill in your academic details.</p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                    {academicEditMode && (
+                      <button
+                        type="button"
+                        onClick={() => setAcademicEditMode(false)}
+                        className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      onClick={async () => { await handleSave('academic'); if (isTabComplete('academic')) setAcademicEditMode(false); }}
+                      disabled={isSaving || !formData.academic_type}
+                      className="ml-auto flex items-center space-x-2 bg-navy text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-black transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                      <span>Save Academic Records</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
 
@@ -795,25 +950,68 @@ export default function ProfilePage() {
                 </h4>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-6">
+                    {/* Auto-filled from Academic Records */}
+                    {(!formData.college_name && !formData.registration_no) && (
+                      <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl flex items-start gap-2.5">
+                        <AlertCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-blue-700 leading-relaxed font-medium">
+                          Fill your <strong>College Name</strong> and <strong>Registration No.</strong> in the <em>Academic Records</em> tab first — they'll auto-appear here as read-only.
+                        </p>
+                      </div>
+                    )}
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-700 ml-1">School / College Name</label>
-                      <input 
-                        type="text" 
-                        value={formData.school_college} 
-                        onChange={(e) => setFormData({...formData, school_college: e.target.value})}
-                        placeholder="Current Institution Name" 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
-                      />
+                      <div className="flex items-center justify-between ml-1">
+                        <label className="text-xs font-bold text-slate-700">School / College Name</label>
+                        {formData.college_name && (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                            <Lock size={10} /> From Academic Records
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          value={formData.college_name || formData.school_college} 
+                          readOnly={!!formData.college_name}
+                          onChange={!formData.college_name ? (e) => setFormData({...formData, school_college: e.target.value}) : undefined}
+                          placeholder="Complete Academic Records tab first" 
+                          className={`w-full px-4 py-2.5 border rounded-lg text-sm font-medium transition-all ${
+                            formData.college_name 
+                              ? "bg-slate-100 border-slate-200 text-slate-600 cursor-not-allowed select-none" 
+                              : "bg-slate-50 border-slate-200 outline-none focus:border-navy focus:bg-white"
+                          }`}
+                        />
+                        {formData.college_name && (
+                          <Lock size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        )}
+                      </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-700 ml-1">ID Card / Roll Number</label>
-                      <input 
-                        type="text" 
-                        value={formData.school_id_number} 
-                        onChange={(e) => setFormData({...formData, school_id_number: e.target.value})}
-                        placeholder="Enter Institutional ID or Roll No." 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium" 
-                      />
+                      <div className="flex items-center justify-between ml-1">
+                        <label className="text-xs font-bold text-slate-700">ID Card / Roll Number</label>
+                        {formData.registration_no && (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                            <Lock size={10} /> From Academic Records
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          value={formData.registration_no || formData.school_id_number} 
+                          readOnly={!!formData.registration_no}
+                          onChange={!formData.registration_no ? (e) => setFormData({...formData, school_id_number: e.target.value}) : undefined}
+                          placeholder="Complete Academic Records tab first" 
+                          className={`w-full px-4 py-2.5 border rounded-lg text-sm font-medium transition-all ${
+                            formData.registration_no 
+                              ? "bg-slate-100 border-slate-200 text-slate-600 cursor-not-allowed select-none" 
+                              : "bg-slate-50 border-slate-200 outline-none focus:border-navy focus:bg-white"
+                          }`}
+                        />
+                        {formData.registration_no && (
+                          <Lock size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        )}
+                      </div>
                     </div>
                   </div>
                   

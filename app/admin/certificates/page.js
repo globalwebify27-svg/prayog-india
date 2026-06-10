@@ -646,14 +646,53 @@ export default function CertificateManagement() {
               <div className="p-8">
                 <div className="flex justify-between items-center mb-6"><h3 className="text-xl font-bold text-slate-900">Issue New Credential</h3><button onClick={() => setShowGenerator(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button></div>
                 <form onSubmit={handleGenerate} className="space-y-5">
-                  <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Student</label><select required value={newCert.userId} onChange={(e) => { const std = studentsList.find(s => s.id == e.target.value); setNewCert({...newCert, userId: e.target.value, studentName: std?.name}); }} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all"><option value="">Choose a student...</option>{studentsList.map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}</select></div>
-                  <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Program</label><select required value={newCert.courseId} onChange={(e) => { const crs = coursesList.find(c => c.id == e.target.value); setNewCert({...newCert, courseId: e.target.value, courseName: crs?.title}); }} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all"><option value="">Choose a course...</option>{coursesList.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Program</label>
+                    <select
+                      required
+                      value={newCert.courseId}
+                      onChange={(e) => {
+                        const crs = coursesList.find(c => c.id == e.target.value);
+                        setNewCert({ ...newCert, courseId: e.target.value, courseName: crs?.title, userId: "", studentName: "" });
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all"
+                    >
+                      <option value="">Choose a course...</option>
+                      {coursesList.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Student</label>
+                    <select
+                      required
+                      disabled={!newCert.courseId}
+                      value={newCert.userId}
+                      onChange={(e) => {
+                        const std = studentsList.find(s => s.id == e.target.value);
+                        setNewCert({ ...newCert, userId: e.target.value, studentName: std?.name });
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">{newCert.courseId ? "Choose a student..." : "Select a course first"}</option>
+                      {newCert.courseId && studentsList
+                        .filter(s =>
+                          s.enrollments?.some(e =>
+                            coursesList.find(c => c.id == newCert.courseId)?.title === e.course_name
+                          )
+                        )
+                        .map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)
+                      }
+                    </select>
+                    {newCert.courseId && studentsList.filter(s => s.enrollments?.some(e => coursesList.find(c => c.id == newCert.courseId)?.title === e.course_name)).length === 0 && (
+                      <p className="text-[10px] text-amber-600 font-medium">No enrolled students found for this course.</p>
+                    )}
+                  </div>
                   <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student Institute / School</label><input type="text" placeholder="e.g. Delhi Public School" value={certInstituteName} onChange={(e) => setCertInstituteName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" /></div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program From Date</label><input type="date" value={certFromDate} onChange={(e) => setCertFromDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" /></div>
                     <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program To Date</label><input type="date" value={certToDate} onChange={(e) => setCertToDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" /></div>
                   </div>
-                  <button disabled={isProcessing} className="w-full bg-navy text-white py-4 rounded-xl font-bold text-sm hover:bg-black transition-all flex items-center justify-center space-x-2 shadow-lg disabled:opacity-50">{isProcessing ? <Loader2 className="animate-spin" size={18} /> : <Award size={18} className="text-primary" />}<span>Generate & Issue Official Certificate</span></button>
+                  <button disabled={isProcessing} className="w-full bg-navy text-white py-4 rounded-xl font-bold text-sm hover:bg-black transition-all flex items-center justify-center space-x-2 shadow-lg disabled:opacity-50">{isProcessing ? <Loader2 className="animate-spin" size={18} /> : <Award size={18} className="text-primary" />}<span>Generate &amp; Issue Official Certificate</span></button>
                 </form>
               </div>
             </motion.div>

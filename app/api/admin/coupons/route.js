@@ -44,6 +44,13 @@ export async function GET() {
       // Ignore if it already exists
     }
 
+    // Automatically deactivate expired coupons
+    await pool.query(`
+      UPDATE promo_codes 
+      SET is_active = 0 
+      WHERE expiry_date IS NOT NULL AND expiry_date < CURDATE() AND is_active = 1
+    `);
+
     const [rows] = await pool.query(`
       SELECT p.*, c.title as course_title 
       FROM promo_codes p
@@ -116,6 +123,24 @@ export async function PUT(req) {
 
     const jsonCourseIds = Array.isArray(course_ids) && course_ids.length > 0 ? JSON.stringify(course_ids) : null;
 
+    let finalIsActive = is_active === undefined ? true : is_active;
+    if (formattedExpiry) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const expiry = new Date(formattedExpiry);
+      // If the expiry date is in the future, automatically reactivate the coupon
+      if (expiry >= today) {
+        finalIsActive = is_active !== undefined ? is_active : true;
+        // Specifically force active status to true if extending an expired coupon
+        if (is_active === undefined || is_active === false) {
+          finalIsActive = true; 
+        }
+      } else {
+        // If the expiry date is still in the past, keep it inactive
+        finalIsActive = false;
+      }
+    }
+
     await pool.query(
       `UPDATE promo_codes SET 
         code = ?, discount_type = ?, discount_value = ?, 
@@ -126,7 +151,7 @@ export async function PUT(req) {
         discount_type || 'percentage',
         discount_value,
         jsonCourseIds,
-        is_active === undefined ? true : is_active,
+        finalIsActive,
         formattedExpiry,
         id
       ]

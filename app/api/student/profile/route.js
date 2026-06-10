@@ -21,6 +21,7 @@ export async function POST(req) {
       father_name, mother_name, gender, qualification, school_college,
       last_qualification_year, id_type, id_number, id_image, school_id_card,
       school_id_number,
+      academic_type, branch_stream, semester_year, college_name, university_board, registration_no, academic_session,
       bio, specialty, expertise, faculty_education
     } = body;
 
@@ -40,13 +41,13 @@ export async function POST(req) {
       father_name &&
       mother_name &&
       gender &&
-      qualification &&
+      academic_type &&
       address &&
       dob &&
       id_number &&
       image &&
       school_id_card &&
-      school_id_number // Added school ID number requirement
+      school_id_number
     ) ? 1 : 0;
 
     // Update profile in users table
@@ -57,15 +58,19 @@ export async function POST(req) {
         gender = ?, qualification = ?, school_college = ?, 
         last_qualification_year = ?, id_type = ?, id_number = ?, 
         id_image = ?, school_id_card = ?, school_id_number = ?, 
-        profile_completed = ? 
+        academic_type = ?, branch_stream = ?, semester_year = ?, 
+        college_name = ?, university_board = ?, registration_no = ?, 
+        academic_session = ?, profile_completed = ? 
        WHERE id = ?`,
       [
         name, phone, dob || null, address, blood_group,
         emergency_contact, image || null, father_name, mother_name,
-        gender, qualification, school_college,
-        last_qualification_year, id_type, id_number,
+        gender, qualification || null, school_college || null,
+        last_qualification_year || null, id_type, id_number,
         id_image || null, school_id_card || null, school_id_number || null,
-        isComplete, userId
+        academic_type || null, branch_stream || null, semester_year || null,
+        college_name || null, university_board || null, registration_no || null,
+        academic_session || null, isComplete, userId
       ]
     );
 

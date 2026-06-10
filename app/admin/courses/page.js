@@ -27,15 +27,27 @@ import {
   Settings2,
   AlertCircle,
   CheckCircle2,
-  FileText
+  FileText,
+  X
 } from "lucide-react";
 import CustomModal from "@/components/CustomModal";
+
+const formatTime12Hr = (time24) => {
+  if (!time24) return "";
+  const [hourStr, minStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12;
+  hour = hour ? hour : 12; // the hour '0' should be '12'
+  return `${hour}:${minStr}${ampm}`;
+};
 
 const STEPS = [
   { id: 1, title: "Identity", sub: "Basic info & brand" },
   { id: 2, title: "Delivery", sub: "Faculty & logistics" },
-  { id: 3, title: "Finance", sub: "Pricing & payments" },
-  { id: 4, title: "Curriculum", sub: "Outcomes & Details" }
+  { id: 3, title: "Schedule", sub: "Timings & start dates" },
+  { id: 4, title: "Finance", sub: "Pricing & payments" },
+  { id: 5, title: "Curriculum", sub: "Outcomes & Details" }
 ];
 
 const SPECIALIZATIONS = [
@@ -56,6 +68,9 @@ export default function AdminCoursesPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [courseToEdit, setCourseToEdit] = useState(null);
   const [courseToDelete, setCourseToDelete] = useState(null);
+  const [slotType, setSlotType] = useState("Morning");
+  const [slotStartTime, setSlotStartTime] = useState("10:00");
+  const [slotEndTime, setSlotEndTime] = useState("13:00");
   const [modalStep, setModalStep] = useState(1);
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
@@ -93,7 +108,7 @@ export default function AdminCoursesPage() {
     } else if (modalStep === 2) {
       // teacher_id is now optional
       if (!data.duration.trim()) newErrors.duration = "Duration is required.";
-    } else if (modalStep === 3) {
+    } else if (modalStep === 4) {
       if (!data.price) newErrors.price = "Price is required.";
       if (data.allow_partial_payment && (!data.installments_count || data.installments_count < 2)) {
         newErrors.installments_count = "Min 2 installments required.";
@@ -125,7 +140,9 @@ export default function AdminCoursesPage() {
     certification: "",
     who_can_join: "",
     methodology: "",
-    important_note: ""
+    important_note: "",
+    upcoming_start_dates: "",
+    custom_timings: ""
   });
 
   useEffect(() => {
@@ -227,7 +244,7 @@ export default function AdminCoursesPage() {
     if (e) e.preventDefault();
     if (!validateStep(newCourse)) return;
 
-    if (modalStep < 3) {
+    if (modalStep < 5) {
       setModalStep(modalStep + 1);
       return;
     }
@@ -242,7 +259,7 @@ export default function AdminCoursesPage() {
     if (result.success) {
       setShowAddModal(false);
       setModalStep(1);
-      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "", is_internship: false, is_one_to_one: false, outcomes: "", certification: "", who_can_join: "", methodology: "", important_note: "" });
+      setNewCourse({ title: "", category: "Robotics", description: "", price: "", type: "online", duration: "6 Months", image: "", teacher_id: "", selectedTimings: [], allow_partial_payment: false, installments_count: 1, rating: "4.5", level: "Beginner", brochure: "", is_internship: false, is_one_to_one: false, outcomes: "", certification: "", who_can_join: "", methodology: "", important_note: "", upcoming_start_dates: "", custom_timings: "" });
       fetchCourses();
       setErrors({});
       showAlert("Course Launched", "The new academic program has been successfully initialized.", "success", () => {}, "OK", false);
@@ -255,7 +272,7 @@ export default function AdminCoursesPage() {
     if (e) e.preventDefault();
     if (!validateStep(courseToEdit)) return;
 
-    if (modalStep < 3) {
+    if (modalStep < 5) {
       setModalStep(modalStep + 1);
       return;
     }
@@ -438,7 +455,9 @@ export default function AdminCoursesPage() {
                             certification: course.certification || "",
                             who_can_join: course.who_can_join || "",
                             methodology: course.methodology || "",
-                            important_note: course.important_note || ""
+                            important_note: course.important_note || "",
+                            upcoming_start_dates: course.upcoming_start_dates || "",
+                            custom_timings: course.custom_timings || ""
                           });
                           setModalStep(1);
                           setShowEditModal(true);
@@ -477,12 +496,19 @@ export default function AdminCoursesPage() {
             </motion.div>
           ))}
         </div>
-      )}
-
-      {/* Add Modal */}
+      )}      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col lg:flex-row overflow-hidden min-h-[500px]">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col lg:flex-row overflow-hidden min-h-[500px] relative">
+            {/* Close Button */}
+            <button 
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full p-2 transition-all z-50"
+            >
+              <X size={18} />
+            </button>
+
             {/* Sidebar */}
             <div className="lg:w-1/3 bg-navy p-8 text-white flex flex-col justify-between">
               <div>
@@ -577,7 +603,7 @@ export default function AdminCoursesPage() {
                           <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between group hover:bg-primary/10 transition-all">
                               <div>
-                                <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Internship</p>
+                                <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Keep as Internship</p>
                                 <p className="text-[9px] text-slate-500 font-medium italic leading-tight">Mark as internship opportunity.</p>
                               </div>
                               <button 
@@ -629,7 +655,7 @@ export default function AdminCoursesPage() {
                       <motion.div key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
                         <div>
                           <h3 className="text-xl font-bold text-slate-900 mb-1">Operational Logistics</h3>
-                          <p className="text-slate-500 text-xs">Assign faculty and configure timing slots.</p>
+                          <p className="text-slate-500 text-xs">Assign faculty and configure duration.</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -702,35 +728,140 @@ export default function AdminCoursesPage() {
                             )}
                           </div>
                         </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Active Timing Slots</label>
-                          <div className="flex flex-wrap gap-2">
-                            {timings.map(t => (
-                              <button
-                                key={t.id}
-                                type="button"
-                                onClick={() => {
-                                  const exists = newCourse.selectedTimings.includes(t.id);
-                                  if (exists) {
-                                    setNewCourse({...newCourse, selectedTimings: newCourse.selectedTimings.filter(id => id !== t.id)});
-                                  } else {
-                                    setNewCourse({...newCourse, selectedTimings: [...newCourse.selectedTimings, t.id]});
-                                  }
-                                }}
-                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border ${
-                                  newCourse.selectedTimings.includes(t.id) ? 'bg-navy text-white border-navy' : 'bg-slate-50 text-slate-400 border-slate-100 hover:border-slate-300'
-                                }`}
-                              >
-                                {t.name}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
                       </motion.div>
                     )}
 
                     {modalStep === 3 && (
                       <motion.div key="step3" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-900 mb-1">Timing Slots & Start Dates</h3>
+                          <p className="text-slate-500 text-xs">Configure the custom timings and upcoming start dates for this course.</p>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Custom Course Timings</label>
+                          <div className="space-y-3">
+                            {/* Added Slots list */}
+                            {(newCourse.custom_timings || "").split("\n").map(s => s.trim()).filter(Boolean).map((s, idx) => (
+                              <div key={idx} className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm">
+                                <span className="font-bold text-slate-700">{s}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const currentSlots = (newCourse.custom_timings || "").split("\n").map(item => item.trim()).filter(Boolean);
+                                    currentSlots.splice(idx, 1);
+                                    setNewCourse({...newCourse, custom_timings: currentSlots.join("\n")});
+                                  }}
+                                  className="ml-auto text-rose-500 hover:text-rose-700 font-bold text-xs"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                            {/* Selector controls */}
+                            <div className="flex flex-wrap gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                              <div className="flex flex-col gap-1">
+                                <span className="text-[9px] font-extrabold uppercase text-slate-400">Type</span>
+                                <select 
+                                  value={slotType}
+                                  onChange={e => setSlotType(e.target.value)}
+                                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold outline-none"
+                                >
+                                  <option value="Morning">Morning</option>
+                                  <option value="Afternoon">Afternoon</option>
+                                  <option value="Evening">Evening</option>
+                                </select>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-[9px] font-extrabold uppercase text-slate-400">Start Time</span>
+                                <input 
+                                  type="time"
+                                  value={slotStartTime}
+                                  onChange={e => setSlotStartTime(e.target.value)}
+                                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold outline-none"
+                                />
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-[9px] font-extrabold uppercase text-slate-400">End Time</span>
+                                <input 
+                                  type="time"
+                                  value={slotEndTime}
+                                  onChange={e => setSlotEndTime(e.target.value)}
+                                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold outline-none"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const formattedStart = formatTime12Hr(slotStartTime);
+                                  const formattedEnd = formatTime12Hr(slotEndTime);
+                                  if (formattedStart && formattedEnd) {
+                                    const newSlot = `${slotType} (${formattedStart} - ${formattedEnd})`;
+                                    const currentSlots = (newCourse.custom_timings || "").split("\n").map(s => s.trim()).filter(Boolean);
+                                    if (!currentSlots.includes(newSlot)) {
+                                      currentSlots.push(newSlot);
+                                      setNewCourse({...newCourse, custom_timings: currentSlots.join("\n")});
+                                    }
+                                  }
+                                }}
+                                className="px-4 py-2 bg-navy text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-black transition-all"
+                              >
+                                Add Slot
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Upcoming Start Dates</label>
+                          <div className="space-y-2">
+                            {/* Date List */}
+                            {(newCourse.upcoming_start_dates || "").split(",").map(d => d.trim()).filter(Boolean).map((d, index) => (
+                              <div key={index} className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm">
+                                <span className="font-bold text-slate-700">{new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const currentDates = (newCourse.upcoming_start_dates || "").split(",").map(item => item.trim()).filter(Boolean);
+                                    currentDates.splice(index, 1);
+                                    setNewCourse({...newCourse, upcoming_start_dates: currentDates.join(", ")});
+                                  }}
+                                  className="ml-auto text-rose-500 hover:text-rose-700 font-bold text-xs"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                            {/* Date Add Picker */}
+                            <div className="flex gap-2">
+                              <input 
+                                type="date"
+                                id="add_course_date_picker"
+                                className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:border-navy outline-none"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const picker = document.getElementById("add_course_date_picker");
+                                  if (picker && picker.value) {
+                                    const currentDates = (newCourse.upcoming_start_dates || "").split(",").map(item => item.trim()).filter(Boolean);
+                                    if (!currentDates.includes(picker.value)) {
+                                      currentDates.push(picker.value);
+                                      setNewCourse({...newCourse, upcoming_start_dates: currentDates.join(", ")});
+                                    }
+                                    picker.value = "";
+                                  }
+                                }}
+                                className="px-4 py-2 bg-navy text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-black transition-all"
+                              >
+                                Add Date
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {modalStep === 4 && (
+                      <motion.div key="step4" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
                         <div>
                           <h3 className="text-xl font-bold text-slate-900 mb-1">Financial Architecture</h3>
                           <p className="text-slate-500 text-xs">Configure tuition fees and installment plans.</p>
@@ -795,8 +926,8 @@ export default function AdminCoursesPage() {
                       </motion.div>
                     )}
 
-                    {modalStep === 4 && (
-                      <motion.div key="step4" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
+                    {modalStep === 5 && (
+                      <motion.div key="step5" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
                         <div>
                           <h3 className="text-xl font-bold text-slate-900 mb-1">Curriculum Details</h3>
                           <p className="text-slate-500 text-xs">Define program outcomes and methodology.</p>
@@ -877,13 +1008,13 @@ export default function AdminCoursesPage() {
                     type="button"
                     onClick={() => {
                       if (validateStep(newCourse)) {
-                        if (modalStep < 4) setModalStep(modalStep + 1);
+                        if (modalStep < 5) setModalStep(modalStep + 1);
                         else handleAddCourse();
                       }
                     }}
                     className="bg-navy text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-navy/20 flex items-center gap-2"
                   >
-                    <span>{modalStep === 4 ? "Launch Program" : "Next Step"}</span>
+                    <span>{modalStep === 5 ? "Launch Program" : "Next Step"}</span>
                     <ArrowRight size={16} />
                   </button>
                 </div>
@@ -896,7 +1027,16 @@ export default function AdminCoursesPage() {
       {/* Edit Modal (Mirrored Structure) */}
       {showEditModal && courseToEdit && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col lg:flex-row overflow-hidden min-h-[500px]">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col lg:flex-row overflow-hidden min-h-[500px] relative">
+            {/* Close Button */}
+            <button 
+              type="button"
+              onClick={() => setShowEditModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full p-2 transition-all z-50"
+            >
+              <X size={18} />
+            </button>
+
             {/* Sidebar */}
             <div className="lg:w-1/3 bg-navy p-8 text-white flex flex-col justify-between">
               <div>
@@ -990,7 +1130,7 @@ export default function AdminCoursesPage() {
                           <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between group hover:bg-primary/10 transition-all">
                               <div>
-                                <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Internship</p>
+                                <p className="text-[10px] font-bold text-navy uppercase tracking-widest mb-0.5">Keep as Internship</p>
                                 <p className="text-[9px] text-slate-500 font-medium italic leading-tight">Mark as internship opportunity.</p>
                               </div>
                               <button 
@@ -1042,7 +1182,7 @@ export default function AdminCoursesPage() {
                       <motion.div key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
                         <div>
                           <h3 className="text-xl font-bold text-slate-900 mb-1">Operational Logistics</h3>
-                          <p className="text-slate-500 text-xs">Assign faculty and configure timing slots.</p>
+                          <p className="text-slate-500 text-xs">Assign faculty and configure duration.</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -1116,36 +1256,140 @@ export default function AdminCoursesPage() {
                             )}
                           </div>
                         </div>
-
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Active Timing Slots</label>
-                          <div className="flex flex-wrap gap-2">
-                            {timings.map(t => (
-                              <button
-                                key={t.id}
-                                type="button"
-                                onClick={() => {
-                                  const exists = courseToEdit.selectedTimings.includes(t.id);
-                                  if (exists) {
-                                    setCourseToEdit({...courseToEdit, selectedTimings: courseToEdit.selectedTimings.filter(id => id !== t.id)});
-                                  } else {
-                                    setCourseToEdit({...courseToEdit, selectedTimings: [...courseToEdit.selectedTimings, t.id]});
-                                  }
-                                }}
-                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border ${
-                                  courseToEdit.selectedTimings.includes(t.id) ? 'bg-navy text-white border-navy' : 'bg-slate-50 text-slate-400 border-slate-100 hover:border-slate-300'
-                                }`}
-                              >
-                                {t.name}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
                       </motion.div>
                     )}
 
                     {modalStep === 3 && (
                       <motion.div key="step3" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-900 mb-1">Timing Slots & Start Dates</h3>
+                          <p className="text-slate-500 text-xs">Configure the custom timings and upcoming start dates for this course.</p>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Custom Course Timings</label>
+                          <div className="space-y-3">
+                            {/* Added Slots list */}
+                            {(courseToEdit.custom_timings || "").split("\n").map(s => s.trim()).filter(Boolean).map((s, idx) => (
+                              <div key={idx} className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm">
+                                <span className="font-bold text-slate-700">{s}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const currentSlots = (courseToEdit.custom_timings || "").split("\n").map(item => item.trim()).filter(Boolean);
+                                    currentSlots.splice(idx, 1);
+                                    setCourseToEdit({...courseToEdit, custom_timings: currentSlots.join("\n")});
+                                  }}
+                                  className="ml-auto text-rose-500 hover:text-rose-700 font-bold text-xs"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                            {/* Selector controls */}
+                            <div className="flex flex-wrap gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                              <div className="flex flex-col gap-1">
+                                <span className="text-[9px] font-extrabold uppercase text-slate-400">Type</span>
+                                <select 
+                                  value={slotType}
+                                  onChange={e => setSlotType(e.target.value)}
+                                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold outline-none"
+                                >
+                                  <option value="Morning">Morning</option>
+                                  <option value="Afternoon">Afternoon</option>
+                                  <option value="Evening">Evening</option>
+                                </select>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-[9px] font-extrabold uppercase text-slate-400">Start Time</span>
+                                <input 
+                                  type="time"
+                                  value={slotStartTime}
+                                  onChange={e => setSlotStartTime(e.target.value)}
+                                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold outline-none"
+                                />
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-[9px] font-extrabold uppercase text-slate-400">End Time</span>
+                                <input 
+                                  type="time"
+                                  value={slotEndTime}
+                                  onChange={e => setSlotEndTime(e.target.value)}
+                                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold outline-none"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const formattedStart = formatTime12Hr(slotStartTime);
+                                  const formattedEnd = formatTime12Hr(slotEndTime);
+                                  if (formattedStart && formattedEnd) {
+                                    const newSlot = `${slotType} (${formattedStart} - ${formattedEnd})`;
+                                    const currentSlots = (courseToEdit.custom_timings || "").split("\n").map(s => s.trim()).filter(Boolean);
+                                    if (!currentSlots.includes(newSlot)) {
+                                      currentSlots.push(newSlot);
+                                      setCourseToEdit({...courseToEdit, custom_timings: currentSlots.join("\n")});
+                                    }
+                                  }
+                                }}
+                                className="px-4 py-2 bg-navy text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-black transition-all"
+                              >
+                                Add Slot
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Upcoming Start Dates</label>
+                          <div className="space-y-2">
+                            {/* Date List */}
+                            {(courseToEdit.upcoming_start_dates || "").split(",").map(d => d.trim()).filter(Boolean).map((d, index) => (
+                              <div key={index} className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm">
+                                <span className="font-bold text-slate-700">{new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const currentDates = (courseToEdit.upcoming_start_dates || "").split(",").map(item => item.trim()).filter(Boolean);
+                                    currentDates.splice(index, 1);
+                                    setCourseToEdit({...courseToEdit, upcoming_start_dates: currentDates.join(", ")});
+                                  }}
+                                  className="ml-auto text-rose-500 hover:text-rose-700 font-bold text-xs"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                            {/* Date Add Picker */}
+                            <div className="flex gap-2">
+                              <input 
+                                type="date"
+                                id="edit_course_date_picker"
+                                className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:border-navy outline-none"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const picker = document.getElementById("edit_course_date_picker");
+                                  if (picker && picker.value) {
+                                    const currentDates = (courseToEdit.upcoming_start_dates || "").split(",").map(item => item.trim()).filter(Boolean);
+                                    if (!currentDates.includes(picker.value)) {
+                                      currentDates.push(picker.value);
+                                      setCourseToEdit({...courseToEdit, upcoming_start_dates: currentDates.join(", ")});
+                                    }
+                                    picker.value = "";
+                                  }
+                                }}
+                                className="px-4 py-2 bg-navy text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-black transition-all"
+                              >
+                                Add Date
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {modalStep === 4 && (
+                      <motion.div key="step4" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
                         <div>
                           <h3 className="text-xl font-bold text-slate-900 mb-1">Financial Architecture</h3>
                           <p className="text-slate-500 text-xs">Configure tuition fees and installment plans.</p>
@@ -1201,6 +1445,7 @@ export default function AdminCoursesPage() {
                           <textarea 
                             rows={3}
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-navy outline-none resize-none"
+                            placeholder="Briefly describe the learning outcome..."
                             value={courseToEdit.description}
                             onChange={e => setCourseToEdit({...courseToEdit, description: e.target.value})}
                           />
@@ -1208,8 +1453,8 @@ export default function AdminCoursesPage() {
                       </motion.div>
                     )}
 
-                    {modalStep === 4 && (
-                      <motion.div key="step4" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
+                    {modalStep === 5 && (
+                      <motion.div key="step5" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
                         <div>
                           <h3 className="text-xl font-bold text-slate-900 mb-1">Curriculum Details</h3>
                           <p className="text-slate-500 text-xs">Define program outcomes and methodology.</p>
@@ -1288,14 +1533,14 @@ export default function AdminCoursesPage() {
                   <button 
                     type="submit"
                     onClick={(e) => {
-                      if (modalStep < 4) {
+                      if (modalStep < 5) {
                         e.preventDefault();
                         if (validateStep(courseToEdit)) setModalStep(modalStep + 1);
                       }
                     }}
                     className="flex items-center gap-2 bg-navy text-white px-8 py-2.5 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg"
                   >
-                    <span>{modalStep === 4 ? "Update Program" : "Next Step"}</span>
+                    <span>{modalStep === 5 ? "Update Program" : "Next Step"}</span>
                     <ChevronRight size={16} />
                   </button>
                 </div>

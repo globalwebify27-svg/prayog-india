@@ -39,10 +39,10 @@ export default function AdminFaculties() {
     description: "",
     type: "info",
     confirmText: "Confirm",
-    onConfirm: () => {}
+    onConfirm: () => { }
   });
 
-  const showAlert = (title, description, type = "info", onConfirm = () => {}, confirmText = "Confirm") => {
+  const showAlert = (title, description, type = "info", onConfirm = () => { }, confirmText = "Confirm") => {
     setModalConfig({
       isOpen: true,
       title,
@@ -69,7 +69,7 @@ export default function AdminFaculties() {
       if (!newFaculty.education.trim()) newErrors.education = "Education details are required.";
       if (!newFaculty.expertise.trim()) newErrors.expertise = "At least one expertise area is required.";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -171,7 +171,7 @@ export default function AdminFaculties() {
   const handleEdit = (faculty) => {
     setNewFaculty({
       name: faculty.name,
-      email: faculty.email,
+      email: faculty.email || "",
       password: "********",
       role: faculty.role,
       specialty: faculty.specialty,
@@ -214,7 +214,7 @@ export default function AdminFaculties() {
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Faculty Management</h1>
           <p className="text-slate-500 text-sm mt-1">Manage institutional mentors, professors, and industry experts.</p>
         </div>
-        <button 
+        <button
           onClick={() => {
             setIsEditing(false);
             setNewFaculty({ name: "", email: "", password: "Teacher@123", role: "Senior Faculty", specialty: "", image: "", bio: "", education: "", expertise: "", selectedCourses: [], selectedTimings: [] });
@@ -230,7 +230,7 @@ export default function AdminFaculties() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {faculties.map((f) => (
-          <motion.div 
+          <motion.div
             key={f.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -247,16 +247,16 @@ export default function AdminFaculties() {
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-3 mb-4">
-               <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <Star size={14} className="text-primary" />
-                  <span className="font-semibold">{f.specialty}</span>
-               </div>
-               <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <BookOpen size={14} className="text-navy" />
-                  <span>{f.education}</span>
-               </div>
+              <div className="flex items-center gap-2 text-xs text-slate-600">
+                <Star size={14} className="text-primary" />
+                <span className="font-semibold">{f.specialty}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-600">
+                <BookOpen size={14} className="text-navy" />
+                <span>{f.education}</span>
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2 mb-4">
@@ -271,13 +271,13 @@ export default function AdminFaculties() {
             </div>
 
             <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
-              <button 
+              <button
                 onClick={() => handleEdit(f)}
                 className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-slate-50 text-slate-400 hover:bg-navy hover:text-white transition-all border border-slate-100"
               >
                 Update Profile
               </button>
-              <button 
+              <button
                 onClick={() => handleDelete(f.id)}
                 className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100"
               >
@@ -304,119 +304,119 @@ export default function AdminFaculties() {
             </div>
 
             <form onSubmit={handleAdd} className="p-8 space-y-6">
-               <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait">
                 {activeStep === 1 && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     className="space-y-4"
                   >
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Full Name</label>
-                          <input 
-                            required 
-                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.name ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
-                            value={newFaculty.name} 
-                            onChange={e => setNewFaculty({...newFaculty, name: e.target.value})} 
-                          />
-                          {errors.name && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.name}</p>}
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Institutional Email</label>
-                          <input 
-                            required 
-                            type="email" 
-                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.email ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
-                            value={newFaculty.email} 
-                            onChange={e => setNewFaculty({...newFaculty, email: e.target.value})} 
-                          />
-                          {errors.email && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
-                        </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Full Name</label>
+                        <input
+                          required
+                          className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.name ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
+                          value={newFaculty.name}
+                          onChange={e => setNewFaculty({ ...newFaculty, name: e.target.value })}
+                        />
+                        {errors.name && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.name}</p>}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Institutional Email</label>
+                        <input
+                          required
+                          type="email"
+                          className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.email ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
+                          value={newFaculty.email}
+                          onChange={e => setNewFaculty({ ...newFaculty, email: e.target.value })}
+                        />
+                        {errors.email && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.email}</p>}
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Access Password</label>
-                          <input 
-                            required 
-                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.password ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
-                            value={newFaculty.password} 
-                            onChange={e => setNewFaculty({...newFaculty, password: e.target.value})} 
-                          />
-                          {errors.password && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.password}</p>}
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Designation</label>
-                          <input 
-                            required 
-                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.role ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
-                            value={newFaculty.role} 
-                            onChange={e => setNewFaculty({...newFaculty, role: e.target.value})} 
-                          />
-                          {errors.role && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.role}</p>}
-                        </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Access Password</label>
+                        <input
+                          required
+                          className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.password ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
+                          value={newFaculty.password}
+                          onChange={e => setNewFaculty({ ...newFaculty, password: e.target.value })}
+                        />
+                        {errors.password && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.password}</p>}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Designation</label>
+                        <input
+                          required
+                          className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.role ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
+                          value={newFaculty.role}
+                          onChange={e => setNewFaculty({ ...newFaculty, role: e.target.value })}
+                        />
+                        {errors.role && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.role}</p>}
+                      </div>
                     </div>
                   </motion.div>
                 )}
 
                 {activeStep === 2 && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     className="space-y-4"
                   >
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Specialty</label>
-                          <input 
-                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.specialty ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
-                            value={newFaculty.specialty} 
-                            onChange={e => setNewFaculty({...newFaculty, specialty: e.target.value})} 
-                          />
-                          {errors.specialty && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.specialty}</p>}
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Education</label>
-                          <input 
-                            className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.education ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
-                            value={newFaculty.education} 
-                            onChange={e => setNewFaculty({...newFaculty, education: e.target.value})} 
-                          />
-                          {errors.education && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.education}</p>}
-                        </div>
-                    </div>
-                    <div>
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Profile Picture</label>
-                        <div className="flex items-center gap-4">
-                           <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
-                              {newFaculty.image ? <img src={newFaculty.image} className="w-full h-full object-cover" /> : <User className="text-slate-300" size={20} />}
-                           </div>
-                           <label className="flex-grow">
-                              <div className={`flex items-center justify-center gap-2 w-full bg-slate-50 border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-[10px] font-bold text-slate-500 cursor-pointer hover:bg-white hover:border-navy transition-all ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                 {uploading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
-                                 <span>{uploading ? 'Uploading...' : 'Click to Upload Image'}</span>
-                              </div>
-                              <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                           </label>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Expertise (comma separated)</label>
-                        <input 
-                          className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.expertise ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`} 
-                          placeholder="Robotics, AI, IoT" 
-                          value={newFaculty.expertise} 
-                          onChange={e => setNewFaculty({...newFaculty, expertise: e.target.value})} 
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Specialty</label>
+                        <input
+                          className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.specialty ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
+                          value={newFaculty.specialty}
+                          onChange={e => setNewFaculty({ ...newFaculty, specialty: e.target.value })}
                         />
-                        {errors.expertise && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.expertise}</p>}
+                        {errors.specialty && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.specialty}</p>}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Education</label>
+                        <input
+                          className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.education ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
+                          value={newFaculty.education}
+                          onChange={e => setNewFaculty({ ...newFaculty, education: e.target.value })}
+                        />
+                        {errors.education && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.education}</p>}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Profile Picture</label>
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                          {newFaculty.image ? <img src={newFaculty.image} className="w-full h-full object-cover" /> : <User className="text-slate-300" size={20} />}
+                        </div>
+                        <label className="flex-grow">
+                          <div className={`flex items-center justify-center gap-2 w-full bg-slate-50 border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-[10px] font-bold text-slate-500 cursor-pointer hover:bg-white hover:border-navy transition-all ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                            {uploading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
+                            <span>{uploading ? 'Uploading...' : 'Click to Upload Image'}</span>
+                          </div>
+                          <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Expertise (comma separated)</label>
+                      <input
+                        className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white transition-all ${errors.expertise ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 focus:border-navy'}`}
+                        placeholder="Robotics, AI, IoT"
+                        value={newFaculty.expertise}
+                        onChange={e => setNewFaculty({ ...newFaculty, expertise: e.target.value })}
+                      />
+                      {errors.expertise && <p className="text-[9px] text-rose-500 font-bold ml-1 mt-1">{errors.expertise}</p>}
                     </div>
                   </motion.div>
                 )}
 
                 {activeStep === 3 && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
@@ -424,109 +424,109 @@ export default function AdminFaculties() {
                   >
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block ml-1">Brief Biography</label>
-                      <textarea rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all resize-none" value={newFaculty.bio} onChange={e => setNewFaculty({...newFaculty, bio: e.target.value})} />
-                    </div>
-                    
-                    <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Assign Academic Programs</label>
-                    
-                    <div className="flex bg-slate-50 p-1 rounded-xl gap-1">
-                      <button 
-                        type="button"
-                        onClick={() => setCourseTab("online")}
-                        className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${courseTab === 'online' ? 'bg-white text-navy shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                      >
-                        Online Courses
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => setCourseTab("offline")}
-                        className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${courseTab === 'offline' ? 'bg-white text-navy shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                      >
-                        Offline Batches
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 p-4 bg-slate-50/50 rounded-2xl border border-slate-100 max-h-[180px] overflow-y-auto">
-                      {courses.filter(c => c.type === courseTab).length === 0 ? (
-                        <p className="col-span-2 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">No {courseTab} courses available</p>
-                      ) : (
-                        courses.filter(c => c.type === courseTab).map(course => (
-                          <label key={course.id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg transition-all cursor-pointer group">
-                            <input 
-                              type="checkbox"
-                              className="w-4 h-4 rounded border-slate-300 text-navy focus:ring-navy"
-                              checked={newFaculty.selectedCourses.includes(course.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setNewFaculty({...newFaculty, selectedCourses: [...newFaculty.selectedCourses, course.id]});
-                                } else {
-                                  setNewFaculty({...newFaculty, selectedCourses: newFaculty.selectedCourses.filter(id => id !== course.id)});
-                                }
-                              }}
-                            />
-                            <span className="text-[11px] font-medium text-slate-600 group-hover:text-navy transition-colors">{course.title}</span>
-                          </label>
-                        ))
-                      )}
+                      <textarea rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-navy focus:bg-white transition-all resize-none" value={newFaculty.bio} onChange={e => setNewFaculty({ ...newFaculty, bio: e.target.value })} />
                     </div>
 
                     <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Assigned Timings (Slots)</label>
-                      <div className="flex flex-wrap gap-2 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                        {availableTimings.length === 0 ? (
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest py-2">No master timings defined</p>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Assign Academic Programs</label>
+
+                      <div className="flex bg-slate-50 p-1 rounded-xl gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setCourseTab("online")}
+                          className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${courseTab === 'online' ? 'bg-white text-navy shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                          Online Courses
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCourseTab("offline")}
+                          className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${courseTab === 'offline' ? 'bg-white text-navy shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                          Offline Batches
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 p-4 bg-slate-50/50 rounded-2xl border border-slate-100 max-h-[180px] overflow-y-auto">
+                        {courses.filter(c => c.type === courseTab).length === 0 ? (
+                          <p className="col-span-2 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">No {courseTab} courses available</p>
                         ) : (
-                          availableTimings.map(t => (
-                            <button 
-                              key={t.id}
-                              type="button"
-                              onClick={() => {
-                                if (newFaculty.selectedTimings.includes(t.id)) {
-                                  setNewFaculty({...newFaculty, selectedTimings: newFaculty.selectedTimings.filter(id => id !== t.id)});
-                                } else {
-                                  setNewFaculty({...newFaculty, selectedTimings: [...newFaculty.selectedTimings, t.id]});
-                                }
-                              }}
-                              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${newFaculty.selectedTimings.includes(t.id) ? 'bg-navy text-white border-navy shadow-sm' : 'bg-white text-slate-400 border-slate-200 hover:border-navy'}`}
-                            >
-                              {t.name} ({t.slot})
-                            </button>
+                          courses.filter(c => c.type === courseTab).map(course => (
+                            <label key={course.id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg transition-all cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4 rounded border-slate-300 text-navy focus:ring-navy"
+                                checked={newFaculty.selectedCourses.includes(course.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setNewFaculty({ ...newFaculty, selectedCourses: [...newFaculty.selectedCourses, course.id] });
+                                  } else {
+                                    setNewFaculty({ ...newFaculty, selectedCourses: newFaculty.selectedCourses.filter(id => id !== course.id) });
+                                  }
+                                }}
+                              />
+                              <span className="text-[11px] font-medium text-slate-600 group-hover:text-navy transition-colors">{course.title}</span>
+                            </label>
                           ))
                         )}
                       </div>
+
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block ml-1">Assigned Timings (Slots)</label>
+                        <div className="flex flex-wrap gap-2 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                          {availableTimings.length === 0 ? (
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest py-2">No master timings defined</p>
+                          ) : (
+                            availableTimings.map(t => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                onClick={() => {
+                                  if (newFaculty.selectedTimings.includes(t.id)) {
+                                    setNewFaculty({ ...newFaculty, selectedTimings: newFaculty.selectedTimings.filter(id => id !== t.id) });
+                                  } else {
+                                    setNewFaculty({ ...newFaculty, selectedTimings: [...newFaculty.selectedTimings, t.id] });
+                                  }
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${newFaculty.selectedTimings.includes(t.id) ? 'bg-navy text-white border-navy shadow-sm' : 'bg-white text-slate-400 border-slate-200 hover:border-navy'}`}
+                              >
+                                {t.name} ({t.slot})
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
                   </motion.div>
                 )}
-               </AnimatePresence>
+              </AnimatePresence>
 
-               {error && <p className="text-[10px] text-rose-500 font-bold">{error}</p>}
+              {error && <p className="text-[10px] text-rose-500 font-bold">{error}</p>}
 
-               <div className="flex justify-between gap-3 pt-6">
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      if (activeStep > 1) setActiveStep(activeStep - 1);
-                      else setShowAddModal(false);
-                    }} 
-                    className="px-6 py-3 text-xs font-bold text-slate-500 hover:text-navy transition-colors"
-                  >
-                    {activeStep === 1 ? 'Cancel' : 'Back'}
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="px-8 py-3 bg-navy text-white rounded-2xl text-xs font-bold shadow-lg shadow-navy/20 hover:bg-black transition-all"
-                  >
-                    {activeStep === 3 ? (isEditing ? 'Update Faculty' : 'Finalize Onboarding') : 'Continue'}
-                  </button>
-               </div>
+              <div className="flex justify-between gap-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeStep > 1) setActiveStep(activeStep - 1);
+                    else setShowAddModal(false);
+                  }}
+                  className="px-6 py-3 text-xs font-bold text-slate-500 hover:text-navy transition-colors"
+                >
+                  {activeStep === 1 ? 'Cancel' : 'Back'}
+                </button>
+                <button
+                  type="submit"
+                  className="px-8 py-3 bg-navy text-white rounded-2xl text-xs font-bold shadow-lg shadow-navy/20 hover:bg-black transition-all"
+                >
+                  {activeStep === 3 ? (isEditing ? 'Update Faculty' : 'Finalize Onboarding') : 'Continue'}
+                </button>
+              </div>
             </form>
           </div>
         </div>
       )}
 
-      <CustomModal 
+      <CustomModal
         isOpen={modalConfig.isOpen}
         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
         onConfirm={modalConfig.onConfirm}
