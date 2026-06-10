@@ -121,6 +121,20 @@ export default function ProfilePage() {
     return false;
   };
 
+  const isAcademicSavedInDb = () => {
+    if (!user || !user.academic_type) return false;
+    const base = !!(
+      user.college_name &&
+      user.university_board &&
+      user.registration_no &&
+      user.academic_session
+    );
+    if (user.academic_type === "School") {
+      return !!(base && user.semester_year);
+    }
+    return !!(base && user.branch_stream && user.semester_year);
+  };
+
   const handleTabClick = (targetTabId) => {
     if (activeTab === "personal" && targetTabId !== "personal") {
       if (!formData.image) {
@@ -662,7 +676,7 @@ export default function ProfilePage() {
               className="p-8 space-y-8"
             >
               {/* ── LOCKED READ-ONLY VIEW ── */}
-              {isTabComplete("academic") && !academicEditMode ? (
+              {isAcademicSavedInDb() && !academicEditMode ? (
                 <div className="space-y-6">
                   {/* Verified banner */}
                   <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
