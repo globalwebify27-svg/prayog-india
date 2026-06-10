@@ -110,11 +110,14 @@ export async function POST(request) {
     const body = await request.json();
     const { userId, courseId, issueDate, fromDate, toDate, instituteName, bulkCertificates } = body;
 
+    const host = request.headers.get("host") || "prayogindiarobotics.com";
+    const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+    const baseUrl = `${protocol}://${host}`;
+
     if (bulkCertificates && Array.isArray(bulkCertificates)) {
       const results = [];
       for (const cert of bulkCertificates) {
         const certNo = `PR-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://prayogindiarobotics.com";
         const qrData = `${baseUrl}/verify/${certNo}`;
         const query = `
           INSERT INTO certificates (user_id, course_id, certificate_number, issue_date, qr_code_data, from_date, to_date, institute_name)
@@ -146,7 +149,6 @@ export async function POST(request) {
       INSERT INTO certificates (user_id, course_id, certificate_number, issue_date, qr_code_data, from_date, to_date, institute_name)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://prayogindiarobotics.com";
     const qrData = `${baseUrl}/verify/${certNo}`;
     
     const [result] = await pool.execute(query, [

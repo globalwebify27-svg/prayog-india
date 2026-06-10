@@ -24,7 +24,10 @@ export async function POST(request) {
     }
 
     const cert = rows[0];
-    const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/verify/${cert.certificate_number}`;
+    const host = request.headers.get("host") || "prayogindiarobotics.com";
+    const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+    const baseUrl = `${protocol}://${host}`;
+    const verificationLink = `${baseUrl}/verify/${cert.certificate_number}`;
 
     const emailHtml = getCertificateEmailTemplate(
       cert.student_name,
@@ -35,7 +38,7 @@ export async function POST(request) {
     // Generate the PDF certificate
     const { generateCertificate } = require('@/lib/pdf');
     const path = require('path');
-    const certUrl = await generateCertificate(cert.student_name, cert.course_name, cert.certificate_number);
+    const certUrl = await generateCertificate(cert.student_name, cert.course_name, cert.certificate_number, baseUrl);
     const fullPath = path.join(process.cwd(), "public", certUrl);
 
     const result = await sendMail(

@@ -126,8 +126,8 @@ export default function StudentDashboard() {
     { label: "Academic Records", val: user.academic_type && (user.college_name || user.school_college) },
     { label: "Basic Info (DOB/Gender/Parents)", val: user.dob && user.gender && user.father_name && user.mother_name },
     { label: "Verification ID", val: user.id_number },
-    { label: "School ID/Roll Number", val: (user.registration_no || user.school_id_number) },
-    { label: "School ID Card", val: user.school_id_card }
+    { label: "Academic ID/Roll Number", val: (user.registration_no || user.school_id_number) },
+    { label: "Academic ID Card", val: user.school_id_card }
   ];
   const completedCount = profileFields.filter(f => f.val).length;
   const profilePercent = Math.round((completedCount / profileFields.length) * 100);

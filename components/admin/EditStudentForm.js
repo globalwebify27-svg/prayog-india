@@ -224,7 +224,7 @@ export default function EditStudentForm({ student }) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">School ID Number</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Academic ID / Roll Number</label>
                       <input 
                         type="text" 
                         value={formData.school_id_number} 

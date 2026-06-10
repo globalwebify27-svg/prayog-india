@@ -251,10 +251,10 @@ export default async function StudentProfilePage({ params }) {
                 )}
               </div>
               <div className="space-y-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">School ID Card Copy</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Academic ID Card Copy</p>
                 {user.school_id_card ? (
                   <div className="group relative rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-50">
-                    <img src={user.school_id_card} alt="School ID" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    <img src={user.school_id_card} alt="Academic ID" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                     <a href={user.school_id_card} target="_blank" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <span className="bg-white text-navy px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">View Full Document</span>
                     </a>
@@ -262,7 +262,7 @@ export default async function StudentProfilePage({ params }) {
                 ) : (
                   <div className="aspect-video bg-slate-50 rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300">
                     <ImageIcon size={32} />
-                    <p className="text-[10px] font-bold mt-2 uppercase tracking-tighter">No School ID Uploaded</p>
+                    <p className="text-[10px] font-bold mt-2 uppercase tracking-tighter">No Academic ID Uploaded</p>
                   </div>
                 )}
               </div>

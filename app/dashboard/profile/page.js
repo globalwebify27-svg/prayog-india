@@ -1016,12 +1016,12 @@ export default function ProfilePage() {
                   </div>
                   
                   <div className="space-y-4">
-                    <label className="text-xs font-bold text-slate-700 ml-1">Upload School ID Card</label>
+                    <label className="text-xs font-bold text-slate-700 ml-1">Upload Academic ID Card</label>
                     <div className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all min-h-[160px] ${formData.school_id_card ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 hover:border-navy bg-slate-50/50'}`}>
                       {formData.school_id_card ? (
                         <div className="flex flex-col items-center gap-4 w-full">
                           <div className="relative group w-full max-w-[200px] aspect-video rounded-xl overflow-hidden shadow-md border border-emerald-100 bg-white">
-                            <img src={formData.school_id_card} alt="School ID Preview" className="w-full h-full object-cover" />
+                            <img src={formData.school_id_card} alt="Academic ID Preview" className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-navy/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[1px]">
                               <a href={formData.school_id_card} target="_blank" rel="noopener noreferrer" className="p-2 bg-white text-navy rounded-lg shadow-xl hover:scale-110 transition-all">
                                 <FileText size={16} />
@@ -1031,7 +1031,7 @@ export default function ProfilePage() {
                           <div className="flex flex-col items-center gap-1">
                             <div className="flex items-center gap-2 text-emerald-600">
                               <CheckCircle size={14} />
-                              <p className="text-[10px] font-bold uppercase tracking-widest">School ID Uploaded</p>
+                              <p className="text-[10px] font-bold uppercase tracking-widest">Academic ID Uploaded</p>
                             </div>
                             <button 
                               onClick={() => setFormData({...formData, school_id_card: ""})}
@@ -1055,7 +1055,7 @@ export default function ProfilePage() {
                             htmlFor="school_id_upload"
                             className="px-5 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:text-navy hover:border-navy transition-all cursor-pointer shadow-sm uppercase tracking-wider"
                           >
-                            Select School ID
+                            Select Academic ID
                           </label>
                         </>
                       )}
