@@ -132,7 +132,14 @@ export default function Header() {
               </Link>
             </div>
           ) : (
-            <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="bg-primary text-navy px-10 py-3 rounded-xl text-sm font-bold uppercase tracking-widest shadow-lg">Enroll Now</Link>
+            <div className="flex flex-col items-center gap-6 w-full pt-4">
+              <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-white/80 hover:text-primary transition-colors text-base font-bold uppercase tracking-wider">
+                Sign In
+              </Link>
+              <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="bg-primary text-navy px-10 py-3 rounded-xl text-sm font-bold uppercase tracking-widest shadow-lg w-full text-center">
+                Enroll Now
+              </Link>
+            </div>
           )}
         </div>
       )}

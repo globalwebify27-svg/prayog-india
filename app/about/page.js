@@ -765,22 +765,22 @@ export default function AboutPage() {
                   key={idx}
                   onClick={() => setSelectedFacultyMember(g)}
                   whileHover={{ y: -6 }}
-                  className="shrink-0 w-[300px] bg-white border border-slate-200 rounded-2xl p-6 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[420px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)] hover:border-[#FFC107]/45"
+                  className="shrink-0 w-[300px] bg-white border border-slate-200 rounded-2xl p-6 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[460px] shadow-[0_5px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(1,37,77,0.06)] hover:border-[#FFC107]/45"
                 >
                   <div>
                     {g.img_url ? (
-                      <div className="w-20 h-20 rounded-2xl overflow-hidden mb-5 border border-slate-100 bg-slate-50 relative shrink-0">
+                      <div className="w-32 h-32 rounded-2xl overflow-hidden mb-5 border border-slate-100 bg-slate-50 relative shrink-0">
                         <Image src={g.img_url} alt={g.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                       </div>
                     ) : (
-                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center font-black text-xl text-white mb-5 shadow-inner"
+                      <div className="w-32 h-32 rounded-2xl flex items-center justify-center font-black text-2xl text-white mb-5 shadow-inner"
                         style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
                         {g.initial || (g.name ? g.name.split(" ").map(n => n[0]).join("") : "GF")}
                       </div>
                     )}
                     <h3 className="font-bold text-[#01254d] text-xl mb-1 group-hover:text-[#FFC107] transition-colors">{g.name}</h3>
                     <p className="text-[#FFC107] text-xs font-semibold uppercase tracking-wider mb-4">{g.role}</p>
-                    <p className="text-slate-500 text-sm leading-relaxed line-clamp-5">{g.desc}</p>
+                    <p className="text-slate-500 text-sm leading-relaxed line-clamp-4">{g.desc}</p>
                   </div>
                   <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-4">
                     <span className="text-xs text-slate-400 group-hover:text-[#01254d] transition-colors">View Profile</span>
@@ -820,11 +820,11 @@ export default function AboutPage() {
                 <div className="flex flex-col sm:flex-row gap-6 items-start mt-6 sm:mt-0">
                   <div className="shrink-0">
                     {selectedFacultyMember.img_url ? (
-                      <div className="relative w-28 h-28 rounded-2xl overflow-hidden border border-slate-100 shadow-md bg-slate-50">
+                      <div className="relative w-36 h-36 rounded-2xl overflow-hidden border border-slate-100 shadow-md bg-slate-50">
                         <Image src={selectedFacultyMember.img_url} alt={selectedFacultyMember.name} fill className="object-cover" />
                       </div>
                     ) : (
-                      <div className="w-28 h-28 rounded-2xl flex items-center justify-center font-black text-3xl text-white shadow-md"
+                      <div className="w-36 h-36 rounded-2xl flex items-center justify-center font-black text-4xl text-white shadow-md"
                         style={{ background: "linear-gradient(135deg, #01254d, #1a3f70)" }}>
                         {selectedFacultyMember.initial || (selectedFacultyMember.name ? selectedFacultyMember.name.split(" ").map(n => n[0]).join("") : "GF")}
                       </div>
