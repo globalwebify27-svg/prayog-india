@@ -175,6 +175,8 @@ export default function ProfilePage() {
     university_board: "",
     registration_no: "",
     academic_session: "",
+    noc_file: "",
+    noc_note: "",
     // Faculty specific
     bio: "",
     specialty: "",
@@ -229,6 +231,8 @@ export default function ProfilePage() {
           university_board: u.university_board || "",
           registration_no: u.registration_no || "",
           academic_session: u.academic_session || "",
+          noc_file: u.noc_file || "",
+          noc_note: u.noc_note || "",
           bio: u.bio || "",
           specialty: u.specialty || "",
           expertise: Array.isArray(u.expertise) ? u.expertise.join(", ") : (u.expertise || ""),
@@ -704,6 +708,33 @@ export default function ProfilePage() {
                       </div>
                     ))}
                   </div>
+
+                  {formData.academic_type !== "School" && (formData.noc_file || formData.noc_note) && (
+                    <div className="pt-6 border-t border-slate-100 grid md:grid-cols-2 gap-6">
+                      {formData.noc_file && (
+                        <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-2">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">NOC / Self Declaration Document</p>
+                          <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                            <span className="text-xs font-semibold text-slate-700 truncate max-w-[180px]">NOC_Document.pdf</span>
+                            <a 
+                              href={formData.noc_file} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-xs font-bold text-navy hover:underline flex items-center gap-1 shrink-0"
+                            >
+                              View File &rarr;
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      {formData.noc_note && (
+                        <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">NOC Note</p>
+                          <p className="text-xs text-slate-600 italic font-medium leading-relaxed">{formData.noc_note}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 /* ── EDIT FORM ── */
@@ -825,6 +856,81 @@ export default function ProfilePage() {
                           className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium"
                         />
                       </div>
+
+                      {/* NOC Section — only shown for non-School qualifications */}
+                      {formData.academic_type !== "School" && (
+                        <div className="pt-6 border-t border-slate-100 space-y-4">
+                          <div>
+                            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-navy" />
+                              NOC / Self Declaration Document
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-1">
+                              Only those who will go for an internship program need to submit an NOC or Self Declaration Form. (Optional)
+                            </p>
+                          </div>
+
+                          <div className="grid md:grid-cols-2 gap-6">
+                            {/* Upload Area */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-bold text-slate-700 ml-1">Upload NOC (PDF / JPEG / PNG)</label>
+                              <div className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all min-h-[140px] ${formData.noc_file ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 hover:border-navy bg-slate-50/50'}`}>
+                                {formData.noc_file ? (
+                                  <div className="flex flex-col items-center gap-2 w-full text-center">
+                                    <div className="flex items-center gap-2 text-emerald-600">
+                                      <CheckCircle size={16} className="shrink-0" />
+                                      <p className="text-xs font-bold uppercase tracking-wider">Document Uploaded</p>
+                                    </div>
+                                    <a 
+                                      href={formData.noc_file} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer" 
+                                      className="text-xs text-navy font-bold hover:underline"
+                                    >
+                                      View Uploaded File
+                                    </a>
+                                    <button 
+                                      type="button"
+                                      onClick={() => setFormData({...formData, noc_file: ""})}
+                                      className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors uppercase underline mt-2"
+                                    >
+                                      Replace File
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <Upload className="text-slate-300 mb-2" size={24} />
+                                    <input 
+                                      type="file" 
+                                      onChange={(e) => handleFileUpload(e, 'noc_file')}
+                                      className="hidden" 
+                                      id="noc_file_upload" 
+                                    />
+                                    <label 
+                                      htmlFor="noc_file_upload"
+                                      className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:text-navy hover:border-navy transition-all cursor-pointer shadow-sm uppercase tracking-wider"
+                                    >
+                                      Select NOC Document
+                                    </label>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Note Box */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-bold text-slate-700 ml-1">NOC Note Box</label>
+                              <textarea 
+                                rows={4}
+                                value={formData.noc_note || ""}
+                                onChange={(e) => setFormData({...formData, noc_note: e.target.value})}
+                                placeholder="Write any notes regarding your NOC or Self Declaration Form here..."
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium resize-none h-[140px]"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">

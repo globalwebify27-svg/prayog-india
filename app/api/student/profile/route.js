@@ -22,6 +22,7 @@ export async function POST(req) {
       last_qualification_year, id_type, id_number, id_image, school_id_card,
       school_id_number,
       academic_type, branch_stream, semester_year, college_name, university_board, registration_no, academic_session,
+      noc_file, noc_note,
       bio, specialty, expertise, faculty_education
     } = body;
 
@@ -60,7 +61,7 @@ export async function POST(req) {
         id_image = ?, school_id_card = ?, school_id_number = ?, 
         academic_type = ?, branch_stream = ?, semester_year = ?, 
         college_name = ?, university_board = ?, registration_no = ?, 
-        academic_session = ?, profile_completed = ? 
+        academic_session = ?, noc_file = ?, noc_note = ?, profile_completed = ? 
        WHERE id = ?`,
       [
         name, phone, dob || null, address, blood_group,
@@ -70,7 +71,7 @@ export async function POST(req) {
         id_image || null, school_id_card || null, school_id_number || null,
         academic_type || null, branch_stream || null, semester_year || null,
         college_name || null, university_board || null, registration_no || null,
-        academic_session || null, isComplete, userId
+        academic_session || null, noc_file || null, noc_note || null, isComplete, userId
       ]
     );
 

@@ -23,7 +23,7 @@ export async function GET() {
              u.school_college, u.last_qualification_year, u.id_type, u.id_number, 
              u.id_image, u.school_id_card, u.school_id_number,
              u.academic_type, u.branch_stream, u.semester_year, u.college_name,
-             u.university_board, u.registration_no, u.academic_session,
+             u.university_board, u.registration_no, u.academic_session, u.noc_file, u.noc_note,
              f.bio, f.specialty, f.expertise, f.education as faculty_education
       FROM users u
       LEFT JOIN faculties f ON u.id = f.user_id

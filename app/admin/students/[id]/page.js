@@ -233,7 +233,7 @@ export default async function StudentProfilePage({ params }) {
               <ImageIcon size={20} className="text-navy" />
               Institutional Documents
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${user.academic_type !== 'School' ? 'lg:grid-cols-3' : ''} gap-6`}>
               <div className="space-y-2">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Government Identity Image</p>
                 {user.id_image ? (
@@ -266,6 +266,31 @@ export default async function StudentProfilePage({ params }) {
                   </div>
                 )}
               </div>
+              {user.academic_type !== "School" && (
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">NOC / Self Declaration Copy</p>
+                  {user.noc_file ? (
+                    <div className="group relative rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-50 flex flex-col items-center justify-center p-4">
+                      <FileText size={36} className="text-navy/40 mb-2" />
+                      <span className="text-xs font-bold text-slate-700 truncate max-w-full mb-1">NOC Document</span>
+                      <a href={user.noc_file} target="_blank" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-4 text-center">
+                        <span className="bg-white text-navy px-4 py-1.5 rounded-full text-xs font-bold shadow-lg mb-2">View Document</span>
+                        {user.noc_note && (
+                          <p className="text-[10px] text-white/95 line-clamp-2 italic px-2">"{user.noc_note}"</p>
+                        )}
+                      </a>
+                      {user.noc_note && (
+                        <p className="text-[9px] text-slate-400 line-clamp-1 italic text-center w-full">"{user.noc_note}"</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-slate-50 rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300">
+                      <ImageIcon size={32} />
+                      <p className="text-[10px] font-bold mt-2 uppercase tracking-tighter">No NOC Uploaded</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
