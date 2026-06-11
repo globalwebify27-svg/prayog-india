@@ -859,17 +859,24 @@ export default function ProfilePage() {
 
                       {/* NOC Section — only shown for non-School qualifications */}
                       {formData.academic_type !== "School" && (
-                        <div className="pt-6 border-t border-slate-100 space-y-4">
+                        <div className="col-span-2 pt-6 border-t border-slate-100 space-y-6">
                           <div>
                             <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                               <span className="w-1.5 h-1.5 rounded-full bg-navy" />
                               NOC / Self Declaration Document
                             </h4>
-                            <p className="text-xs text-slate-500 mt-1">
-                              Only those who will go for an internship program need to submit an NOC or Self Declaration Form. (Optional)
+                          </div>
+
+                          {/* Highlighted Warning Box (Single-line layout) */}
+                          <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2.5">
+                            <AlertCircle size={14} className="text-amber-600 shrink-0" />
+                            <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">
+                              <strong className="text-amber-950 font-bold mr-1">Note:</strong>
+                              Only students going for an internship program are required to submit an NOC or Self Declaration Form. (Optional)
                             </p>
                           </div>
 
+                          {/* The two boxes in one row */}
                           <div className="grid md:grid-cols-2 gap-6">
                             {/* Upload Area */}
                             <div className="space-y-2">
