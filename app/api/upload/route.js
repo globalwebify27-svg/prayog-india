@@ -38,12 +38,20 @@ export async function POST(request) {
 
     // Image Optimization Pipeline
     if (isImage && !mimeType.includes("svg") && !mimeType.includes("gif")) {
-      buffer = await sharp(buffer)
-        .resize({ width: 1920, withoutEnlargement: true }) // Cap width to 1920px to prevent massive resolutions
-        .webp({ quality: 80 }) // Convert to webp with 80% compression quality for massive size reduction
-        .toBuffer();
-      
-      finalExt = ".webp";
+      const isPng = mimeType.includes("png") || finalExt === ".png";
+      if (isPng) {
+        buffer = await sharp(buffer)
+          .resize({ width: 1920, withoutEnlargement: true })
+          .png({ quality: 90, compressionLevel: 9 })
+          .toBuffer();
+        finalExt = ".png";
+      } else {
+        buffer = await sharp(buffer)
+          .resize({ width: 1920, withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toBuffer();
+        finalExt = ".webp";
+      }
     }
 
     const uniqueFilename = `${seoName}-${Date.now()}${finalExt}`;

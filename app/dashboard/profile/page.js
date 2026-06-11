@@ -23,7 +23,9 @@ import {
   CheckCircle,
   FileText,
   BookOpen,
-  X
+  X,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 import CustomModal from "@/components/CustomModal";
@@ -40,6 +42,9 @@ export default function ProfilePage() {
 
   // Password Change State
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -307,10 +312,18 @@ export default function ProfilePage() {
       }
     }
 
-    // Aadhar validation for students
+    // Aadhar and Academic ID validation for students
     if (user?.role !== 'teacher' && section === 'kyc') {
       if (!formData.id_number || formData.id_number.replace(/\D/g, '').length !== 12) {
         showAlert("Validation Error", "Aadhar number is mandatory and must be exactly 12 digits.", "error");
+        return;
+      }
+      if (!formData.id_image) {
+        showAlert("Validation Error", "Please upload the front copy of your Aadhar Card.", "error");
+        return;
+      }
+      if (!formData.school_id_card) {
+        showAlert("Validation Error", "Please upload your Academic ID Card.", "error");
         return;
       }
     }
@@ -792,13 +805,13 @@ export default function ProfilePage() {
                       {/* Semester / Year / Class */}
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-700 ml-1">
-                          {formData.academic_type === "School" ? "Class / Standard" : "Current Semester / Year"}
+                          {formData.academic_type === "School" ? "Class / Standard" : "Current Semester / Year / Passed Out Year"}
                         </label>
                         <input
                           type="text"
                           value={formData.semester_year}
                           onChange={(e) => setFormData({...formData, semester_year: e.target.value})}
-                          placeholder={formData.academic_type === "School" ? "e.g. 10th / 12th" : "e.g. 3rd Year / 6th Sem"}
+                          placeholder={formData.academic_type === "School" ? "e.g. 10th / 12th" : "e.g. 8th Sem / Passed Out 2024"}
                           className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-navy focus:bg-white transition-all text-sm font-medium"
                         />
                       </div>
@@ -1022,7 +1035,7 @@ export default function ProfilePage() {
                   </div>
                   
                   <div className="space-y-4">
-                    <label className="text-xs font-bold text-slate-700 ml-1">Upload ID Proof (Front)</label>
+                    <label className="text-xs font-bold text-slate-700 ml-1">Upload ID Proof (Front) <span className="text-rose-500">*</span></label>
                     <div className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all min-h-[160px] ${formData.id_image ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 hover:border-navy bg-slate-50/50'}`}>
                       {formData.id_image ? (
                         <div className="flex flex-col items-center gap-4 w-full">
@@ -1143,7 +1156,7 @@ export default function ProfilePage() {
                   </div>
                   
                   <div className="space-y-4">
-                    <label className="text-xs font-bold text-slate-700 ml-1">Upload Academic ID Card</label>
+                    <label className="text-xs font-bold text-slate-700 ml-1">Upload Academic ID Card <span className="text-rose-500">*</span></label>
                     <div className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all min-h-[160px] ${formData.school_id_card ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 hover:border-navy bg-slate-50/50'}`}>
                       {formData.school_id_card ? (
                         <div className="flex flex-col items-center gap-4 w-full">
@@ -1312,33 +1325,60 @@ export default function ProfilePage() {
                     <form onSubmit={handlePasswordChange} className="space-y-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Current Password</label>
-                        <input 
-                          required
-                          type="password" 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all"
-                          value={passwordData.currentPassword}
-                          onChange={e => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                        />
+                        <div className="relative">
+                          <input 
+                            required
+                            type={showCurrentPassword ? "text" : "password"} 
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all font-medium"
+                            value={passwordData.currentPassword}
+                            onChange={e => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                          >
+                            {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">New Password</label>
-                        <input 
-                          required
-                          type="password" 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all"
-                          value={passwordData.newPassword}
-                          onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})}
-                        />
+                        <div className="relative">
+                          <input 
+                            required
+                            type={showNewPassword ? "text" : "password"} 
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all font-medium"
+                            value={passwordData.newPassword}
+                            onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})}
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                          >
+                            {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Confirm New Password</label>
-                        <input 
-                          required
-                          type="password" 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all"
-                          value={passwordData.confirmPassword}
-                          onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                        />
+                        <div className="relative">
+                          <input 
+                            required
+                            type={showConfirmPassword ? "text" : "password"} 
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm outline-none focus:border-navy focus:bg-white transition-all font-medium"
+                            value={passwordData.confirmPassword}
+                            onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                          >
+                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
                       </div>
                       <button 
                         disabled={isSavingPassword}
