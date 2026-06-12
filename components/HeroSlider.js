@@ -11,7 +11,7 @@ const slides = [
     title: "Revolutionizing Robotics",
     subtitle: "STEM & INNOVATION",
     description: "Explore the fascinating world of robotics. Learn to design, build, and program your own robots using hands-on kits.",
-    image: "/assets/hero-indian-2.png",
+    image: "/assets/hero_robotics_realistic.png",
     accent: "#FFC107"
   },
   {
@@ -19,7 +19,7 @@ const slides = [
     title: "Master AI Intelligence",
     subtitle: "COGNITIVE SYSTEMS",
     description: "Bridge the gap between hardware and intelligence. Build advanced neural networks for autonomous systems.",
-    image: "/assets/indian-hero.png",
+    image: "/assets/hero_ai_realistic.png",
     accent: "#FFC107"
   },
   {
@@ -27,7 +27,7 @@ const slides = [
     title: "STEM For Future Leaders",
     subtitle: "EARLY INNOVATION",
     description: "Nurturing the next generation of engineers with specialized modules in drone tech and embedded electronics.",
-    image: "/assets/about-img.png",
+    image: "/assets/hero_stem_realistic.png",
     accent: "#FFC107"
   }
 ];
