@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Download } from "lucide-react";
 import { useSettings } from "./SettingsContext";
 
 export default function Footer() {
@@ -81,6 +81,15 @@ export default function Footer() {
                 </div>
               </li>
             </ul>
+            <div className="pt-6">
+              <Link 
+                href="/prayog-app.apk"
+                className="inline-flex items-center space-x-2 bg-primary text-navy font-bold text-xs uppercase px-4 py-2.5 rounded-lg hover:bg-white hover:text-navy transition-all shadow-md w-full justify-center"
+              >
+                <Download size={14} />
+                <span>Download App</span>
+              </Link>
+            </div>
           </div>
         </div>
 

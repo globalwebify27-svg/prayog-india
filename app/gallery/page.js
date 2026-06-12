@@ -10,6 +10,7 @@ import {
   MapPin,
   Calendar,
   X,
+  ChevronLeft,
   ChevronRight
 } from "lucide-react";
 import Header from "@/components/Header";
@@ -41,6 +42,39 @@ export default function GalleryPage() {
 
 
   const filteredImages = galleryImages;
+
+  const currentIndex = selectedImage 
+    ? filteredImages.findIndex(img => img.id === selectedImage.id) 
+    : -1;
+
+  const handlePrev = (e) => {
+    if (e) e.stopPropagation();
+    if (filteredImages.length === 0 || currentIndex === -1) return;
+    const prevIndex = (currentIndex - 1 + filteredImages.length) % filteredImages.length;
+    setSelectedImage(filteredImages[prevIndex]);
+  };
+
+  const handleNext = (e) => {
+    if (e) e.stopPropagation();
+    if (filteredImages.length === 0 || currentIndex === -1) return;
+    const nextIndex = (currentIndex + 1) % filteredImages.length;
+    setSelectedImage(filteredImages[nextIndex]);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!selectedImage) return;
+      if (e.key === "ArrowLeft") {
+        handlePrev();
+      } else if (e.key === "ArrowRight") {
+        handleNext();
+      } else if (e.key === "Escape") {
+        setSelectedImage(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedImage, currentIndex, filteredImages]);
 
   return (
     <main className="min-h-screen bg-slate-50 font-body">
@@ -162,6 +196,20 @@ export default function GalleryPage() {
           >
             <button className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
               <X size={28} />
+            </button>
+            <button 
+              onClick={handlePrev}
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center border border-white/10 shadow-lg transition-all z-10"
+              aria-label="Previous image"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button 
+              onClick={handleNext}
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center border border-white/10 shadow-lg transition-all z-10"
+              aria-label="Next image"
+            >
+              <ChevronRight size={24} />
             </button>
             <motion.div 
               initial={{ scale: 0.98, opacity: 0 }}
