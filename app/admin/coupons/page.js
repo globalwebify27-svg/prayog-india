@@ -41,6 +41,7 @@ export default function CouponsManagement() {
     discount_value: "",
     course_ids: [],
     expiry_date: "",
+    usage_limit: "",
     is_active: true,
   });
 
@@ -108,7 +109,7 @@ export default function CouponsManagement() {
         setShowModal(false);
         setCouponToEdit(null);
         setNewCoupon({
-          code: "", discount_type: "percentage", discount_value: "", course_ids: [], expiry_date: "", is_active: true
+          code: "", discount_type: "percentage", discount_value: "", course_ids: [], expiry_date: "", usage_limit: "", is_active: true
         });
         showAlert("Success", "Coupon saved successfully.", "success");
       } else {
@@ -251,6 +252,7 @@ export default function CouponsManagement() {
                         ? `Valid for ${coupon.course_ids.length} course(s)` 
                         : (coupon.course_title ? `Valid for: ${coupon.course_title}` : 'Valid for all courses')}
                       {coupon.expiry_date && ` | Expires: ${new Date(coupon.expiry_date).toLocaleDateString()}`}
+                      {` | Used: ${coupon.usage_count || 0}${coupon.usage_limit ? ` / ${coupon.usage_limit} uses` : " (Unlimited)"}`}
                     </p>
                   </div>
                 </div>
@@ -400,14 +402,26 @@ export default function CouponsManagement() {
                          <p className="text-[10px] text-slate-400 italic">Leave all unchecked to apply the coupon to <strong>all courses</strong>.</p>
                       </div>
 
-                      <div className="space-y-2">
-                         <label className="text-[10px] font-black text-navy uppercase tracking-widest">Expiry Date (Optional)</label>
-                         <input 
-                            type="date" 
-                            value={couponToEdit ? (couponToEdit.expiry_date ? new Date(new Date(couponToEdit.expiry_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] : '') : newCoupon.expiry_date}
-                            onChange={(e) => couponToEdit ? setCouponToEdit({...couponToEdit, expiry_date: e.target.value}) : setNewCoupon({...newCoupon, expiry_date: e.target.value})}
-                            className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                         />
+                      <div className="grid grid-cols-2 gap-4">
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-navy uppercase tracking-widest">Expiry Date (Optional)</label>
+                            <input 
+                               type="date" 
+                               value={couponToEdit ? (couponToEdit.expiry_date ? new Date(new Date(couponToEdit.expiry_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] : '') : newCoupon.expiry_date}
+                               onChange={(e) => couponToEdit ? setCouponToEdit({...couponToEdit, expiry_date: e.target.value}) : setNewCoupon({...newCoupon, expiry_date: e.target.value})}
+                               className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                            />
+                         </div>
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-navy uppercase tracking-widest">Usage Limit (Optional)</label>
+                            <input 
+                               type="number" 
+                               value={couponToEdit ? (couponToEdit.usage_limit || '') : newCoupon.usage_limit}
+                               onChange={(e) => couponToEdit ? setCouponToEdit({...couponToEdit, usage_limit: e.target.value}) : setNewCoupon({...newCoupon, usage_limit: e.target.value})}
+                               className="w-full bg-slate-50 border border-navy/5 rounded-xl px-4 py-3.5 text-sm font-bold text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                               placeholder="e.g. 100 (Blank for unlimited)"
+                            />
+                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-navy/5 mt-4">

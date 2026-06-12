@@ -59,7 +59,18 @@ export async function POST(req) {
         const courseIdsArray = coupon.course_ids ? (typeof coupon.course_ids === 'string' ? JSON.parse(coupon.course_ids) : coupon.course_ids) : [];
         const isApplicable = courseMatch || courseIdsArray.includes(Number(course_id)) || Number(coupon.course_id) === Number(course_id);
 
-        if (isNotExpired && isApplicable) {
+        let limitNotExceeded = true;
+        if (coupon.usage_limit !== null) {
+          const [usageRows] = await pool.query(
+            "SELECT COUNT(*) as count FROM enrollments WHERE coupon_code = ?",
+            [coupon.code]
+          );
+          if (usageRows[0].count >= coupon.usage_limit) {
+            limitNotExceeded = false;
+          }
+        }
+
+        if (isNotExpired && isApplicable && limitNotExceeded) {
           if (coupon.discount_type === 'percentage') {
             amount = amount - (amount * (Number(coupon.discount_value) / 100));
           } else {

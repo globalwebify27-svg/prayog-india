@@ -67,7 +67,7 @@ export default function HeroSlider() {
           className="relative lg:absolute inset-0 w-full h-full flex flex-col lg:flex-row items-center pt-24 pb-32 lg:py-0"
         >
           {/* Big Vertical ID - Subtle */}
-          <motion.div 
+          <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 0.05 }}
             transition={{ delay: 0.5, duration: 1 }}
@@ -93,14 +93,14 @@ export default function HeroSlider() {
               <p className="text-blue-100/60 text-xs md:text-lg max-w-md mb-8 md:mb-10 leading-relaxed font-medium">
                 {slides[current].description}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
                 <Link href="/courses" className="w-full sm:w-auto group relative bg-[#FFC107] text-[#01254d] px-8 py-4 rounded-xl font-heading font-bold text-sm uppercase tracking-widest overflow-hidden transition-all shadow-lg shadow-[#FFC107]/20 hover:scale-105 active:scale-95 text-center">
                   <span className="relative z-10">Explore Track</span>
                   <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 </Link>
-                
-                <button 
+
+                <button
                   onClick={() => setShowIntroVideo(true)}
                   className="flex items-center space-x-4 group text-white hover:text-[#FFC107] transition-colors pl-2 sm:pl-0"
                 >
@@ -115,7 +115,7 @@ export default function HeroSlider() {
 
           {/* Right Image Side */}
           <div className="relative z-10 w-full lg:w-1/2 flex items-center justify-center px-6 md:px-12">
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.4, duration: 1 }}
@@ -123,21 +123,21 @@ export default function HeroSlider() {
             >
               <div className="absolute -inset-2 border border-white/5 rounded-[1.5rem] md:rounded-[2rem] -z-10"></div>
               <div className="w-full h-full rounded-[1.2rem] md:rounded-[1.5rem] overflow-hidden shadow-2xl">
-                <img 
-                  src={slides[current].image} 
-                  alt={slides[current].title} 
-                  className="w-full h-full object-cover" 
+                <img
+                  src={slides[current].image}
+                  alt={slides[current].title}
+                  className="w-full h-full object-cover"
                 />
               </div>
 
               {/* Floating Badge - Responsive */}
-              <motion.div 
+              <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ repeat: Infinity, duration: 4 }}
                 className="absolute -bottom-4 -left-4 md:-bottom-8 md:-left-8 bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-xl z-20 border-l-4 border-[#FFC107]"
               >
                 <div className="text-[#01254d] text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-1">Hands-on Learning</div>
-                <div className="text-slate-900 text-sm md:text-xl font-heading font-bold">Industrial Lab</div>
+                <div className="text-slate-900 text-sm md:text-xl font-heading font-bold">Innovation Lab</div>
               </motion.div>
             </motion.div>
           </div>
@@ -151,19 +151,18 @@ export default function HeroSlider() {
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`h-1 transition-all duration-500 rounded-full ${
-                current === i ? "w-8 bg-[#FFC107]" : "w-3 bg-white/20 hover:bg-white/40"
-              }`}
+              className={`h-1 transition-all duration-500 rounded-full ${current === i ? "w-8 bg-[#FFC107]" : "w-3 bg-white/20 hover:bg-white/40"
+                }`}
             />
           ))}
         </div>
-        <button 
+        <button
           onClick={prevSlide}
           className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
         >
           <ChevronLeft size={20} />
         </button>
-        <button 
+        <button
           onClick={nextSlide}
           className="w-10 h-10 rounded-full bg-[#FFC107] text-[#01254d] flex items-center justify-center hover:bg-white transition-all shadow-lg shadow-[#FFC107]/10"
         >
@@ -202,13 +201,13 @@ export default function HeroSlider() {
 
               {/* Video Widescreen Chassis */}
               <div className="aspect-video w-full bg-black">
-                <iframe 
-                  className="w-full h-full" 
-                  src="https://www.youtube.com/embed/kRaxlc2Fblk?autoplay=1" 
-                  title="Prayog India Corporate Intro Video" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                  referrerPolicy="strict-origin-when-cross-origin" 
+                <iframe
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/kRaxlc2Fblk?autoplay=1"
+                  title="Prayog India Corporate Intro Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
                 />
               </div>

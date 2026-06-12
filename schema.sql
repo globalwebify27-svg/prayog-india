@@ -207,3 +207,17 @@ CREATE TABLE IF NOT EXISTS promos (
   start_date DATE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS promo_codes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,
+  discount_type ENUM('percentage', 'fixed') DEFAULT 'percentage',
+  discount_value DECIMAL(10, 2) NOT NULL,
+  course_id INT NULL,
+  course_ids JSON DEFAULT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  expiry_date DATE NULL,
+  usage_limit INT NULL DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL
+);

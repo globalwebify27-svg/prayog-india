@@ -21,6 +21,18 @@ export async function POST(req) {
 
     const coupon = rows[0];
 
+    // Check usage limit
+    if (coupon.usage_limit !== null) {
+      const [usageRows] = await pool.query(
+        "SELECT COUNT(*) as count FROM enrollments WHERE coupon_code = ?",
+        [coupon.code]
+      );
+      const usageCount = usageRows[0].count;
+      if (usageCount >= coupon.usage_limit) {
+        return NextResponse.json({ success: false, message: "Coupon usage limit reached / exceeded" }, { status: 400 });
+      }
+    }
+
     // 2. Check if coupon is expired
     if (coupon.expiry_date && new Date(coupon.expiry_date) < new Date(new Date().setHours(0,0,0,0))) {
       return NextResponse.json({ success: false, message: "Coupon expired" }, { status: 400 });

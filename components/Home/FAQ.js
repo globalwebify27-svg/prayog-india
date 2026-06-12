@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     question: "Do I need to bring my own laptop or robot kit?",
-    answer: "No, we provide all the necessary industrial-grade robotic kits and equipment. Students only need to bring their curiosity!"
+    answer: "We provide all the necessary industrial-grade robotic kits and equipment. However, carrying a personal laptop is mandatory for programming the robots and coding exercises."
   },
   {
     question: "Can these workshops help in school/college projects?",
