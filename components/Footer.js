@@ -95,7 +95,16 @@ export default function Footer() {
 
         {/* Legal Bar */}
         <div className="border-t border-white/5 mt-20 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold uppercase tracking-widest text-white/20 space-y-4 md:space-y-0">
-          <p>© {new Date().getFullYear()} PRAYOG INDIA ROBOTICS PVT. LTD. All rights reserved.</p>
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-center md:text-left">
+            <p>© {new Date().getFullYear()} PRAYOG INDIA ROBOTICS PVT. LTD. All rights reserved.</p>
+            <span className="hidden md:inline text-white/5">|</span>
+            <p>
+              Designed & Developed by{" "}
+              <a href="https://globalwebify.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors text-white/40">
+                globalwebify.com
+              </a>
+            </p>
+          </div>
           <div className="flex space-x-8">
             <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms-and-conditions" className="hover:text-white transition-colors">Terms & Conditions</Link>
