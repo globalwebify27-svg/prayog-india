@@ -31,6 +31,7 @@ export default function StudentsAdmin() {
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [user, setUser] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [modeFilter, setModeFilter] = useState("all");
@@ -221,6 +222,7 @@ export default function StudentsAdmin() {
             showAlert("Deleted", "Student record and all associated data deleted successfully.", "success");
             fetchStudents();
             setMenuOpen(null);
+            setSelectedStudentIds(prev => prev.filter(id => id !== studentId));
           } else {
             showAlert("Error", data.message || "Failed to delete student", "error");
           }
@@ -230,6 +232,37 @@ export default function StudentsAdmin() {
         }
       },
       "Delete Now"
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedStudentIds.length === 0) return;
+    
+    showAlert(
+      "Confirm Bulk Deletion",
+      `Are you absolutely sure you want to delete ${selectedStudentIds.length} selected student(s)? This will permanently remove all their enrollments, payments, attendance, and certificates. This action cannot be undone.`,
+      "warning",
+      async () => {
+        try {
+          const res = await fetch(`/api/admin/students`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: selectedStudentIds })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showAlert("Deleted", `${selectedStudentIds.length} student records and all associated data deleted successfully.`, "success");
+            setSelectedStudentIds([]);
+            fetchStudents();
+          } else {
+            showAlert("Error", data.message || "Failed to delete students", "error");
+          }
+        } catch (error) {
+          console.error("Bulk delete error:", error);
+          showAlert("System Error", "An error occurred while deleting the student records.", "error");
+        }
+      },
+      "Delete Selected"
     );
   };
 
@@ -267,6 +300,15 @@ export default function StudentsAdmin() {
             <p className="text-slate-500 text-sm mt-1">Manage institutional enrollments and academic records.</p>
           </div>
           <div className="flex items-center space-x-3 w-full md:w-auto">
+            {user?.role === 'admin' && selectedStudentIds.length > 0 && (
+              <button 
+                onClick={handleBulkDelete}
+                className="bg-rose-600 text-white px-4 py-2.5 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-rose-700 transition-all shadow-sm"
+              >
+                <Trash2 size={16} />
+                <span>Delete Selected ({selectedStudentIds.length})</span>
+              </button>
+            )}
             {user?.role === 'admin' && (
               <button 
                 onClick={() => setIsAddModalOpen(true)}
@@ -347,6 +389,24 @@ export default function StudentsAdmin() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 [&>th:first-child]:rounded-tl-2xl [&>th:last-child]:rounded-tr-2xl">
+                {user?.role === 'admin' && (
+                  <th className="pl-6 py-4 w-10 text-xs font-semibold text-slate-500">
+                    <input 
+                      type="checkbox"
+                      className="rounded border-slate-300 text-navy focus:ring-navy w-4 h-4 cursor-pointer"
+                      checked={filteredStudents.length > 0 && filteredStudents.every(s => selectedStudentIds.includes(s.id))}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          const newSelection = [...new Set([...selectedStudentIds, ...filteredStudents.map(s => s.id)])];
+                          setSelectedStudentIds(newSelection);
+                        } else {
+                          const filteredIds = filteredStudents.map(s => s.id);
+                          setSelectedStudentIds(selectedStudentIds.filter(id => !filteredIds.includes(id)));
+                        }
+                      }}
+                    />
+                  </th>
+                )}
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500">
                   <div className="flex items-center space-x-1 cursor-pointer hover:text-navy transition-colors">
                     <span>Student Profile</span>
@@ -362,19 +422,35 @@ export default function StudentsAdmin() {
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-24 text-center">
+                  <td colSpan={user?.role === 'admin' ? 6 : 5} className="px-6 py-24 text-center">
                     <div className="w-8 h-8 border-2 border-slate-200 border-t-navy rounded-full animate-spin mx-auto" />
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-24 text-center">
+                  <td colSpan={user?.role === 'admin' ? 6 : 5} className="px-6 py-24 text-center">
                     <Users size={32} className="text-slate-200 mx-auto mb-3" />
                     <p className="text-slate-400 font-medium text-sm italic">No student records match your search criteria.</p>
                   </td>
                 </tr>
               ) : filteredStudents.map((student) => (
                 <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
+                  {user?.role === 'admin' && (
+                    <td className="pl-6 py-4 w-10">
+                      <input 
+                        type="checkbox"
+                        className="rounded border-slate-300 text-navy focus:ring-navy w-4 h-4 cursor-pointer"
+                        checked={selectedStudentIds.includes(student.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedStudentIds([...selectedStudentIds, student.id]);
+                          } else {
+                            setSelectedStudentIds(selectedStudentIds.filter(id => id !== student.id));
+                          }
+                        }}
+                      />
+                    </td>
+                  )}
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-9 h-9 rounded-lg bg-navy flex items-center justify-center text-white font-bold text-xs shadow-sm">

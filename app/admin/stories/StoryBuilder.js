@@ -84,10 +84,37 @@ export default function StoryBuilder({ initialData, onSave, isSaving }) {
     setContent(newContent);
   };
 
+  const slugify = (text) => {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+  };
+
+  const handleTitleChange = (val) => {
+    setTitle(val);
+    const oldSlug = slugify(title);
+    if (!slug || slug === oldSlug) {
+      setSlug(slugify(val));
+    }
+  };
+
   const handleSave = () => {
+    let finalSlug = slug.trim();
+    if (!finalSlug && title) {
+      finalSlug = slugify(title);
+    }
+    if (!title.trim()) {
+      alert("Please enter a title");
+      return;
+    }
+    if (!finalSlug) {
+      alert("Please enter a unique URL slug");
+      return;
+    }
     onSave({
       title,
-      slug,
+      slug: finalSlug,
       excerpt,
       thumbnail,
       banner_image: banner,
@@ -130,7 +157,7 @@ export default function StoryBuilder({ initialData, onSave, isSaving }) {
               <input 
                 type="text" 
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Enter a compelling title..."
                 className="w-full text-4xl font-bold text-navy placeholder:text-slate-200 focus:outline-none bg-transparent"
               />

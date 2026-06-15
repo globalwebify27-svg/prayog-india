@@ -89,3 +89,70 @@ export async function GET() {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
+    }
+
+    const { ids } = await req.json();
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ success: false, message: "No student IDs provided" }, { status: 400 });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      // Get enrollment IDs for these students
+      const [enrollments] = await connection.query("SELECT id FROM enrollments WHERE user_id IN (?)", [ids]);
+      const enrollmentIds = enrollments.map(e => e.id);
+
+      if (enrollmentIds.length > 0) {
+        // Delete installments
+        await connection.query("DELETE FROM installments WHERE enrollment_id IN (?)", [enrollmentIds]);
+      }
+
+      // Delete attendance records
+      await connection.query("DELETE FROM attendance WHERE user_id IN (?)", [ids]);
+
+      // Delete certificates
+      await connection.query("DELETE FROM certificates WHERE user_id IN (?)", [ids]);
+
+      // Delete exam submissions
+      await connection.query("DELETE FROM exam_submissions WHERE user_id IN (?)", [ids]);
+
+      // Delete material completions
+      await connection.query("DELETE FROM material_completions WHERE student_id IN (?)", [ids]);
+
+      // Delete enrollments
+      await connection.query("DELETE FROM enrollments WHERE user_id IN (?)", [ids]);
+
+      // Finally, delete the users
+      await connection.query("DELETE FROM users WHERE id IN (?)", [ids]);
+
+      await connection.commit();
+      return NextResponse.json({
+        success: true,
+        message: `${ids.length} students and all associated records deleted successfully`
+      });
+    } catch (txError) {
+      await connection.rollback();
+      throw txError;
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error("Admin student bulk deletion error:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
