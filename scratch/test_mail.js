@@ -22,10 +22,11 @@ if (fs.existsSync(envPath)) {
 console.log('SMTP Host:', process.env.SMTP_HOST);
 console.log('SMTP User:', process.env.SMTP_USER);
 
+const smtpPort = parseInt(process.env.SMTP_PORT || "587");
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.hostinger.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: false,
+  port: smtpPort,
+  secure: smtpPort === 465,
   auth: {
     user: process.env.SMTP_USER || "your@email.com",
     pass: process.env.SMTP_PASS || "password",
