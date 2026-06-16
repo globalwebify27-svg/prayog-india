@@ -21,35 +21,27 @@ import Link from "next/link";
 const labs = [
   {
     id: 1,
-    title: "Industrial Robotics Bay",
-    equipment: "6-Axis KUKA Arms, Fanuc Controllers",
-    desc: "A high-precision environment for mastering kinematics, motion planning, and safety protocols in industrial automation.",
-    image: "/assets/course1.png",
-    specs: ["Heavy Payload Arms", "Magnetic Grippers", "PLC Control Racks"]
+    title: "Robotics Innovation Lab",
+    equipment: "Microcontrollers, Servo Motors, Sensors, Actuators, and Educational Robotic Kits",
+    desc: "A hands-on workspace for design, assembly, and coding robotic models. Students learn the foundations of mechatronics, circuit routing, and programming motion controllers using practical hardware kits.",
+    image: "/assets/hero_robotics_realistic.png",
+    specs: ["Microcontroller Prototyping", "Servo & Stepper Control", "Sensor Interfacing", "Basic Motion Programming"]
   },
   {
     id: 2,
-    title: "AI & Vision Laboratory",
-    equipment: "NVIDIA Jetson Clusters, Depth Cameras",
-    desc: "A research hub dedicated to computer vision datasets, neural network training, and autonomous navigation algorithms.",
-    image: "/assets/course2.png",
-    specs: ["GPU Computing Nodes", "Stereo Vision Sensors", "Lidar Units"]
+    title: "R&D Lab",
+    equipment: "Development Boards, Digital Multimeters, Soldering Stations, Basic Oscilloscopes, and Electronic Components",
+    desc: "Our collaborative space for electronic prototyping and hardware design. Ideal for firmware engineering, basic circuit soldering, and developing smart Internet of Things (IoT) applications.",
+    image: "/assets/m3.png",
+    specs: ["Embedded System Design", "Solder & Assembly Stations", "Wireless IoT Networks", "Circuit Diagnostics"]
   },
   {
     id: 3,
-    title: "Embedded Systems & IoT Wing",
-    equipment: "ESP32 Arrays, ARM Cortex-M Hubs",
-    desc: "Where firmware meets hardware. Students design connected sensor arrays and real-time monitoring systems.",
-    image: "/assets/m5.png",
-    specs: ["Digital Oscilloscopes", "SMD Solder Stations", "Spectrum Analyzers"]
-  },
-  {
-    id: 4,
-    title: "UAV Prototyping Center",
-    equipment: "Custom Carbon Airframes, Pixhawk FCs",
-    desc: "A specialized lab for drone design, flight controller calibration, and autonomous mission testing.",
+    title: "Drone Technology Lab",
+    equipment: "Educational Quadcopter Kits, Flight Controllers, Telemetry Modules, and Flight Simulators",
+    desc: "A laboratory dedicated to aerial robotics. Focuses on flight control basics, drone assembly, flight stability calibration, and manual/guided navigation testing.",
     image: "/assets/m1.png",
-    specs: ["Wind Tunnel Access", "3D Printing Farm", "Propulsion Test Benches"]
+    specs: ["Quadcopter Assembly", "Flight Control Tuning", "Basic Telemetry Setup", "FPV & Simulator Training"]
   }
 ];
 
@@ -67,7 +59,7 @@ export default function InfrastructurePage() {
               Institutional <span className="text-primary">Infrastructure</span>
             </h1>
             <p className="text-blue-100/60 text-lg md:text-xl leading-relaxed">
-              Explore our world-class specialized laboratories and research bays equipped with the same industrial hardware used by global engineering firms.
+              Explore our hands-on laboratories and prototyping bays equipped with development hardware and interactive engineering kits.
             </p>
           </motion.div>
         </div>

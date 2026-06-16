@@ -28,33 +28,33 @@ const faqCategories = [
 const faqs = [
   {
     category: "admissions",
-    question: "What is the eligibility criteria for the Industrial Robotics program?",
-    answer: "Our industrial programs are primarily designed for engineering students (B.E./B.Tech) and diploma holders. However, enthusiastic learners from other technical backgrounds are also welcome after a preliminary screening."
+    question: "What is the eligibility criteria for the Robotics and Coding programs?",
+    answer: "Our robotics and technology programs are designed for school students, college students, and technology enthusiasts. We welcome learners of all skill levels who want to build practical hands-on experience in tech."
   },
   {
     category: "admissions",
     question: "How do I register for the upcoming cohort?",
-    answer: "You can register directly through our institutional portal by selecting your desired program and completing the multi-step enrollment process. Early bird registrations often receive specialized lab access."
+    answer: "You can register directly through our portal by selecting your desired course and completing the registration steps. Once enrolled, you will receive access to course materials and batch schedule updates."
   },
   {
     category: "curriculum",
     question: "Is the training completely hands-on?",
-    answer: "Yes, Prayog India prioritizes 'technical reality' over theory. 80% of our curriculum involves direct interaction with industrial arms, PLC controllers, and hardware nodes in our specialized labs."
+    answer: "Yes, Prayog India prioritizes project-based learning. The vast majority of our curriculum involves building and programming physical kits, working with microcontrollers (like Arduino/ESP32), sensors, and hands-on modules in our labs."
   },
   {
     category: "curriculum",
     question: "Can I choose between online and offline modes?",
-    answer: "We offer hybrid learning paths. Theoretical foundations and AI workshops can be attended virtually, while hardware-intensive sessions require presence at our regional hubs for practical experience."
+    answer: "Yes, we offer both online and offline learning options. Theoretical lessons and code walk-throughs can be done virtually, while hands-on laboratory work can be done at our physical centers using our hardware kits."
   },
   {
     category: "certifications",
-    question: "Are the certifications globally recognized?",
-    answer: "Absolutely. Prayog India is an ISO-certified institution. Our certificates carry verifiable serial numbers and are recognized by our network of 50+ industrial partners."
+    question: "What certification do I receive upon completion?",
+    answer: "Upon successfully completing the program and projects, you will receive a certificate of completion from Prayog India Robotics. This certificate validates your participation, course hours, and the practical skills you acquired during the training."
   },
   {
     category: "technical",
     question: "What kind of hardware will I be working with?",
-    answer: "You will have access to 6-axis industrial arms, ESP32-based IoT nodes, PLC automation racks, and high-performance UAV platforms depending on your specialization."
+    answer: "Depending on your course, you will work with educational development boards (such as Arduino and ESP32), sensor modules, actuators, micro-servos, and DIY quadcopter/drone components."
   }
 ];
 
@@ -77,7 +77,7 @@ export default function FAQPage() {
               Knowledge <span className="text-primary">Base & FAQ</span>
             </h1>
             <p className="text-blue-100/60 text-lg md:text-xl leading-relaxed">
-              Find answers to the most frequent inquiries regarding our academic protocols, industrial labs, and institutional certifications.
+              Find answers to the most frequent inquiries regarding our training programs, hands-on labs, and certifications.
             </p>
           </motion.div>
         </div>

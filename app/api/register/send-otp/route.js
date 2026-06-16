@@ -42,6 +42,16 @@ export async function POST(req) {
 
     if (!mailResult.success) {
       console.error("Mail send failed:", mailResult.error);
+      
+      if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_BASE_URL?.includes('localhost')) {
+        console.log(`\n==========================================\n[DEV ONLY] SMTP FAILURE BYPASSED\nEmail: ${email}\nOTP Code: ${otp}\n==========================================\n`);
+        return NextResponse.json({ 
+          success: true, 
+          message: `[DEV ONLY] OTP sent successfully (Bypassed SMTP failure. Code: ${otp})`,
+          devOtp: otp 
+        });
+      }
+      
       return NextResponse.json({ success: false, message: "Failed to send verification email." }, { status: 500 });
     }
 

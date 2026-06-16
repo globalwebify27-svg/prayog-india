@@ -439,6 +439,9 @@ function RegisterForm({ pageContent }) {
       if (data.success) {
         setIsOtpModalOpen(true);
         setResendCountdown(30); // 30 seconds cooldown
+        if (data.devOtp) {
+          setOtpCode(data.devOtp);
+        }
       } else {
         setErrors({ email: data.message || "Failed to send verification code." });
         setIsOtpModalOpen(false);
