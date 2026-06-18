@@ -1,0 +1,504 @@
+--------- beginning of main
+11-29 00:16:25.918 23748 23748 D nativeloader: Load libopencv_info.so using ns clns-6 from class loader (caller=/data/app/~~KCVG1rXBx6CHKDCy4Jmazg==/com.android.MGC_8_7_165-uGRlHXHcfYIVivpzGHL3sw==/base.apk!classes2.dex): dlopen failed: library "libopencv_info.so" not found
+11-29 00:16:25.918 23748 23748 E OpenCV/StaticHelper: OpenCV error: Cannot load info library for OpenCV
+11-29 00:16:25.918 23748 23748 D OpenCV/StaticHelper: Library list: ""
+11-29 00:16:25.918 23748 23748 D OpenCV/StaticHelper: First attempt to load libs
+11-29 00:16:25.918 23748 23748 D OpenCV/StaticHelper: Trying to init OpenCV libs
+11-29 00:16:25.918 23748 23748 D OpenCV/StaticHelper: Trying to load library opencv_java4
+11-29 00:16:25.921 23826 23826 W libprocessgroup: Controller io is not found
+11-29 00:16:25.921 23826 23826 W libprocessgroup: Controller io is not found
+11-29 00:16:25.921 23826 23826 W libprocessgroup: Controller io is not found
+11-29 00:16:25.921 23826 23826 W libprocessgroup: JoinCgroup: controller schedtune is not found
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqGroupIdle
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqGroupIdle
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: BfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqGroupIdle
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: BfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqGroupIdle
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: BfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqGroupIdle
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: BfqWeight
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqGroupIdle
+11-29 00:16:25.921 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqWeight
+11-29 00:16:25.922 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: BfqWeight
+11-29 00:16:25.922 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqGroupIdle
+11-29 00:16:25.922 23826 23826 W libprocessgroup: SetAttribute: unknown attribute: CfqWeight
+11-29 00:16:25.931 23748 23748 D nativeloader: Load /data/app/~~KCVG1rXBx6CHKDCy4Jmazg==/com.android.MGC_8_7_165-uGRlHXHcfYIVivpzGHL3sw==/lib/arm64/libopencv_java4.so using ns clns-6 from class loader (caller=/data/app/~~KCVG1rXBx6CHKDCy4Jmazg==/com.android.MGC_8_7_165-uGRlHXHcfYIVivpzGHL3sw==/base.apk!classes2.dex): ok
+11-29 00:16:25.932 23748 23748 D OpenCV/StaticHelper: Library opencv_java4 loaded
+11-29 00:16:25.932 23748 23748 D OpenCV/StaticHelper: First attempt to load libs is OK
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: General configuration for OpenCV 4.5.4 =====================================
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Version control:               4.5.4
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Platform:
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Timestamp:                   2021-10-09T19:14:18Z
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Host:                        Linux 4.15.0-58-generic x86_64
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Target:                      Android 1 aarch64
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     CMake:                       3.6.0-rc2
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     CMake generator:             Ninja
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     CMake build tool:            /opt/android/android-sdk.gradle/cmake/3.6.4111459/bin/ninja
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Configuration:               Release
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   CPU/HW features:
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Baseline:                    NEON FP16
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   C/C++:
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Built as dynamic libs?:      NO
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     C++ standard:                11
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     C++ Compiler:                /opt/android/android-ndk-r18b/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++  (ver 7.0)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     C++ flags (Release):         -isystem /opt/android/android-ndk-r18b/sysroot/usr/include/aarch64-linux-android -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11    -fsigned-char -W -Wall -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -Wformat -Werror=format-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wundef -Winit-self -Wpointer-arith -Wshadow -Wsign-promo -Wuninitialized -Winconsistent-missing-override -Wno-delete-non-virtual-dtor -Wno-unnamed-type-template-args -Wno-comment -fdiagnostics-show-option -Qunused-arguments    -fvisibility=hidden -fvisibility-inlines-hidden  -O2 -DNDEBUG   -DNDEBUG
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     C++ flags (Debug):           -isystem /opt/android/android-ndk-r18b/sysroot/usr/include/aarch64-linux-android -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11    -fsigned-char -W -Wall -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -Wformat -Werror=format-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wundef -Winit-self -Wpointer-arith -Wshadow -Wsign-promo -Wuninitialized -Winconsistent-missing-override -Wno-delete-non-virtual-dtor -Wno-unnamed-type-template-args -Wno-comment -fdiagnostics-show-option -Qunused-arguments    -fvisibility=hidden -fvisibility-inlines-hidden  -O0 -fno-limit-debug-info   -DDEBUG -D_DEBUG -g
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     C Compiler:                  /opt/android/android-ndk-r18b/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     C flags (Release):           -isystem /opt/android/android-ndk-r18b/sysroot/usr/include/aarch64-linux-android -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security    -fsigned-char -W -Wall -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -Wformat -Werror=format-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wundef -Winit-self -Wpointer-arith -Wshadow -Wsign-promo -Wuninitialized -Winconsistent-missing-override -Wno-delete-non-virtual-dtor -Wno-unnamed-type-template-args -Wno-comment -fdiagnostics-show-option -Qunused-arguments    -fvisibility=hidden -fvisibility-inlines-hidden  -O2 -DNDEBUG   -DNDEBUG
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     C flags (Debug):             -isystem /opt/android/android-ndk-r18b/sysroot/usr/include/aarch64-linux-android -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security    -fsigned-char -W -Wall -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -Wformat -Werror=format-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wundef -Winit-self -Wpointer-arith -Wshadow -Wsign-promo -Wuninitialized -Winconsistent-missing-override -Wno-delete-non-virtual-dtor -Wno-unnamed-type-template-args -Wno-comment -fdiagnostics-show-option -Qunused-arguments    -fvisibility=hidden -fvisibility-inlines-hidden  -O0 -fno-limit-debug-info   -DDEBUG -D_DEBUG -g
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Linker flags (Release):      -Wl,--exclude-libs,libgcc.a -Wl,--exclude-libs,libatomic.a -nostdlib++ --sysroot /opt/android/android-ndk-r18b/platforms/android-21/arch-arm64 -Wl,--build-id -Wl,--warn-shared-textrel -Wl,--fatal-warnings -L/opt/android/android-ndk-r18b/sources/cxx-stl/llvm-libc++/libs/arm64-v8a -Wl,--no-undefined -Wl,-z,noexecstack -Qunused-arguments -Wl,-z,relro -Wl,-z,now   -Wl,--as-needed  
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Linker flags (Debug):        -Wl,--exclude-libs,libgcc.a -Wl,--exclude-libs,libatomic.a -nostdlib++ --sysroot /opt/android/android-ndk-r18b/platforms/android-21/arch-arm64 -Wl,--build-id -Wl,--warn-shared-textrel -Wl,--fatal-warnings -L/opt/android/android-ndk-r18b/sources/cxx-stl/llvm-libc++/libs/arm64-v8a -Wl,--no-undefined -Wl,-z,noexecstack -Qunused-arguments -Wl,-z,relro -Wl,-z,now   -Wl,--as-needed  
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     ccache:                      YES
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Precompiled headers:         NO
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Extra dependencies:          z dl m log
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     3rdparty dependencies:       libcpufeatures libprotobuf ade tbb ittnotify libjpeg-turbo libwebp libpng libtiff libopenjp2 IlmImf quirc tegra_hal
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   OpenCV modules:
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     To be built:                 calib3d core dnn features2d flann gapi highgui imgcodecs imgproc java ml objdetect photo stitching video videoio
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Disabled:                    world
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Disabled by dependency:      -
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Unavailable:                 python2 python3 ts
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Applications:                -
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Documentation:               NO
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Non-free algorithms:         NO
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Android NDK:                   /opt/android/android-ndk-r18b (ver 18.1.5063045)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Android ABI:                 arm64-v8a
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     NDK toolchain:               aarch64-linux-android-clang
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     STL type:                    c++_shared
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Native API level:            21
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Android SDK:                   /opt/android/android-sdk.gradle (tools: 26.1.1 build tools: 28.0.3)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   GUI:                           NONE
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Media I/O: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     ZLib:                        z (ver 1.2.7)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     JPEG:                        build-libjpeg-turbo (ver 2.1.0-62)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     WEBP:                        build (ver encoder: 0x020f)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     PNG:                         build (ver 1.6.37)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     TIFF:                        build (ver 42 - 4.2.0)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     JPEG 2000:                   build (ver 2.4.0)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     OpenEXR:                     build (ver 2.3.0)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     HDR:                         YES
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     SUNRASTER:                   YES
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     PXM:                         YES
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     PFM:                         YES
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Video I/O:
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Parallel framework:            TBB (ver 2020.2 interface 11102)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Trace:                         YES (with Intel ITT)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Other third-party libraries:
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Custom HAL:                  YES (carotene (ver 0.0.1))
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Protobuf:                    build (3.5.1)
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Python (for build):            /usr/bin/python2.7
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Java:                          export all functions
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     ant:                         NO
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Java wrappers:               YES
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:     Java tests:                  NO
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: 
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper:   Install to:                    /build/master_pack-android/build/o4a/install
+11-29 00:16:25.932 23748 23748 I OpenCV/StaticHelper: -----------------------------------------------------------------
+11-29 00:16:25.933 23748 23748 I SignatureCheck: Signature check ok
+--------- beginning of system
+11-29 00:16:25.934 23748 23748 D ResourcesManagerExtImpl: applyConfigurationToAppResourcesLocked app.getDisplayId() return callback.displayId:-1
+11-29 00:16:25.959 23748 23748 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10170; state: DISABLED
+11-29 00:16:25.971 23748 23838 D nativeloader: Load /data/app/~~KCVG1rXBx6CHKDCy4Jmazg==/com.android.MGC_8_7_165-uGRlHXHcfYIVivpzGHL3sw==/lib/arm64/libnative_crash_handler_jni.so using ns clns-6 from class loader (caller=/data/app/~~KCVG1rXBx6CHKDCy4Jmazg==/com.android.MGC_8_7_165-uGRlHXHcfYIVivpzGHL3sw==/base.apk): ok
+11-29 00:16:25.977 23748 23837 W oid.MGC_8_7_165: Method boolean iux.handleMessage(android.os.Message) failed lock verification and will run slower.
+11-29 00:16:25.977 23748 23837 W oid.MGC_8_7_165: Common causes for lock verification issues are non-optimized dex code
+11-29 00:16:25.977 23748 23837 W oid.MGC_8_7_165: and incorrect proguard optimizations.
+11-29 00:16:25.980 23748 23748 I CameraManagerExtImpl: getInstance success!
+11-29 00:16:25.980 23748 23748 I CameraManagerExtImpl: packagename is com.android.MGC_8_7_165
+11-29 00:16:25.981 23748 23748 I OplusCameraManager: saveOpPackageName, mOpPackageName: com.android.MGC_8_7_165
+11-29 00:16:25.982 23748 23748 W CAM_A   : Camera HAL package not found.
+11-29 00:16:25.982 23748 23748 W CAM_A   : Camera HAL package not found.
+11-29 00:16:25.982 23748 23748 W CAM_A   : Camera HAL package not found.
+11-29 00:16:25.982 23748 23748 W CAM_A   : Called onCreate
+11-29 00:16:25.983 23748 23840 W oid.MGC_8_7_165: Method void iwi.q(ixb, java.util.Set) failed lock verification and will run slower.
+11-29 00:16:25.984 23748 23840 W oid.MGC_8_7_165: Accessing hidden field Ljava/util/Collections$SynchronizedCollection;->mutex:Ljava/lang/Object; (max-target-o, reflection, denied)
+11-29 00:16:25.985 23748 23840 W oid.MGC_8_7_165: Accessing hidden method Ljava/util/Collections$SynchronizedSet;-><init>(Ljava/util/Set;Ljava/lang/Object;)V (max-target-o, reflection, denied)
+11-29 00:16:25.985 23748 23840 W oid.MGC_8_7_165: Accessing hidden method Ljava/util/Collections$SynchronizedCollection;-><init>(Ljava/util/Collection;Ljava/lang/Object;)V (max-target-o, reflection, denied)
+11-29 00:16:25.985 23748 23748 E WARNING!!!: Cannot start the Google Camera on an unsupported device
+11-29 00:16:25.986 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:25.986 23748 23748 I OplusCameraManagerGlobal: Connecting to camera service
+11-29 00:16:25.988 23748 23748 I CameraManagerGlobal: Connecting to camera service
+11-29 00:16:25.997 23748 23748 D OplusCameraUtils: new OplusCameraUtils!
+11-29 00:16:25.997 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.007 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.009 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.012 23748 23748 E TEST_getBit [ID = 0]: OK
+11-29 00:16:26.012 23748 23748 E TEST_colorFilterArrangement [ID = 0]: OK because = 1
+11-29 00:16:26.012 23748 23748 E TEST_and_ADD_android.lens.facing [ID = 0]: OK
+11-29 00:16:26.012 23748 23748 E TEST_and_ADD_android.control.aeAvailableModes [ID = 0]: OK
+11-29 00:16:26.012 23748 23748 E TEST_and_ADD_android.lens.info.availableFocalLengths [ID = 0]: OK
+11-29 00:16:26.013 23748 23748 E TEST_and_ADD_android.lens.info.availableApertures [ID = 0]: OK
+11-29 00:16:26.013 23748 23748 E TEST_and_ADD_android.sensor.info.physicalSize [ID = 0]: OK
+11-29 00:16:26.013 23748 23748 E ALL_TEST [ID = 0]: PASSED
+11-29 00:16:26.013 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.015 23748 23748 E TEST_getBit [ID = 1]: OK
+11-29 00:16:26.015 23748 23748 E TEST_colorFilterArrangement [ID = 1]: OK because = 2
+11-29 00:16:26.015 23748 23748 E TEST_and_ADD_android.lens.facing [ID = 1]: OK
+11-29 00:16:26.015 23748 23748 E TEST_and_ADD_android.control.aeAvailableModes [ID = 1]: OK
+11-29 00:16:26.015 23748 23748 E TEST_and_ADD_android.lens.info.availableFocalLengths [ID = 1]: OK
+11-29 00:16:26.015 23748 23748 E TEST_and_ADD_android.lens.info.availableApertures [ID = 1]: OK
+11-29 00:16:26.015 23748 23748 E TEST_and_ADD_android.sensor.info.physicalSize [ID = 1]: OK
+11-29 00:16:26.015 23748 23748 E ALL_TEST [ID = 1]: PASSED
+11-29 00:16:26.015 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.017 23748 23748 E LENS [ID = 2]: NOT_EXIST
+11-29 00:16:26.017 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.019 23748 23748 E LENS [ID = 3]: NOT_EXIST
+11-29 00:16:26.019 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.020 23748 23748 E LENS [ID = 4]: NOT_EXIST
+11-29 00:16:26.020 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.021 23748 23748 E LENS [ID = 5]: NOT_EXIST
+11-29 00:16:26.021 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.021 23748 23748 E LENS [ID = 6]: NOT_EXIST
+11-29 00:16:26.022 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.022 23748 23748 E LENS [ID = 7]: NOT_EXIST
+11-29 00:16:26.022 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.023 23748 23748 E LENS [ID = 8]: NOT_EXIST
+11-29 00:16:26.023 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.023 23748 23748 E LENS [ID = 9]: NOT_EXIST
+11-29 00:16:26.023 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.024 23748 23748 E LENS [ID = 10]: NOT_EXIST
+11-29 00:16:26.024 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.024 23748 23748 E LENS [ID = 11]: NOT_EXIST
+11-29 00:16:26.024 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.025 23748 23748 E LENS [ID = 12]: NOT_EXIST
+11-29 00:16:26.025 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.025 23748 23748 E LENS [ID = 13]: NOT_EXIST
+11-29 00:16:26.025 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.026 23748 23748 E LENS [ID = 14]: NOT_EXIST
+11-29 00:16:26.026 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.026 23748 23748 E LENS [ID = 15]: NOT_EXIST
+11-29 00:16:26.026 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.026 23748 23748 E LENS [ID = 16]: NOT_EXIST
+11-29 00:16:26.027 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.027 23748 23748 E LENS [ID = 17]: NOT_EXIST
+11-29 00:16:26.027 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.027 23748 23748 E LENS [ID = 18]: NOT_EXIST
+11-29 00:16:26.027 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.028 23748 23748 E LENS [ID = 19]: NOT_EXIST
+11-29 00:16:26.028 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.028 23748 23748 E LENS [ID = 20]: NOT_EXIST
+11-29 00:16:26.028 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.029 23748 23748 E LENS [ID = 21]: NOT_EXIST
+11-29 00:16:26.029 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.029 23748 23748 E LENS [ID = 22]: NOT_EXIST
+11-29 00:16:26.029 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.029 23748 23748 E LENS [ID = 23]: NOT_EXIST
+11-29 00:16:26.030 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.030 23748 23748 E LENS [ID = 24]: NOT_EXIST
+11-29 00:16:26.030 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.030 23748 23748 E LENS [ID = 25]: NOT_EXIST
+11-29 00:16:26.030 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.031 23748 23748 E LENS [ID = 26]: NOT_EXIST
+11-29 00:16:26.031 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.031 23748 23748 E LENS [ID = 27]: NOT_EXIST
+11-29 00:16:26.031 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.032 23748 23748 E LENS [ID = 28]: NOT_EXIST
+11-29 00:16:26.032 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.032 23748 23748 E LENS [ID = 29]: NOT_EXIST
+11-29 00:16:26.032 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.032 23748 23748 E LENS [ID = 30]: NOT_EXIST
+11-29 00:16:26.032 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.033 23748 23748 E LENS [ID = 31]: NOT_EXIST
+11-29 00:16:26.033 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.033 23748 23748 E LENS [ID = 32]: NOT_EXIST
+11-29 00:16:26.033 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.034 23748 23748 E LENS [ID = 33]: NOT_EXIST
+11-29 00:16:26.034 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.034 23748 23748 E LENS [ID = 34]: NOT_EXIST
+11-29 00:16:26.034 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.035 23748 23748 E LENS [ID = 35]: NOT_EXIST
+11-29 00:16:26.035 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.036 23748 23748 E LENS [ID = 36]: NOT_EXIST
+11-29 00:16:26.036 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.036 23748 23748 E LENS [ID = 37]: NOT_EXIST
+11-29 00:16:26.036 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.037 23748 23748 E LENS [ID = 38]: NOT_EXIST
+11-29 00:16:26.037 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.037 23748 23748 E LENS [ID = 39]: NOT_EXIST
+11-29 00:16:26.037 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.038 23748 23748 E LENS [ID = 40]: NOT_EXIST
+11-29 00:16:26.038 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.038 23748 23748 E LENS [ID = 41]: NOT_EXIST
+11-29 00:16:26.039 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.039 23748 23748 E LENS [ID = 42]: NOT_EXIST
+11-29 00:16:26.039 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.040 23748 23748 E LENS [ID = 43]: NOT_EXIST
+11-29 00:16:26.040 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.040 23748 23748 E LENS [ID = 44]: NOT_EXIST
+11-29 00:16:26.040 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.040 23748 23748 E LENS [ID = 45]: NOT_EXIST
+11-29 00:16:26.041 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.041 23748 23748 E LENS [ID = 46]: NOT_EXIST
+11-29 00:16:26.041 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.041 23748 23748 E LENS [ID = 47]: NOT_EXIST
+11-29 00:16:26.042 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.042 23748 23748 E LENS [ID = 48]: NOT_EXIST
+11-29 00:16:26.042 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.042 23748 23748 E LENS [ID = 49]: NOT_EXIST
+11-29 00:16:26.042 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.043 23748 23748 E LENS [ID = 50]: NOT_EXIST
+11-29 00:16:26.043 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.043 23748 23748 E LENS [ID = 51]: NOT_EXIST
+11-29 00:16:26.043 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.044 23748 23748 E LENS [ID = 52]: NOT_EXIST
+11-29 00:16:26.044 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.044 23748 23748 E LENS [ID = 53]: NOT_EXIST
+11-29 00:16:26.044 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.044 23748 23748 E LENS [ID = 54]: NOT_EXIST
+11-29 00:16:26.045 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.045 23748 23748 E LENS [ID = 55]: NOT_EXIST
+11-29 00:16:26.045 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.045 23748 23748 E LENS [ID = 56]: NOT_EXIST
+11-29 00:16:26.045 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.046 23748 23748 E LENS [ID = 57]: NOT_EXIST
+11-29 00:16:26.046 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.046 23748 23748 E LENS [ID = 58]: NOT_EXIST
+11-29 00:16:26.046 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.047 23748 23748 E LENS [ID = 59]: NOT_EXIST
+11-29 00:16:26.047 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.047 23748 23748 E LENS [ID = 60]: NOT_EXIST
+11-29 00:16:26.047 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.048 23748 23748 E LENS [ID = 61]: NOT_EXIST
+11-29 00:16:26.048 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.048 23748 23748 E LENS [ID = 62]: NOT_EXIST
+11-29 00:16:26.048 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.049 23748 23748 E LENS [ID = 63]: NOT_EXIST
+11-29 00:16:26.049 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.050 23748 23748 E LENS [ID = 64]: NOT_EXIST
+11-29 00:16:26.050 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.051 23748 23748 E LENS [ID = 65]: NOT_EXIST
+11-29 00:16:26.051 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.051 23748 23748 E LENS [ID = 66]: NOT_EXIST
+11-29 00:16:26.051 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.051 23748 23748 E LENS [ID = 67]: NOT_EXIST
+11-29 00:16:26.051 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.052 23748 23748 E LENS [ID = 68]: NOT_EXIST
+11-29 00:16:26.052 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.052 23748 23748 E LENS [ID = 69]: NOT_EXIST
+11-29 00:16:26.052 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.053 23748 23748 E LENS [ID = 70]: NOT_EXIST
+11-29 00:16:26.053 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.053 23748 23748 E LENS [ID = 71]: NOT_EXIST
+11-29 00:16:26.053 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.054 23748 23748 E LENS [ID = 72]: NOT_EXIST
+11-29 00:16:26.054 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.054 23748 23748 E LENS [ID = 73]: NOT_EXIST
+11-29 00:16:26.054 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.055 23748 23748 E LENS [ID = 74]: NOT_EXIST
+11-29 00:16:26.055 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.055 23748 23748 E LENS [ID = 75]: NOT_EXIST
+11-29 00:16:26.055 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.056 23748 23748 E LENS [ID = 76]: NOT_EXIST
+11-29 00:16:26.056 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.057 23748 23748 E LENS [ID = 77]: NOT_EXIST
+11-29 00:16:26.057 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.057 23748 23748 E LENS [ID = 78]: NOT_EXIST
+11-29 00:16:26.057 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.058 23748 23748 E LENS [ID = 79]: NOT_EXIST
+11-29 00:16:26.058 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.059 23748 23748 E LENS [ID = 80]: NOT_EXIST
+11-29 00:16:26.059 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.059 23748 23748 E LENS [ID = 81]: NOT_EXIST
+11-29 00:16:26.059 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.060 23748 23748 E LENS [ID = 82]: NOT_EXIST
+11-29 00:16:26.060 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.061 23748 23748 E LENS [ID = 83]: NOT_EXIST
+11-29 00:16:26.061 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.061 23748 23748 E LENS [ID = 84]: NOT_EXIST
+11-29 00:16:26.061 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.061 23748 23748 E LENS [ID = 85]: NOT_EXIST
+11-29 00:16:26.061 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.062 23748 23748 E LENS [ID = 86]: NOT_EXIST
+11-29 00:16:26.062 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.063 23748 23748 E LENS [ID = 87]: NOT_EXIST
+11-29 00:16:26.063 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.063 23748 23748 E LENS [ID = 88]: NOT_EXIST
+11-29 00:16:26.063 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.064 23748 23748 E LENS [ID = 89]: NOT_EXIST
+11-29 00:16:26.064 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.064 23748 23748 E LENS [ID = 90]: NOT_EXIST
+11-29 00:16:26.064 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.064 23748 23748 E LENS [ID = 91]: NOT_EXIST
+11-29 00:16:26.064 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.065 23748 23748 E LENS [ID = 92]: NOT_EXIST
+11-29 00:16:26.065 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.065 23748 23748 E LENS [ID = 93]: NOT_EXIST
+11-29 00:16:26.065 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.066 23748 23748 E LENS [ID = 94]: NOT_EXIST
+11-29 00:16:26.066 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.066 23748 23748 E LENS [ID = 95]: NOT_EXIST
+11-29 00:16:26.066 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.066 23748 23748 E LENS [ID = 96]: NOT_EXIST
+11-29 00:16:26.066 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.067 23748 23748 E LENS [ID = 97]: NOT_EXIST
+11-29 00:16:26.067 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.067 23748 23748 E LENS [ID = 98]: NOT_EXIST
+11-29 00:16:26.067 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.068 23748 23748 E LENS [ID = 99]: NOT_EXIST
+11-29 00:16:26.068 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.068 23748 23748 E LENS [ID = 100]: NOT_EXIST
+11-29 00:16:26.068 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.069 23748 23748 E LENS [ID = 101]: NOT_EXIST
+11-29 00:16:26.069 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.069 23748 23748 E LENS [ID = 102]: NOT_EXIST
+11-29 00:16:26.070 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.070 23748 23748 E LENS [ID = 103]: NOT_EXIST
+11-29 00:16:26.070 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.070 23748 23748 E LENS [ID = 104]: NOT_EXIST
+11-29 00:16:26.070 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.071 23748 23748 E LENS [ID = 105]: NOT_EXIST
+11-29 00:16:26.071 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.071 23748 23748 E LENS [ID = 106]: NOT_EXIST
+11-29 00:16:26.071 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.072 23748 23748 E LENS [ID = 107]: NOT_EXIST
+11-29 00:16:26.072 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.072 23748 23748 E LENS [ID = 108]: NOT_EXIST
+11-29 00:16:26.072 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.073 23748 23748 E LENS [ID = 109]: NOT_EXIST
+11-29 00:16:26.073 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.073 23748 23748 E LENS [ID = 110]: NOT_EXIST
+11-29 00:16:26.073 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.074 23748 23748 E LENS [ID = 111]: NOT_EXIST
+11-29 00:16:26.074 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.074 23748 23748 E LENS [ID = 112]: NOT_EXIST
+11-29 00:16:26.074 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.074 23748 23748 E LENS [ID = 113]: NOT_EXIST
+11-29 00:16:26.075 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.075 23748 23748 E LENS [ID = 114]: NOT_EXIST
+11-29 00:16:26.075 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.075 23748 23748 E LENS [ID = 115]: NOT_EXIST
+11-29 00:16:26.076 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.076 23748 23748 E LENS [ID = 116]: NOT_EXIST
+11-29 00:16:26.076 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.076 23748 23748 E LENS [ID = 117]: NOT_EXIST
+11-29 00:16:26.076 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.077 23748 23748 E LENS [ID = 118]: NOT_EXIST
+11-29 00:16:26.077 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.077 23748 23748 E LENS [ID = 119]: NOT_EXIST
+11-29 00:16:26.077 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.078 23748 23748 E LENS [ID = 120]: NOT_EXIST
+11-29 00:16:26.078 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.078 23748 23748 E LENS [ID = 121]: NOT_EXIST
+11-29 00:16:26.078 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.079 23748 23748 E LENS [ID = 122]: NOT_EXIST
+11-29 00:16:26.079 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.079 23748 23748 E LENS [ID = 123]: NOT_EXIST
+11-29 00:16:26.079 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.080 23748 23748 E LENS [ID = 124]: NOT_EXIST
+11-29 00:16:26.080 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.080 23748 23748 E LENS [ID = 125]: NOT_EXIST
+11-29 00:16:26.080 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.081 23748 23748 E LENS [ID = 126]: NOT_EXIST
+11-29 00:16:26.081 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.081 23748 23748 E LENS [ID = 127]: NOT_EXIST
+11-29 00:16:26.081 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.081 23748 23748 E LENS [ID = 128]: NOT_EXIST
+11-29 00:16:26.081 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.082 23748 23748 E LENS [ID = 129]: NOT_EXIST
+11-29 00:16:26.082 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.082 23748 23748 E LENS [ID = 130]: NOT_EXIST
+11-29 00:16:26.082 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.083 23748 23748 E LENS [ID = 131]: NOT_EXIST
+11-29 00:16:26.083 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.083 23748 23748 E LENS [ID = 132]: NOT_EXIST
+11-29 00:16:26.083 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.083 23748 23748 E LENS [ID = 133]: NOT_EXIST
+11-29 00:16:26.083 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.084 23748 23748 E LENS [ID = 134]: NOT_EXIST
+11-29 00:16:26.084 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.084 23748 23748 E LENS [ID = 135]: NOT_EXIST
+11-29 00:16:26.084 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.084 23748 23748 E LENS [ID = 136]: NOT_EXIST
+11-29 00:16:26.084 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.085 23748 23748 E LENS [ID = 137]: NOT_EXIST
+11-29 00:16:26.085 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.085 23748 23748 E LENS [ID = 138]: NOT_EXIST
+11-29 00:16:26.085 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.085 23748 23748 E LENS [ID = 139]: NOT_EXIST
+11-29 00:16:26.085 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.086 23748 23748 E LENS [ID = 140]: NOT_EXIST
+11-29 00:16:26.086 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.086 23748 23748 E LENS [ID = 141]: NOT_EXIST
+11-29 00:16:26.086 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.087 23748 23748 E LENS [ID = 142]: NOT_EXIST
+11-29 00:16:26.087 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.087 23748 23748 E LENS [ID = 143]: NOT_EXIST
+11-29 00:16:26.087 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.087 23748 23748 E LENS [ID = 144]: NOT_EXIST
+11-29 00:16:26.087 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.088 23748 23748 E LENS [ID = 145]: NOT_EXIST
+11-29 00:16:26.088 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.088 23748 23748 E LENS [ID = 146]: NOT_EXIST
+11-29 00:16:26.088 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.088 23748 23748 E LENS [ID = 147]: NOT_EXIST
+11-29 00:16:26.089 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.089 23748 23748 E LENS [ID = 148]: NOT_EXIST
+11-29 00:16:26.089 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.089 23748 23748 E LENS [ID = 149]: NOT_EXIST
+11-29 00:16:26.089 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.090 23748 23748 E LENS [ID = 150]: NOT_EXIST
+11-29 00:16:26.090 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.090 23748 23748 E LENS [ID = 151]: NOT_EXIST
+11-29 00:16:26.090 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.090 23748 23748 E LENS [ID = 152]: NOT_EXIST
+11-29 00:16:26.090 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.091 23748 23748 E LENS [ID = 153]: NOT_EXIST
+11-29 00:16:26.091 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.091 23748 23748 E LENS [ID = 154]: NOT_EXIST
+11-29 00:16:26.091 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.091 23748 23748 E LENS [ID = 155]: NOT_EXIST
+11-29 00:16:26.091 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.092 23748 23748 E LENS [ID = 156]: NOT_EXIST
+11-29 00:16:26.092 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.092 23748 23748 E LENS [ID = 157]: NOT_EXIST
+11-29 00:16:26.092 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.092 23748 23748 E LENS [ID = 158]: NOT_EXIST
+11-29 00:16:26.093 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.093 23748 23748 E LENS [ID = 159]: NOT_EXIST
+11-29 00:16:26.093 23748 23748 E FOUND_LENSES:  [ 0 1 ]
+11-29 00:16:26.093 23748 23748 E AFTER_BLACK_LIST_LENSES:  [ 0 1 ]
+11-29 00:16:26.093 23748 23748 E SORTS_LENSES:  [ 0 1 ]
+11-29 00:16:26.093 23748 23748 E AFTER_HIDING_LENSES:  [ 0 1 ]
+11-29 00:16:26.093 23748 23748 I OplusCameraManagerGlobal: setClientInfo, packageName: com.android.MGC_8_7_165, uid: 10170, pid: 23748
+11-29 00:16:26.097 23748 23748 E TOGGLE_DISTRIBUTION_BACK_LENSES:  [ 0 ]
+11-29 00:16:26.097 23748 23748 E TOGGLE_DISTRIBUTION_FRONT_LENSES:  [ 1 ]
+11-29 00:16:26.107 23748 23748 D nativeloader: Load libSchedAssistJni.so using system ns (caller=/system/framework/oplus-framework.jar): ok
+11-29 00:16:26.107 23748 23748 D ExtensionsLoader: createInstance(64bit) : createExtendedFactory
+11-29 00:16:26.108 23748 23748 D ExtensionsLoader: Opened libSchedAssistExtImpl.so
+11-29 00:16:26.108 23748 23748 E SchedAssist: ofbOpen failed with error=No such file or directory
+11-29 00:16:26.108 23748 23748 E SchedAssist: sysOpen failed with error=No such file or directory
+11-29 00:16:26.108 23748 23748 E SchedAssist: sharedImFd failed with error=Permission denied
+11-29 00:16:26.112 23748 23748 D OplusGraphicsEvent: OplusGraphicsEventListener create now!
+11-29 00:16:26.114 23748 23748 D OplusGraphicsEvent: addEventListener success!
+11-29 00:16:26.127 23748 23748 D ScrollOptim [ConfigManager]: initOptConfig: pkg= com.android.MGC_8_7_165, mOptEnable= true, mAnimAheadEnable= true, mInsertDefaultNum= 1, mFrameInsertEnableList= {}, mSCEnableList= []
+11-29 00:16:26.133 23748 23748 E JobServiceEngine: Error while executing job: 900990555
+11-29 00:16:26.134 23748 23748 D AndroidRuntime: Shutting down VM
+--------- beginning of crash
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: FATAL EXCEPTION: main
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: Process: com.android.MGC_8_7_165, PID: 23748
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: java.lang.RuntimeException: android.app.BackgroundServiceStartNotAllowedException: Not allowed to start service Intent { cmp=com.android.MGC_8_7_165/com.google.android.apps.camera.prewarm.NoOpPrewarmService }: app is in background uid UidRecord{a8ac52d u0a170 TRNB idle change:idle|uncached|procstate procs:0 seq(1123929,1123929)} caps=------
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: 	at android.app.job.JobServiceEngine$JobHandler.handleMessage(JobServiceEngine.java:199)
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:257)
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:368)
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:8826)
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+11-29 00:16:26.135 23748 23748 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$Me

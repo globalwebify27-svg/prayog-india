@@ -34,6 +34,7 @@ import { useEffect } from "react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin", roles: ["admin", "teacher"] },
+  { icon: Zap, label: "Broadcasts", href: "/admin/broadcasts", roles: ["admin", "teacher"] },
   { icon: MessageSquare, label: "Leads & Enquiries", href: "/admin/leads", roles: ["admin"] },
   { 
     icon: Users, 
