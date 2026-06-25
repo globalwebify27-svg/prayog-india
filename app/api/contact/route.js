@@ -22,8 +22,9 @@ export async function POST(request) {
       );
 
       // 2. Alert to Admin
+      const adminRecipient = process.env.ADMIN_EMAIL || process.env.SMTP_FROM || process.env.SMTP_USER || "info@prayogindiarobotics.com";
       await sendMail(
-        process.env.SMTP_USER || "info@prayogindiarobotics.com",
+        adminRecipient,
         `New Website Enquiry: ${subject}`,
         getAdminContactNotificationTemplate(name, email, subject, message)
       );

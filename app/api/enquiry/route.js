@@ -23,8 +23,9 @@ export async function POST(request) {
 
       // 2. Alert to Admin (with phone and course)
       const adminMessage = `Course: ${course}\nPhone: ${phone}\nMessage: ${message}`;
+      const adminRecipient = process.env.ADMIN_EMAIL || process.env.SMTP_FROM || process.env.SMTP_USER || "info@prayogindiarobotics.com";
       await sendMail(
-        process.env.SMTP_USER || "info@prayogindiarobotics.com",
+        adminRecipient,
         `New Course Enquiry: ${course}`,
         getAdminContactNotificationTemplate(name, email, `Course Enquiry: ${course}`, adminMessage)
       );
