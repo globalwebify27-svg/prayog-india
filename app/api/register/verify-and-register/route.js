@@ -322,9 +322,12 @@ export async function POST(req) {
         attachments.push({ filename: `Receipt_${razorpay_payment_id}.pdf`, path: fullPath });
       }
 
-      await sendMail(email, "Welcome to Prayog India - Registration Confirmed", emailHtml, attachments);
+      // Send onboarding email in background
+      sendMail(email, "Welcome to Prayog India - Registration Confirmed", emailHtml, attachments).catch((mailError) => {
+        console.error("Failed to send onboarding mail in background:", mailError);
+      });
     } catch (mailError) {
-      console.error("Failed to send onboarding mail:", mailError);
+      console.error("Failed to prepare onboarding mail:", mailError);
     }
 
     return NextResponse.json({ 

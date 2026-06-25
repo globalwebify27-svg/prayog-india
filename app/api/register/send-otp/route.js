@@ -38,22 +38,15 @@ export async function POST(req) {
       ? `${emailBaseUrl}${logoRows[0].setting_value}`
       : `${emailBaseUrl}/assets/logo.png`;
     const emailHtml = getOTPEmailTemplate(otp, "10 minutes", logoUrl);
-    const mailResult = await sendMail(email, "Verify Your Email - Prayog India", emailHtml);
-
-    if (!mailResult.success) {
-      console.error("Mail send failed:", mailResult.error);
-      
-      if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_BASE_URL?.includes('localhost')) {
-        console.log(`\n==========================================\n[DEV ONLY] SMTP FAILURE BYPASSED\nEmail: ${email}\nOTP Code: ${otp}\n==========================================\n`);
-        return NextResponse.json({ 
-          success: true, 
-          message: `[DEV ONLY] OTP sent successfully (Bypassed SMTP failure. Code: ${otp})`,
-          devOtp: otp 
-        });
+    
+    // Send email in the background so the user doesn't wait and timeout
+    sendMail(email, "Verify Your Email - Prayog India", emailHtml).then((mailResult) => {
+      if (!mailResult.success) {
+        console.error("Background Mail send failed for:", email, mailResult.error);
+      } else {
+        console.log("Background Mail sent successfully to:", email);
       }
-      
-      return NextResponse.json({ success: false, message: "Failed to send verification email." }, { status: 500 });
-    }
+    });
 
     return NextResponse.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {

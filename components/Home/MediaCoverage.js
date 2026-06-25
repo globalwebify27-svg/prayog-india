@@ -80,13 +80,13 @@ export default function MediaCoverage() {
       <div className="absolute top-0 right-0 w-1/3 h-full bg-slate-50/50 -skew-x-12 translate-x-1/2 pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-          <div className="max-w-2xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
+          <div className="lg:col-span-5 space-y-6">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="flex items-center space-x-3 mb-4"
+              className="flex items-center space-x-3"
             >
               <div className="h-[1px] w-8 bg-primary" />
               <span className="text-primary font-black text-[10px] uppercase tracking-[0.2em]">Institutional Influence</span>
@@ -95,7 +95,7 @@ export default function MediaCoverage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-semibold text-navy leading-tight tracking-tight"
+              className="text-4xl md:text-5xl font-semibold text-navy leading-tight tracking-tight animate-fade-in"
             >
               In The <span className="text-primary italic">Spotlight</span>
             </motion.h2>
@@ -104,23 +104,40 @@ export default function MediaCoverage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-slate-500 text-lg mt-4 leading-relaxed"
+              className="text-slate-500 text-lg leading-relaxed"
             >
               Exploring Prayog India's impact on technical education through major news networks, digital publications, and broadcast media.
             </motion.p>
+            <div className="pt-4">
+              <Link 
+                href="/gallery?category=Media Coverage"
+                className="group inline-flex items-center space-x-3 text-navy font-bold text-xs uppercase tracking-widest bg-slate-50 px-8 py-4 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-xl hover:shadow-navy/5 transition-all"
+              >
+                <span>Full Archive</span>
+                <div className="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center group-hover:bg-primary group-hover:text-navy transition-colors">
+                  <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </Link>
+            </div>
           </div>
           
-          <div className="flex items-center space-x-4">
-            {/* Buttons removed per request */}
-            <Link 
-              href="/gallery?category=Media Coverage"
-              className="group flex items-center space-x-3 text-navy font-bold text-xs uppercase tracking-widest bg-slate-50 px-8 py-4 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-xl hover:shadow-navy/5 transition-all"
+          <div className="lg:col-span-7">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="w-full aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-navy/10 border border-slate-100 bg-slate-100"
             >
-              <span>Full Archive</span>
-              <div className="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center group-hover:bg-primary group-hover:text-navy transition-colors">
-                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </Link>
+              <iframe 
+                src="https://www.youtube.com/embed/YjQAUG1oTGQ" 
+                title="Prayog India News Channel Story" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </motion.div>
           </div>
         </div>
 
