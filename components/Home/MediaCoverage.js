@@ -21,21 +21,37 @@ export default function MediaCoverage() {
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [spotlightVideo, setSpotlightVideo] = useState({
+    video_id: "YjQAUG1oTGQ",
+    title: "Prayog India News Channel Story"
+  });
   const scrollRef = useRef(null);
 
   useEffect(() => {
+    let ignore = false;
     async function fetchMedia() {
       try {
-        const res = await fetch("/api/gallery?category=Media Coverage");
-        const data = await res.json();
-        setMediaItems(data); 
+        const [galRes, vidRes] = await Promise.all([
+          fetch("/api/gallery?category=Media Coverage"),
+          fetch("/api/videos?category=Media")
+        ]);
+        const galData = await galRes.json();
+        const vidData = await vidRes.json();
+
+        if (!ignore) {
+          setMediaItems(Array.isArray(galData) ? galData : []);
+          if (Array.isArray(vidData) && vidData.length > 0) {
+            setSpotlightVideo(vidData[0]);
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch media coverage:", err);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     }
     fetchMedia();
+    return () => { ignore = true; };
   }, []);
 
   // Auto scroll logic
@@ -106,7 +122,7 @@ export default function MediaCoverage() {
               transition={{ delay: 0.1 }}
               className="text-slate-500 text-lg leading-relaxed"
             >
-              Exploring Prayog India's impact on technical education through major news networks, digital publications, and broadcast media.
+              Exploring Prayog India&apos;s impact on technical education through major news networks, digital publications, and broadcast media.
             </motion.p>
             <div className="pt-4">
               <Link 
@@ -130,8 +146,8 @@ export default function MediaCoverage() {
               className="w-full aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-navy/10 border border-slate-100 bg-slate-100"
             >
               <iframe 
-                src="https://www.youtube.com/embed/YjQAUG1oTGQ" 
-                title="Prayog India News Channel Story" 
+                src={`https://www.youtube.com/embed/${spotlightVideo.video_id}`} 
+                title={spotlightVideo.title}
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowFullScreen

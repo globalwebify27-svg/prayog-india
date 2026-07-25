@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Award, 
@@ -39,7 +39,8 @@ export default function CertificateManagement() {
   
   // Filters
   const [filterCourse, setFilterCourse] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("issued"); // 'issued' or 'pending'
+  const [filterAdmissionDate, setFilterAdmissionDate] = useState("");
+  const [filterStatus, setFilterStatus] = useState("issued"); // 'issued', 'pending', or 'all'
   
   // Bulk Actions
   const [selectedItems, setSelectedItems] = useState([]);
@@ -62,9 +63,70 @@ export default function CertificateManagement() {
   const modalCertificateRef = useRef(null);
 
   useEffect(() => {
-    fetchCertificates();
-    fetchInitialData();
-  }, [filterCourse, filterStatus]);
+    let ignore = false;
+
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (filterCourse !== "all") params.append("courseId", filterCourse);
+        if (filterAdmissionDate) params.append("admissionDate", filterAdmissionDate);
+        params.append("status", filterStatus);
+        
+        const res = await fetch(`/api/certificates?${params.toString()}`);
+        const data = await res.json();
+        if (!ignore && data.success) {
+          setCertificates(data.certificates);
+        }
+      } catch (error) {
+        console.error("Failed to fetch certificates:", error);
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      ignore = true;
+    };
+  }, [filterCourse, filterStatus, filterAdmissionDate]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadInitialData = async () => {
+      try {
+        const [stdRes, crsRes, settingsRes] = await Promise.all([
+          fetch("/api/admin/students"),
+          fetch("/api/admin/courses"),
+          fetch("/api/admin/settings")
+        ]);
+        const stdData = await stdRes.json();
+        const crsData = await crsRes.json();
+        const settingsData = await settingsRes.json();
+        if (!ignore) {
+          if (stdData.success) setStudentsList(stdData.students);
+          if (crsData.success) setCoursesList(crsData.courses);
+          if (settingsData.success) {
+            setSettings({
+              signatory_name: settingsData.settings.signatory_name || "Authorized Signatory",
+              signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png",
+              logo_url: settingsData.settings.logo_url || "/assets/logo.png"
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch initial data:", error);
+      }
+    };
+
+    loadInitialData();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   useEffect(() => {
     const updateScale = () => {
@@ -100,6 +162,7 @@ export default function CertificateManagement() {
     try {
       const params = new URLSearchParams();
       if (filterCourse !== "all") params.append("courseId", filterCourse);
+      if (filterAdmissionDate) params.append("admissionDate", filterAdmissionDate);
       params.append("status", filterStatus);
       
       const res = await fetch(`/api/certificates?${params.toString()}`);
@@ -111,30 +174,6 @@ export default function CertificateManagement() {
       console.error("Failed to fetch certificates:", error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchInitialData = async () => {
-    try {
-      const [stdRes, crsRes, settingsRes] = await Promise.all([
-        fetch("/api/admin/students"),
-        fetch("/api/admin/courses"),
-        fetch("/api/admin/settings")
-      ]);
-      const stdData = await stdRes.json();
-      const crsData = await crsRes.json();
-      const settingsData = await settingsRes.json();
-      if (stdData.success) setStudentsList(stdData.students);
-      if (crsData.success) setCoursesList(crsData.courses);
-      if (settingsData.success) {
-        setSettings({
-          signatory_name: settingsData.settings.signatory_name || "Authorized Signatory",
-          signatory_signature: settingsData.settings.signatory_signature || "/assets/signature.png",
-          logo_url: settingsData.settings.logo_url || "/assets/logo.png"
-        });
-      }
-    } catch (error) {
-      console.error("Failed to fetch initial data:", error);
     }
   };
 
@@ -163,12 +202,9 @@ export default function CertificateManagement() {
     }
   };
 
-  const handleBulkGenerate = async () => {
+  const handleBulkGenerate = async (e) => {
+    if (e) e.preventDefault();
     if (selectedItems.length === 0) return;
-    if (!certFromDate || !certToDate) {
-      setShowBulkDateModal(true);
-      return;
-    }
     setIsProcessing(true);
     try {
       const bulkCertificates = selectedItems.map(id => {
@@ -226,76 +262,51 @@ export default function CertificateManagement() {
             dummyCanvas.width = 1;
             dummyCanvas.height = 1;
             const ctx = dummyCanvas.getContext('2d', { willReadFrequently: true });
-            
+
             const normalizeColorStr = (str) => {
               if (!str || typeof str !== 'string') return str;
-              // Regex matching color functions with up to one level of nested parentheses
               const matches = str.match(/(?:oklch|lab|oklab|lch|color)\((?:[^)(]+|\([^)(]*\))*\)/g);
               if (!matches) return str;
               
               let result = str;
               matches.forEach(match => {
-                ctx.clearRect(0, 0, 1, 1);
-                ctx.fillStyle = 'rgba(0,0,0,0)';
-                ctx.fillStyle = match;
-                ctx.fillRect(0, 0, 1, 1);
-                const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
-                const rgbaStr = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
-                result = result.split(match).join(rgbaStr);
+                try {
+                  ctx.clearRect(0, 0, 1, 1);
+                  ctx.fillStyle = 'rgba(0,0,0,0)';
+                  ctx.fillStyle = match;
+                  ctx.fillRect(0, 0, 1, 1);
+                  const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+                  const rgbaStr = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+                  result = result.split(match).join(rgbaStr);
+                } catch (e) {
+                  result = result.split(match).join('rgba(0,0,0,0)');
+                }
               });
               return result;
             };
 
-            // Sanitize style tags
             const styleTags = clonedDoc.querySelectorAll('style');
             styleTags.forEach(tag => {
               try {
-                if (tag.innerHTML && tag.innerHTML.match(/(oklch|lab|oklab|lch|color)\(/)) {
-                  tag.innerHTML = normalizeColorStr(tag.innerHTML);
+                if (tag.textContent && (tag.textContent.includes('oklch') || tag.textContent.includes('lab') || tag.textContent.includes('color('))) {
+                  tag.textContent = normalizeColorStr(tag.textContent);
                 }
               } catch (e) {}
             });
-
-            // Inject Google Fonts directly to ensure html2canvas has the correct fonts
-          // even if local stylesheets are removed or fail to parse.
-          const fontLink = clonedDoc.createElement('link');
-          fontLink.rel = 'stylesheet';
-          fontLink.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap';
-          clonedDoc.head.appendChild(fontLink);
-
-          // Remove external stylesheets to prevent html2canvas parsing errors on modern CSS colors.
-          // Google Fonts are preserved so @font-face rules still apply.
-          const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
-          linkTags.forEach(tag => {
-            if (tag.href && !tag.href.includes('fonts.googleapis.com')) {
-              tag.remove();
-            }
-          });
 
             const inlineStyles = (source, target) => {
               if (!source || !target) return;
               const computed = window.getComputedStyle(source);
               for (let i = 0; i < computed.length; i++) {
                 const key = computed[i];
-                let value = computed.getPropertyValue(key);
-                
-                if (value && (value.includes('oklch') || value.includes('lab') || value.includes('color('))) {
-                  value = normalizeColorStr(value);
-                }
                 try {
-                  // Prevent html2canvas text-rendering and font-ligatures bugs
-                  if (key === 'text-rendering') value = 'auto';
-                  if (key === 'font-variant-ligatures') value = 'normal';
-                  
-                  target.style[key] = value;
+                  let value = computed.getPropertyValue(key);
+                  if (value && (value.includes('oklch') || value.includes('lab') || value.includes('color('))) {
+                    value = normalizeColorStr(value);
+                  }
+                  target.style.setProperty(key, value, computed.getPropertyPriority(key));
                 } catch (e) {}
               }
-              
-              // Force safe text properties
-              target.style.textRendering = 'auto';
-              target.style.fontVariantLigatures = 'normal';
-              target.style.letterSpacing = computed.letterSpacing === 'normal' ? '0px' : computed.letterSpacing;
-              
               for (let i = 0; i < source.children.length; i++) {
                 if (target.children[i]) {
                   inlineStyles(source.children[i], target.children[i]);
@@ -311,10 +322,8 @@ export default function CertificateManagement() {
                 cloneElement.style.left = '0';
                 cloneElement.style.top = '0';
               }
-              // Only inline styles for the certificate element tree to prevent global crashes
               inlineStyles(element, elementNode);
 
-              // Ignore extraneous elements to prevent html2canvas from parsing their styles
               const allElements = clonedDoc.body.querySelectorAll('*');
               allElements.forEach(el => {
                 if (!elementNode.contains(el) && el !== elementNode && !el.contains(elementNode) && el.tagName !== 'STYLE' && el.tagName !== 'LINK' && el.tagName !== 'SCRIPT') {
@@ -384,7 +393,9 @@ export default function CertificateManagement() {
 
   const filteredCerts = certificates.filter(c => 
     c.student_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.student_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.course_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.batch_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.certificate_number?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -425,31 +436,65 @@ export default function CertificateManagement() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-4">
-        <div className="flex items-center space-x-2 text-slate-500 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">
-          <Filter size={16} />
-          <span className="text-xs font-bold uppercase tracking-wider">Filters:</span>
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3 flex-grow">
+          <div className="flex items-center space-x-2 text-slate-500 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200/80 h-10 shadow-xs">
+            <Filter size={14} className="text-navy" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Filters</span>
+          </div>
+          
+          {/* Course Filter */}
+          <select 
+            value={filterCourse} 
+            onChange={(e) => setFilterCourse(e.target.value)} 
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:border-navy focus:ring-1 focus:ring-navy outline-none h-10 hover:border-slate-300 transition-all cursor-pointer max-w-[260px] truncate shadow-xs"
+          >
+            <option value="all">All Courses</option>
+            {coursesList.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+          </select>
+
+          {/* Status Filter */}
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)} 
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:border-navy focus:ring-1 focus:ring-navy outline-none h-10 hover:border-slate-300 transition-all cursor-pointer shadow-xs"
+          >
+            <option value="issued">Issued Certificates</option>
+            <option value="pending">Pending Issuance</option>
+            <option value="all">All Records</option>
+          </select>
+
+          {/* Admission Date Filter */}
+          <div className="flex items-center space-x-2 bg-white border border-slate-200 rounded-xl px-3.5 h-10 shadow-xs hover:border-slate-300 transition-all">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">Date:</span>
+            <input 
+              type="date" 
+              title="Admission Date"
+              value={filterAdmissionDate} 
+              onChange={(e) => setFilterAdmissionDate(e.target.value)} 
+              className="bg-transparent text-xs font-semibold text-slate-800 outline-none cursor-pointer"
+            />
+            {filterAdmissionDate && (
+              <button 
+                onClick={() => setFilterAdmissionDate("")} 
+                className="text-slate-400 hover:text-rose-500 ml-1 text-xs font-bold transition-colors"
+                title="Clear date filter"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
-        
-        <select value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:border-navy outline-none">
-          <option value="all">All Courses</option>
-          {coursesList.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-        </select>
 
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:border-navy outline-none">
-          <option value="issued">Issued Certificates</option>
-          <option value="pending">Pending Issuance</option>
-          <option value="all">All Records</option>
-        </select>
-
-        <div className="relative flex-grow max-w-md ml-auto">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        {/* Search */}
+        <div className="relative min-w-[220px]">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
-            placeholder="Search student or credential..." 
+            placeholder="Search student or email..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-navy focus:bg-white transition-all" 
+            className="w-full pl-9 pr-4 h-10 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-navy focus:bg-white focus:ring-1 focus:ring-navy transition-all placeholder:text-slate-400 font-medium" 
           />
         </div>
       </div>
@@ -465,13 +510,21 @@ export default function CertificateManagement() {
               </div>
               {selectedItems.length > 0 && (
                 <div className="flex items-center space-x-3">
-                  <span className="text-xs font-bold text-navy">{selectedItems.length} selected</span>
-                  {filterStatus === 'pending' && (
-                    <button onClick={handleBulkGenerate} disabled={isProcessing} className="flex items-center space-x-2 bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50">
-                      {isProcessing ? <Loader2 size={12} className="animate-spin" /> : <Award size={12} />}
-                      <span>Bulk Generate</span>
-                    </button>
-                  )}
+                  <span className="text-xs font-bold text-navy bg-slate-100 px-2.5 py-1 rounded-md">{selectedItems.length} selected</span>
+                  <button 
+                    onClick={() => setShowBulkDateModal(true)} 
+                    disabled={isProcessing} 
+                    className="flex items-center space-x-2 bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                  >
+                    {isProcessing ? <Loader2 size={14} className="animate-spin" /> : <Award size={14} />}
+                    <span>Bulk Generate ({selectedItems.length})</span>
+                  </button>
+                  <button 
+                    onClick={() => setSelectedItems([])} 
+                    className="text-xs text-slate-400 hover:text-slate-600 font-medium underline"
+                  >
+                    Deselect All
+                  </button>
                 </div>
               )}
             </div>
@@ -485,7 +538,8 @@ export default function CertificateManagement() {
                         {selectedItems.length === filteredCerts.length && filteredCerts.length > 0 ? <CheckSquare size={16} className="text-navy" /> : <Square size={16} />}
                       </button>
                     </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-widest">Student & Program</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-widest">Student & Email</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-widest">Admission Date</th>
                     <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-widest">Credential ID</th>
                     <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-widest text-center">Status</th>
                     <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-widest text-right">Actions</th>
@@ -493,9 +547,9 @@ export default function CertificateManagement() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {isLoading ? (
-                    <tr><td colSpan="5" className="px-6 py-10 text-center"><Loader2 className="animate-spin mx-auto text-navy" size={32} /></td></tr>
+                    <tr><td colSpan="6" className="px-6 py-10 text-center"><Loader2 className="animate-spin mx-auto text-navy" size={32} /></td></tr>
                   ) : filteredCerts.length === 0 ? (
-                    <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-400 text-sm italic">No credentials found matching your criteria.</td></tr>
+                    <tr><td colSpan="6" className="px-6 py-10 text-center text-slate-400 text-sm italic">No credentials found matching your criteria.</td></tr>
                   ) : (
                     filteredCerts.map((cert) => {
                       const itemId = cert.id || `${cert.user_id}-${cert.course_id}`;
@@ -510,8 +564,13 @@ export default function CertificateManagement() {
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
                               <span className="text-sm font-semibold text-slate-900">{cert.student_name}</span>
-                              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tight">{cert.course_name}</span>
+                              <span className="text-xs text-slate-400">{cert.student_email}</span>
                             </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-xs text-slate-600 font-medium">
+                              {cert.enrolled_at ? new Date(cert.enrolled_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                            </span>
                           </td>
                           <td className="px-6 py-4"><span className="text-xs font-mono font-semibold text-slate-500">{cert.certificate_number || 'PENDING_ID'}</span></td>
                           <td className="px-6 py-4 text-center">
@@ -700,40 +759,62 @@ export default function CertificateManagement() {
         )}
       </AnimatePresence>
 
-      {/* Bulk Date Modal */}
+      {/* Bulk Generate Modal */}
       <AnimatePresence>
         {showBulkDateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowBulkDateModal(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
               <div className="p-8">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-bold text-slate-900">Program Duration</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Bulk Issue Credentials</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Issuing certificates for <span className="font-bold text-navy">{selectedItems.length}</span> selected student(s).</p>
+                  </div>
                   <button onClick={() => setShowBulkDateModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button>
                 </div>
-                <p className="text-xs text-slate-500 mb-5">These details will apply to all <span className="font-bold text-navy">{selectedItems.length}</span> selected certificates.</p>
-                <div className="space-y-4">
+                <form onSubmit={handleBulkGenerate} className="space-y-5 mt-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student Institute / School</label>
-                    <input type="text" placeholder="e.g. Delhi Public School" value={certInstituteName} onChange={(e) => setCertInstituteName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" />
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Delhi Public School" 
+                      value={certInstituteName} 
+                      onChange={(e) => setCertInstituteName(e.target.value)} 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" 
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program From Date</label>
-                    <input type="date" required value={certFromDate} onChange={(e) => setCertFromDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program To Date</label>
-                    <input type="date" required value={certToDate} onChange={(e) => setCertToDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program From Date</label>
+                      <input 
+                        type="date" 
+                        required
+                        value={certFromDate} 
+                        onChange={(e) => setCertFromDate(e.target.value)} 
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Program To Date</label>
+                      <input 
+                        type="date" 
+                        required
+                        value={certToDate} 
+                        onChange={(e) => setCertToDate(e.target.value)} 
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-navy outline-none transition-all" 
+                      />
+                    </div>
                   </div>
                   <button 
-                    onClick={() => { if (certFromDate && certToDate) { setShowBulkDateModal(false); handleBulkGenerate(); } else { alert('Please select both dates'); } }} 
+                    type="submit"
                     disabled={isProcessing} 
                     className="w-full bg-navy text-white py-4 rounded-xl font-bold text-sm hover:bg-black transition-all flex items-center justify-center space-x-2 shadow-lg disabled:opacity-50 mt-2"
                   >
                     {isProcessing ? <Loader2 className="animate-spin" size={18} /> : <Award size={18} className="text-primary" />}
-                    <span>Generate {selectedItems.length} Certificates</span>
+                    <span>Generate &amp; Issue {selectedItems.length} Certificates</span>
                   </button>
-                </div>
+                </form>
               </div>
             </motion.div>
           </div>

@@ -6,70 +6,106 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
     const courseId = searchParams.get("courseId");
-    const status = searchParams.get("status"); // 'issued' or 'pending'
+    const search = searchParams.get("search");
+    const admissionDate = searchParams.get("admissionDate");
+    const status = searchParams.get("status"); // 'issued', 'pending', or 'all'
 
     if (status === "pending") {
       let query = `
         SELECT 
           u.id as user_id, 
           u.name as student_name, 
+          u.email as student_email,
           c.id as course_id, 
           c.title as course_name,
+          b.id as batch_id,
+          b.name as batch_name,
+          MAX(e.enrolled_at) as enrolled_at,
           MAX(e.enrolled_at) as issue_date,
           NULL as id, NULL as certificate_number, NULL as qr_code_data,
           NULL as from_date, NULL as to_date, NULL as institute_name
         FROM enrollments e
         JOIN users u ON e.user_id = u.id
         JOIN courses c ON e.course_id = c.id
+        LEFT JOIN batches b ON e.batch_id = b.id
         LEFT JOIN certificates cert ON e.user_id = cert.user_id AND e.course_id = cert.course_id
         WHERE cert.id IS NULL
       `;
       let params = [];
-      if (courseId) {
+      if (courseId && courseId !== "all") {
         query += " AND c.id = ?";
         params.push(courseId);
       }
-      query += " GROUP BY u.id, u.name, c.id, c.title";
+      if (search) {
+        query += " AND (u.name LIKE ? OR u.email LIKE ?)";
+        params.push(`%${search}%`, `%${search}%`);
+      }
+      if (admissionDate) {
+        query += " AND DATE(e.enrolled_at) = ?";
+        params.push(admissionDate);
+      }
+      query += " GROUP BY u.id, u.name, u.email, c.id, c.title, b.id, b.name";
       const [rows] = await pool.execute(query, params);
       return NextResponse.json({ success: true, certificates: rows });
     }
 
     if (status === "all") {
       let params = [];
-      let courseFilter = "";
-      if (courseId) {
-        courseFilter = " AND cr.id = ?";
+      let issuedFilter = "";
+      if (courseId && courseId !== "all") {
+        issuedFilter += " AND cr.id = ?";
         params.push(courseId);
+      }
+      if (search) {
+        issuedFilter += " AND (u.name LIKE ? OR u.email LIKE ?)";
+        params.push(`%${search}%`, `%${search}%`);
+      }
+      if (admissionDate) {
+        issuedFilter += " AND DATE(e.enrolled_at) = ?";
+        params.push(admissionDate);
       }
 
       // Issued certificates
       let issuedQuery = `
-        SELECT c.*, u.name as student_name, cr.title as course_name 
+        SELECT c.*, u.name as student_name, u.email as student_email, cr.title as course_name, b.name as batch_name, e.enrolled_at
         FROM certificates c 
         JOIN users u ON c.user_id = u.id 
         JOIN courses cr ON c.course_id = cr.id
-        WHERE 1=1${courseFilter}
+        LEFT JOIN enrollments e ON e.user_id = c.user_id AND e.course_id = c.course_id
+        LEFT JOIN batches b ON e.batch_id = b.id
+        WHERE 1=1${issuedFilter}
+        GROUP BY c.id
       `;
 
       // Pending (enrolled but no certificate)
       let pendingParams = [];
-      let pendingCourseFilter = "";
-      if (courseId) {
-        pendingCourseFilter = " AND cs.id = ?";
+      let pendingFilter = "";
+      if (courseId && courseId !== "all") {
+        pendingFilter += " AND cs.id = ?";
         pendingParams.push(courseId);
       }
+      if (search) {
+        pendingFilter += " AND (u.name LIKE ? OR u.email LIKE ?)";
+        pendingParams.push(`%${search}%`, `%${search}%`);
+      }
+      if (admissionDate) {
+        pendingFilter += " AND DATE(e.enrolled_at) = ?";
+        pendingParams.push(admissionDate);
+      }
+
       let pendingQuery = `
         SELECT 
           NULL as id, u.id as user_id, cs.id as course_id,
-          NULL as certificate_number, MAX(e.enrolled_at) as issue_date, 
+          NULL as certificate_number, MAX(e.enrolled_at) as issue_date, MAX(e.enrolled_at) as enrolled_at,
           NULL as qr_code_data, NULL as from_date, NULL as to_date, NULL as institute_name,
-          u.name as student_name, cs.title as course_name
+          u.name as student_name, u.email as student_email, cs.title as course_name, b.name as batch_name
         FROM enrollments e
         JOIN users u ON e.user_id = u.id
         JOIN courses cs ON e.course_id = cs.id
+        LEFT JOIN batches b ON e.batch_id = b.id
         LEFT JOIN certificates cert ON e.user_id = cert.user_id AND e.course_id = cert.course_id
-        WHERE cert.id IS NULL${pendingCourseFilter}
-        GROUP BY u.id, u.name, cs.id, cs.title
+        WHERE cert.id IS NULL${pendingFilter}
+        GROUP BY u.id, u.name, u.email, cs.id, cs.title, b.name
       `;
 
       const [issuedRows] = await pool.execute(issuedQuery, params);
@@ -78,7 +114,15 @@ export async function GET(request) {
       return NextResponse.json({ success: true, certificates: combined });
     }
 
-    let query = "SELECT c.*, u.name as student_name, cr.title as course_name FROM certificates c JOIN users u ON c.user_id = u.id JOIN courses cr ON c.course_id = cr.id";
+    // Default 'issued' status
+    let query = `
+      SELECT c.*, u.name as student_name, u.email as student_email, cr.title as course_name, b.name as batch_name, e.enrolled_at
+      FROM certificates c 
+      JOIN users u ON c.user_id = u.id 
+      JOIN courses cr ON c.course_id = cr.id
+      LEFT JOIN enrollments e ON e.user_id = c.user_id AND e.course_id = c.course_id
+      LEFT JOIN batches b ON e.batch_id = b.id
+    `;
     let params = [];
     let whereClauses = [];
 
@@ -86,16 +130,24 @@ export async function GET(request) {
       whereClauses.push("c.user_id = ?");
       params.push(userId);
     }
-    if (courseId) {
+    if (courseId && courseId !== "all") {
       whereClauses.push("c.course_id = ?");
       params.push(courseId);
+    }
+    if (search) {
+      whereClauses.push("(u.name LIKE ? OR u.email LIKE ?)");
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    if (admissionDate) {
+      whereClauses.push("DATE(e.enrolled_at) = ?");
+      params.push(admissionDate);
     }
 
     if (whereClauses.length > 0) {
       query += " WHERE " + whereClauses.join(" AND ");
     }
 
-    query += " ORDER BY c.issue_date DESC";
+    query += " GROUP BY c.id ORDER BY c.issue_date DESC";
 
     const [rows] = await pool.execute(query, params);
     return NextResponse.json({ success: true, certificates: rows });

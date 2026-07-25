@@ -74,7 +74,7 @@ export default function Testimonials() {
           spaceBetween={15}
           slidesPerView={1}
           speed={800}
-          loop={true}
+          loop={reviews.slice(0, 3).length > 3}
           navigation={{
             prevEl: '.testimonial-prev',
             nextEl: '.testimonial-next',
@@ -88,7 +88,7 @@ export default function Testimonials() {
           }}
           className="pt-6 pb-16 px-4 -mx-4 !overflow-visible"
         >
-          {reviews.slice(0, 10).map((t, i) => (
+          {reviews.slice(0, 3).map((t, i) => (
             <SwiperSlide key={t.id || i} className="h-auto">
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all flex flex-col justify-between h-full min-h-[280px]">
                 <div>
@@ -103,7 +103,7 @@ export default function Testimonials() {
                   </div>
 
                   <p className="text-slate-600 mb-8 italic leading-relaxed text-sm">
-                    "{t.content}"
+                    &quot;{t.content}&quot;
                   </p>
                 </div>
 

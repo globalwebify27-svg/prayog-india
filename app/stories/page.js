@@ -21,33 +21,38 @@ export default function SuccessNarrativesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStories();
-  }, []);
-
-  const fetchStories = async () => {
-    try {
-      const res = await fetch("/api/stories");
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        const processed = data.map(story => {
-          let extraImages = [];
-          try {
-            const content = typeof story.content === 'string' ? JSON.parse(story.content) : story.content;
-            content?.forEach(block => {
-              if (block.type === 'image') extraImages.push(block.value);
-              if (block.type === 'gallery') extraImages.push(...block.value);
-            });
-          } catch (e) {}
-          return { ...story, extraImages: [...new Set(extraImages)].filter(img => img !== story.thumbnail) };
-        });
-        setStories(processed);
+    let ignore = false;
+    const loadStories = async () => {
+      try {
+        const res = await fetch("/api/stories");
+        const data = await res.json();
+        if (!ignore && Array.isArray(data)) {
+          const processed = data.map(story => {
+            let extraImages = [];
+            try {
+              const content = typeof story.content === 'string' ? JSON.parse(story.content) : story.content;
+              content?.forEach(block => {
+                if (block.type === 'image') extraImages.push(block.value);
+                if (block.type === 'gallery') extraImages.push(...block.value);
+              });
+            } catch (e) {}
+            return { ...story, extraImages: [...new Set(extraImages)].filter(img => img !== story.thumbnail) };
+          });
+          setStories(processed);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stories:", error);
+      } finally {
+        if (!ignore) setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch stories:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    loadStories();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <main className="min-h-screen bg-slate-50 font-body">
@@ -57,14 +62,61 @@ export default function SuccessNarrativesPage() {
       <section className="pt-40 pb-16 bg-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-            <h4 className="text-navy font-bold uppercase tracking-[0.4em] text-[10px] mb-4">Institutional Impact Feed</h4>
+            <h4 className="text-navy font-bold uppercase tracking-[0.4em] text-[10px] mb-4">Institutional Impact & Student Reels</h4>
             <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
               Success <span className="text-navy">Narratives</span>
             </h1>
             <p className="text-slate-500 text-sm md:text-base max-w-2xl mx-auto leading-relaxed font-medium italic">
-              "Witness the transformation through documented case studies of robotics and industrial excellence."
+              &quot;Witness the transformation through documented case studies and student video reels of robotics excellence.&quot;
             </p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Dedicated Student Reels Grid */}
+      <section className="py-12 bg-slate-900 text-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl md:text-3xl font-black text-white flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
+              Student Video Testimonial Reels
+            </h2>
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">3 Videos</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4 md:gap-6">
+            {[
+              { id: "Hc1Y2xe8tP8", title: "Robotics in Action #1", thumbnail: "https://img.youtube.com/vi/Hc1Y2xe8tP8/hqdefault.jpg" },
+              { id: "Ychi5tA2UTY", title: "Student Project Demo #2", thumbnail: "https://img.youtube.com/vi/Ychi5tA2UTY/hqdefault.jpg" },
+              { id: "iG8phPg9hZk", title: "Hands-on Workshop #3", thumbnail: "https://img.youtube.com/vi/iG8phPg9hZk/hqdefault.jpg" }
+            ].map((reel) => (
+              <div 
+                key={reel.id}
+                onClick={() => window.open(`https://youtube.com/shorts/${reel.id}`, '_blank')}
+                className="group relative rounded-3xl overflow-hidden aspect-[9/16] bg-slate-800 cursor-pointer border border-white/10 shadow-xl hover:scale-[1.02] transition-all"
+              >
+                <img 
+                  src={reel.thumbnail} 
+                  alt={reel.title}
+                  onError={(e) => { e.target.src = `https://img.youtube.com/vi/${reel.id}/hqdefault.jpg`; }}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors flex flex-col justify-between p-4">
+                  <div className="self-end">
+                    <span className="bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-full tracking-wider uppercase shadow-md">Shorts</span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center my-auto">
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                      <Play size={20} fill="currentColor" className="ml-0.5" />
+                    </div>
+                  </div>
+                  <p className="text-sm font-bold text-white truncate drop-shadow-md">
+                    {reel.title}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

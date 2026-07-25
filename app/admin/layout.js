@@ -89,6 +89,7 @@ const menuItems = [
       { label: "1:1 Training", href: "/admin/training", icon: Zap },
       { label: "Seasonal Programs", href: "/admin/promos", icon: Zap },
       { label: "Internship Banner", href: "/admin/banners/internship", icon: Layout },
+      { label: "YouTube Videos", href: "/admin/videos", icon: Video },
       { label: "Media Gallery", href: "/admin/gallery", icon: Image },
       { label: "Google Reviews", href: "/admin/testimonials", icon: MessageSquare },
       { label: "Active Internships", href: "/admin/internships", icon: Briefcase },
