@@ -98,7 +98,7 @@ const CertificateTemplate = ({
           {/* Student Name with underline */}
           <div style={{ width: "60%", borderBottom: "2px dotted #444", paddingBottom: "2px", marginBottom: "12px" }}>
             <span style={{ fontSize: "30px", fontWeight: "bold", fontStyle: "normal", color: "#000" }}>
-              {studentName}
+              {studentName ? studentName.toUpperCase() : ""}
             </span>
           </div>
 

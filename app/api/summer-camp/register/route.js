@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { name, email, phone, studentClass, batchId } = await req.json();
+    const rawData = await req.json();
+    const { name: rawName, email, phone, studentClass, batchId } = rawData;
+    const name = rawName ? rawName.trim().toUpperCase() : "";
 
     if (!name || !email || !phone || !studentClass || !batchId) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });

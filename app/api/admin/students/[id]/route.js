@@ -18,11 +18,13 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 
+    const rawBody = await req.json();
     const { 
-      name, email, phone, dob, address, blood_group, emergency_contact,
+      name: rawName, email, phone, dob, address, blood_group, emergency_contact,
       father_name, mother_name, gender, qualification, school_college,
       last_qualification_year, id_type, id_number, school_id_number
-    } = await req.json();
+    } = rawBody;
+    const name = rawName ? rawName.trim().toUpperCase() : rawName;
 
     await pool.query(
       `UPDATE users SET 

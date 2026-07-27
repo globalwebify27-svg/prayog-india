@@ -5,7 +5,9 @@ import { sendMail, getOnboardingEmailTemplate } from "@/lib/mailer";
 
 export async function POST(req) {
   try {
-    const { name, email, phone, emergency_contact = null, password, course_id, mode, batch, isInstallment, coupon_code, payment_method } = await req.json();
+    const rawBody = await req.json();
+    const { name: rawName, email, phone, emergency_contact = null, password, course_id, mode, batch, isInstallment, coupon_code, payment_method } = rawBody;
+    const name = rawName ? rawName.trim().toUpperCase() : "";
 
     // 1. Fetch Course Details (Price, Installments)
     const [courseRows] = await pool.query("SELECT * FROM courses WHERE id = ?", [course_id]);

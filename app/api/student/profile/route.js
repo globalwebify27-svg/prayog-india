@@ -17,7 +17,7 @@ export async function POST(req) {
 
     const body = await req.json();
     const {
-      name, phone, dob, address, blood_group, emergency_contact, image,
+      name: rawName, phone, dob, address, blood_group, emergency_contact, image,
       father_name, mother_name, gender, qualification, school_college,
       last_qualification_year, id_type, id_number, id_image, school_id_card,
       school_id_number,
@@ -25,6 +25,7 @@ export async function POST(req) {
       noc_file, noc_note,
       bio, specialty, expertise, faculty_education
     } = body;
+    const name = rawName ? rawName.trim().toUpperCase() : rawName;
 
     // Get user role
     const [userRows] = await pool.query("SELECT role FROM users WHERE id = ?", [userId]);

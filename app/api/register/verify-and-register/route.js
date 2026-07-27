@@ -7,15 +7,17 @@ import { generateReceipt } from "@/lib/pdf";
 
 export async function POST(req) {
   try {
+    const rawData = await req.json();
     const { 
       // Razorpay details
       razorpay_order_id, 
       razorpay_payment_id, 
       razorpay_signature,
       // User/Registration details
-      name, email, phone, emergency_contact, password, course_id, mode, batch, batch_id, timing_id, start_date, isInstallment, payment_method, coupon_code, custom_timing,
+      name: rawName, email, phone, emergency_contact, password, course_id, mode, batch, batch_id, timing_id, start_date, isInstallment, payment_method, coupon_code, custom_timing,
       academic_type, branch_stream, semester_year, college_name, university_board, registration_no, academic_session
-    } = await req.json();
+    } = rawData;
+    const name = rawName ? rawName.trim().toUpperCase() : "";
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return NextResponse.json({ success: false, message: "Missing payment signature" }, { status: 400 });
